@@ -1,0 +1,71 @@
+{
+  "hosting": {
+    "public": "apps/web/.next/static",
+    "cleanUrls": true,
+    "trailingSlash": false,
+    "rewrites": [
+      { "source": "/api/**",       "function": "cfApi",       "region": "asia-east1" },
+      { "source": "/auth/**",      "function": "cfApi",       "region": "asia-east1" },
+      { "source": "/token/**",     "function": "cfApi",       "region": "asia-east1" },
+      { "source": "/checkout/**",  "function": "cfCommerce",  "region": "asia-east1" },
+      { "source": "/pricing/**",   "function": "cfCommerce",  "region": "asia-east1" },
+      { "source": "/inventory/**", "function": "cfCommerce",  "region": "asia-east1" },
+      { "source": "/voucher/**",   "function": "cfCommerce",  "region": "asia-east1" },
+      { "source": "/events/**",    "function": "cfCommerce",  "region": "asia-east1" },
+      { "source": "/sse/**",       "function": "cfCommerce",  "region": "asia-east1" },
+      { "source": "/payment/**",   "function": "cfCommerce",  "region": "asia-east1" },
+      { "source": "**",            "destination": "/index.html" }
+    ],
+    "headers": [
+      {
+        "source": "/**",
+        "headers": [
+          { "key": "X-Frame-Options",          "value": "SAMEORIGIN" },
+          { "key": "X-Content-Type-Options",   "value": "nosniff" },
+          { "key": "Referrer-Policy",          "value": "strict-origin-when-cross-origin" },
+          { "key": "Permissions-Policy",       "value": "camera=(), microphone=(), geolocation=()" },
+          { "key": "Strict-Transport-Security","value": "max-age=63072000; includeSubDomains; preload" },
+          { "key": "Content-Security-Policy",  "value": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://connect.facebook.net https://accounts.google.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://graph.facebook.com https://oauth2.googleapis.com https://www.googleapis.com wss:; frame-src https://accounts.google.com https://www.facebook.com; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests;" },
+          { "key": "X-XSS-Protection",        "value": "1; mode=block" }
+        ]
+      },
+      {
+        "source": "**/*.@(js|css|woff2|woff|ttf|otf)",
+        "headers": [
+          { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+        ]
+      },
+      {
+        "source": "**/*.@(png|jpg|jpeg|webp|svg|gif|ico)",
+        "headers": [
+          { "key": "Cache-Control", "value": "public, max-age=604800" }
+        ]
+      }
+    ],
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ]
+  },
+  "functions": [
+    {
+      "source": "apps/cf-api",
+      "codebase": "cf-api",
+      "runtime": "nodejs22",
+      "ignore": ["node_modules", ".git", "**/*.test.ts", "**/*.spec.ts", "dist"]
+    },
+    {
+      "source": "apps/cf-commerce",
+      "codebase": "cf-commerce",
+      "runtime": "nodejs22",
+      "ignore": ["node_modules", ".git", "**/*.test.ts", "**/*.spec.ts", "dist"]
+    }
+  ],
+  "database": {
+    "rules": "database.rules.json"
+  },
+  "storage": {
+    "rules": "storage.rules"
+  }
+}

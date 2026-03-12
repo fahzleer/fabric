@@ -1,0 +1,58 @@
+{
+  "name": "web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "ulimit -n 65536 && next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "biome lint ./src",
+    "format": "biome format --write ./src",
+    "typecheck": "tsc --noEmit",
+    "preinstall": "bunx --bun only-allow bun",
+    "test": "bun test",
+    "coverage": "bun test --coverage",
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run --browser chrome"
+  },
+  "dependencies": {
+    "@effect-atom/atom-react": "^0.5.0",
+    "@effect-rx/rx-react": "^0.42.4",
+    "@orpc/client": "^1.13.5",
+    "@orpc/react-query": "^1.13.5",
+    "@tanstack/react-query": "^5.90.21",
+    "arkregex": "^0.0.5",
+    "better-result": "^2.7.0",
+    "bignumber.js": "^9.3.1",
+    "dexie": "^4.3.0",
+    "dexie-react-hooks": "^4.2.0",
+    "mixpanel-browser": "^2.74.0",
+    "next": "16.1.6",
+    "nuqs": "^2.8.8",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "sonner": "^2.0.7",
+    "viem": "^2.46.3",
+    "wagmi": "^3.5.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@cypress-audit/lighthouse": "^1.4.2",
+    "@tailwindcss/postcss": "^4",
+    "@types/bun": "^1",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "cypress": "^15.10.0",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  },
+  "engines": {
+    "bun": ">=1.2.0",
+    "npm": "bun-is-our-jam",
+    "yarn": "bun-is-our-jam",
+    "pnpm": "bun-is-our-jam"
+  },
+  "packageManager": "bun@1.2.22",
+  "license": "MIT"
+}

@@ -1,0 +1,7 @@
+{
+  "projects": {
+    "default": "demo-fabric-local",
+    "production": "YOUR_FIREBASE_PROJECT_ID",
+    "staging": "YOUR_FIREBASE_STAGING_PROJECT_ID"
+  }
+}

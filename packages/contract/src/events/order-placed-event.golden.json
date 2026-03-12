@@ -1,0 +1,13 @@
+{
+  "_type": "OrderPlaced",
+  "_version": 1,
+  "eventId": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+  "occurredAt": "2024-01-15T10:30:00.000Z",
+  "payload": {
+    "orderId": "ord-contract-test-1",
+    "userId": "usr-contract-test-1",
+    "totalAmountInCents": 150000,
+    "currency": "THB",
+    "paymentToken": "tok_test_abc123"
+  }
+}

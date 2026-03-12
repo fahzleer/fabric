@@ -1,0 +1,131 @@
+@import "tailwindcss";
+
+:root {
+  --background: 40 30% 96%;
+  --foreground: 0 0% 4%;
+
+  --card: 40 20% 98%;
+  --card-foreground: 0 0% 4%;
+
+  --popover: 40 20% 98%;
+  --popover-foreground: 0 0% 4%;
+
+  --primary: 33 30% 65%;
+  --primary-foreground: 0 0% 4%;
+
+  --secondary: 40 15% 90%;
+  --secondary-foreground: 0 0% 20%;
+
+  --muted: 40 10% 85%;
+  --muted-foreground: 0 0% 42%;
+
+  --accent: 33 30% 65%;
+  --accent-foreground: 0 0% 4%;
+
+  --destructive: 0 72% 51%;
+  --destructive-foreground: 40 30% 96%;
+
+  --border: 40 15% 88%;
+  --input: 40 15% 88%;
+  --ring: 33 30% 65%;
+
+  --radius: 0.25rem;
+
+  --font-sans: "Inter Variable", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Playfair Display", Georgia, "Times New Roman", serif;
+  --font-mono: "JetBrains Mono", "Fira Code", ui-monospace, monospace;
+
+  --space-page: clamp(1rem, 5vw, 5rem);
+  --space-section: clamp(2rem, 8vw, 8rem);
+
+  --fabric-ink: #0a0a0a;
+  --fabric-cream: #f5f0e8;
+  --fabric-thread: #c4a882;
+  --fabric-smoke: #6b6b6b;
+  --fabric-linen: #e8e2d8;
+}
+
+.dark {
+  --background: 0 0% 4%;
+  --foreground: 40 30% 96%;
+
+  --card: 0 0% 7%;
+  --card-foreground: 40 30% 96%;
+
+  --popover: 0 0% 7%;
+  --popover-foreground: 40 30% 96%;
+
+  --primary: 33 30% 65%;
+  --primary-foreground: 0 0% 4%;
+
+  --secondary: 0 0% 12%;
+  --secondary-foreground: 40 30% 96%;
+
+  --muted: 0 0% 12%;
+  --muted-foreground: 0 0% 60%;
+
+  --accent: 33 30% 65%;
+  --accent-foreground: 0 0% 4%;
+
+  --destructive: 0 63% 55%;
+  --destructive-foreground: 40 30% 96%;
+
+  --border: 0 0% 15%;
+  --input: 0 0% 15%;
+  --ring: 33 30% 65%;
+
+  --fabric-ink: #f5f0e8;
+  --fabric-cream: #0a0a0a;
+}
+
+@theme inline {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+}
+
+*,
+*::before,
+*::after {
+  border-color: hsl(var(--border));
+}
+
+body {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: var(--font-sans);
+  font-feature-settings: "rlig" 1, "calt" 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.font-editorial {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+}
+
+.font-price {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.tracking-wordmark {
+  letter-spacing: 0.15em;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: hsl(var(--background));
+}
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground));
+}

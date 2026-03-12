@@ -1,0 +1,70 @@
+{
+  "name": "fabric",
+  "private": true,
+  "version": "0.0.1",
+  "description": "Fabric — monorepo (web + cf-api + cf-commerce + worker / Firebase stack)",
+  "homepage": "https://github.com/fahzleer/fabric#readme",
+  "bugs": {
+    "url": "https://github.com/fahzleer/fabric/issues"
+  },
+  "author": "Fahz Leer <fahzleer@gmail.com> (https://github.com/fahzleer)",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fahzleer/fabric"
+  },
+  "keywords": [
+    "e-commerce",
+    "firebase",
+    "cloudflare-workers",
+    "event-sourcing",
+    "typescript",
+    "bun",
+    "turborepo"
+  ],
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "emulator": "firebase emulators:start --only database,storage",
+    "dev": "turbo dev --filter='!worker'",
+    "build": "turbo build",
+    "lint": "biome lint .",
+    "lint:all": "turbo lint",
+    "format": "biome format --write .",
+    "check": "biome check --write .",
+    "typecheck": "turbo typecheck",
+    "test": "turbo test",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@types/jsdom": "^28.0.0",
+    "bun-types": "^1.3.9",
+    "husky": "^9.1.7",
+    "jscodeshift": "^17.3.0",
+    "jsdom": "^28.1.0",
+    "lint-staged": "^16.3.3",
+    "turbo": "^2.5.4",
+    "typescript": "^5.9.2"
+  },
+  "engines": {
+    "bun": ">=1.2.0",
+    "npm": "bun-is-our-jam",
+    "yarn": "bun-is-our-jam",
+    "pnpm": "bun-is-our-jam"
+  },
+  "packageManager": "bun@1.2.22",
+  "dependencies": {
+    "@pierre/diffs": "^1.0.11"
+  },
+  "lint-staged": {
+    "**/*.{ts,tsx}": [
+      "biome check --write --no-errors-on-unmatched"
+    ],
+    "**/*.{json,md}": [
+      "biome format --write --no-errors-on-unmatched"
+    ]
+  },
+  "license": "MIT"
+}

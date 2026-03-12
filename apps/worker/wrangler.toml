@@ -1,0 +1,20 @@
+name = "fabric-edge-router"
+main = "src/index.ts"
+compatibility_date = "2025-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+routes = [
+  { pattern = "yourdomain.com/*", zone_name = "yourdomain.com" }
+]
+
+[vars]
+CF_API_URL = "https://asia-east1-YOUR_PROJECT_ID.cloudfunctions.net/cfApi"
+CF_COMMERCE_URL = "https://asia-east1-YOUR_PROJECT_ID.cloudfunctions.net/cfCommerce"
+FIREBASE_HOSTING_URL = "https://YOUR_PROJECT_ID.web.app"
+
+[build]
+command = "bun run build"
+
+[[rules]]
+type = "ESModule"
+globs = ["**/*.ts"]

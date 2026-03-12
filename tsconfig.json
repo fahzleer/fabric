@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "exactOptionalPropertyTypes": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitReturns": true,
+    "skipLibCheck": true,
+    "types": ["bun-types"]
+  },
+  "exclude": [
+    "node_modules",
+    "apps",
+    "packages/orpc",
+    "packages/ui",
+    "scripts"
+  ]
+}

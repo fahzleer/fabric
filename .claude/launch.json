@@ -1,0 +1,29 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "web",
+      "runtimeExecutable": "bun",
+      "runtimeArgs": ["run", "dev", "--filter=web"],
+      "port": 3000
+    },
+    {
+      "name": "cf-api",
+      "runtimeExecutable": "bun",
+      "runtimeArgs": ["--hot", "--env-file=apps/cf-api/.env", "run", "apps/cf-api/src/index.ts"],
+      "port": 3010
+    },
+    {
+      "name": "cf-commerce",
+      "runtimeExecutable": "bun",
+      "runtimeArgs": ["--hot", "--env-file=apps/cf-commerce/.env", "run", "apps/cf-commerce/src/index.ts"],
+      "port": 8082
+    },
+    {
+      "name": "static",
+      "runtimeExecutable": "bun",
+      "runtimeArgs": ["--eval", "Bun.serve({port:9999,fetch(req){const p=new URL(req.url).pathname;const f=Bun.file('.'+p);return f.exists().then(e=>e?new Response(f):new Response('not found',{status:404}))}})"],
+      "port": 9999
+    }
+  ]
+}

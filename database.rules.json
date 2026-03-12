@@ -1,0 +1,84 @@
+{
+  "rules": {
+    "users": {
+      "$userId": {
+        ".read": "auth != null && (auth.uid === $userId || auth.token.role === 'admin')",
+        ".write": "auth != null && (auth.uid === $userId || auth.token.role === 'admin')"
+      }
+    },
+    "users_by_email": {
+      ".read": "auth != null && auth.token.role === 'admin'",
+      ".write": "auth != null && auth.token.role === 'admin'"
+    },
+    "product_current": {
+      ".read": true,
+      ".write": "auth != null && (auth.token.role === 'admin' || auth.token.role === 'store_owner')",
+      ".indexOn": ["status", "ownerId", "category", "createdAt"]
+    },
+    "product_revisions": {
+      ".read": "auth != null",
+      ".write": "auth != null && (auth.token.role === 'admin' || auth.token.role === 'store_owner')"
+    },
+    "orders": {
+      ".read": "auth != null && auth.token.role === 'admin'",
+      "$orderId": {
+        ".read": "auth != null && (data.child('userId').val() === auth.uid || auth.token.role === 'admin')",
+        ".write": "auth != null"
+      },
+      ".indexOn": ["userId", "merchantId", "cartId", "status", "createdAt"]
+    },
+    "carts": {
+      "$userId": {
+        ".read": "auth != null && auth.uid === $userId",
+        ".write": "auth != null && auth.uid === $userId"
+      }
+    },
+    "merchants": {
+      "$userId": {
+        ".read": "auth != null && (auth.uid === $userId || auth.token.role === 'admin')",
+        ".write": "auth != null && auth.uid === $userId"
+      }
+    },
+    "vouchers": {
+      ".read": "auth != null",
+      ".write": "auth != null && auth.token.role === 'admin'"
+    },
+    "refresh_tokens": {
+      ".read": false,
+      ".write": false
+    },
+    "token_blacklist": {
+      ".read": false,
+      ".write": false
+    },
+    "login_attempts": {
+      ".read": false,
+      ".write": false
+    },
+    "event_log": {
+      ".read": "auth != null && auth.token.role === 'admin'",
+      ".write": false
+    },
+    "processed_events": {
+      ".read": false,
+      ".write": false
+    },
+    "products_current": {
+      ".read": true,
+      ".write": false,
+      ".indexOn": ["status", "lastEventAt"]
+    },
+    "activity_log": {
+      ".read": "auth != null && auth.token.role === 'admin'",
+      ".write": false
+    },
+    "inventory_receipts": {
+      ".read": "auth != null && auth.token.role === 'admin'",
+      ".write": false
+    },
+    "$other": {
+      ".read": false,
+      ".write": false
+    }
+  }
+}

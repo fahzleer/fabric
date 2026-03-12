@@ -1,0 +1,130 @@
+{
+  "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
+  "organizeImports": {
+    "enabled": true
+  },
+
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+
+      "correctness": {
+        "noUnusedVariables": "error",
+        "noUnusedImports": "error",
+        "noUnusedFunctionParameters": "error",
+        "useExhaustiveDependencies": "warn",
+        "noConstantCondition": "error",
+        "noUndeclaredVariables": "error",
+        "noInvalidUseBeforeDeclaration": "error"
+      },
+
+      "suspicious": {
+        "noExplicitAny": "error",
+        "noArrayIndexKey": "warn",
+        "noConfusingVoidType": "error",
+        "noDoubleEquals": "error",
+        "noEmptyBlockStatements": "error",
+        "noFallthroughSwitchClause": "error",
+        "noAssignInExpressions": "error",
+        "noRedeclare": "error"
+      },
+
+      "style": {
+        "noNonNullAssertion": "error",
+        "useConst": "error",
+        "noParameterAssign": "error",
+        "useDefaultParameterLast": "error",
+        "noUnusedTemplateLiteral": "error",
+        "useEnumInitializers": "error",
+        "useTemplate": "warn",
+        "noShoutyConstants": "off",
+        "useNodejsImportProtocol": "off"
+      },
+
+      "complexity": {
+        "noExcessiveCognitiveComplexity": {
+          "level": "warn",
+          "options": { "maxAllowedComplexity": 15 }
+        },
+        "noForEach": "off",
+        "useLiteralKeys": "error",
+        "useSimplifiedLogicExpression": "error",
+        "noUselessStringConcat": "error",
+        "noUselessTypeConstraint": "error"
+      },
+
+      "performance": {
+        "noDelete": "error",
+        "noBarrelFile": "off",
+        "noReExportAll": "off"
+      },
+
+      "security": {
+        "noDangerouslySetInnerHtml": "error",
+        "noGlobalEval": "error"
+      }
+    }
+  },
+
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineWidth": 100
+  },
+
+  "javascript": {
+    "globals": ["Bun"],
+    "parser": {
+      "unsafeParameterDecoratorsEnabled": true
+    },
+    "formatter": {
+      "quoteStyle": "double",
+      "semicolons": "always",
+      "trailingCommas": "es5"
+    }
+  },
+
+  "css": {
+    "linter": {
+      "enabled": false
+    }
+  },
+
+  "files": {
+    "include": [
+      "apps/cf-api/src/**",
+      "apps/cf-commerce/src/**",
+      "apps/web/src/**",
+      "apps/worker/src/**",
+      "packages/types/src/**",
+      "packages/ui/src/**",
+      "packages/contract/src/**",
+      "packages/cache/src/**",
+      "packages/firebase/src/**",
+      "packages/orpc/src/**"
+    ],
+    "ignore": [
+      "**/node_modules/**",
+      "**/.next/**",
+      "**/dist/**",
+      "**/build/**",
+      "**/*.min.js",
+      "**/bun.lock",
+      "**/bun.lockb",
+      "**/*.d.ts",
+      "**/public/**",
+      "**/.turbo/**",
+      "packages/ui/coverage/**",
+      "database.rules.json",
+      "scripts/**",
+      "**/storybook-static/**"
+    ]
+  }
+}

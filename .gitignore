@@ -1,0 +1,50 @@
+# Dependencies
+node_modules/
+.pnp/
+.pnp.js
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+storybook-static/
+
+# Test coverage (generated — never commit)
+coverage/
+*.lcov
+
+# Playwright
+playwright-report/
+test-results/
+
+# Turbo cache
+.turbo/
+
+# Bun lockfile artifacts
+bun.lockb
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.idea/
+*.iml
+
+# Scala / sbt (apps/payment)
+target/
+project/target/
+project/project/
+.bsp/
+.metals/
+
+# Firebase emulator data
+.firebase/
+firebase-debug.log
+ui-debug.log
