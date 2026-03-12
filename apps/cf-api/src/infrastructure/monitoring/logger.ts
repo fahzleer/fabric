@@ -27,7 +27,7 @@ const ANSI = {
 } as const;
 
 function emit(entry: LogEntry): void {
-  if (process.env["LOG_SILENT"] === "true") return;
+  if (process.env.LOG_SILENT === "true") return;
   if (IS_DEV) {
     const color = ANSI[entry.severity as keyof typeof ANSI] ?? ANSI.reset;
     const { severity, service, message, ...rest } = entry;
