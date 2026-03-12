@@ -76,6 +76,7 @@ export const cfCommerce = onRequest(
     timeoutSeconds: 120,
     minInstances: 0,
     concurrency: 80,
+    secrets: ["INTERNAL_SECRET"],
   },
   (req, res): Promise<void> => {
     return (async (): Promise<void> => {
