@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
 test("Input default renders with placeholder", async ({ page }) => {
   await page.goto("/iframe.html?id=ui-input--default");

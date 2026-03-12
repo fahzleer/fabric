@@ -65,7 +65,11 @@ async function getAuthToken(): Promise<Maybe<string>> {
         "Content-Type": "application/json",
         "x-internal-secret": INTERNAL_SECRET,
       },
-      body: JSON.stringify({ userId: user.id, email: user.email, role: (user.role === "user" || !user.role) ? "customer" : user.role }),
+      body: JSON.stringify({
+        userId: user.id,
+        email: user.email,
+        role: user.role === "user" || !user.role ? "customer" : user.role,
+      }),
       cache: "no-store",
     });
     if (!res.ok) return None();
@@ -96,14 +100,24 @@ async function fetchOrderDetail(
 
 function computePriceBreakdown(order: Maybe<OrderDetail>): PriceBreakdown {
   if (isNone(order)) {
-    return { subtotalCents: 0, currency: "THB", discountCents: 0, shippingCents: 0, taxCents: 0, totalCents: 0 };
+    return {
+      subtotalCents: 0,
+      currency: "THB",
+      discountCents: 0,
+      shippingCents: 0,
+      taxCents: 0,
+      totalCents: 0,
+    };
   }
   const o = order.value;
   const subtotalCents = o.lines.reduce(
     (acc, l) => acc + Math.round(l.unitPrice.amount * 100) * l.quantity,
     0
   );
-  const taxCents = Math.max(0, o.totalAmountInCents - (subtotalCents - o.discountCents + o.shippingCents));
+  const taxCents = Math.max(
+    0,
+    o.totalAmountInCents - (subtotalCents - o.discountCents + o.shippingCents)
+  );
   return {
     subtotalCents,
     currency: o.currency,
@@ -117,7 +131,9 @@ function computePriceBreakdown(order: Maybe<OrderDetail>): PriceBreakdown {
 function getStatusInfo(order: Maybe<OrderDetail>) {
   if (isNone(order)) return { label: "", colour: "text-gray-700 bg-gray-50 border-gray-200" };
   const status = order.value.status;
-  return STATUS_LABELS[status] ?? { label: status, colour: "text-gray-700 bg-gray-50 border-gray-200" };
+  return (
+    STATUS_LABELS[status] ?? { label: status, colour: "text-gray-700 bg-gray-50 border-gray-200" }
+  );
 }
 
 function OrderLineItems({ lines, currency }: { lines: OrderLine[]; currency: string }) {
@@ -163,7 +179,9 @@ function OrderPriceBreakdown({ breakdown }: { breakdown: PriceBreakdown }) {
       )}
       <div className="flex justify-between text-sm text-gray-600">
         <span>Shipping</span>
-        <span>{shippingCents === 0 ? "Free" : formatPrice({ amount: shippingCents / 100, currency })}</span>
+        <span>
+          {shippingCents === 0 ? "Free" : formatPrice({ amount: shippingCents / 100, currency })}
+        </span>
       </div>
       {taxCents > 0 && (
         <div className="flex justify-between text-sm text-gray-600">

@@ -1,6 +1,6 @@
+import { beforeEach, describe, expect, mock, test } from "bun:test";
 import { login } from "./login.use-case";
 import type { LoginDeps } from "./login.use-case";
-import { beforeEach, describe, expect, mock, test } from "bun:test";
 
 const mockVerifyPassword = mock(async (_password: string, _hash: string): Promise<boolean> => true);
 

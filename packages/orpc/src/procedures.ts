@@ -1,4 +1,4 @@
-import { os, ORPCError, type Context } from "@orpc/server";
+import { os, type Context, ORPCError } from "@orpc/server";
 import { type AuthedFields, isAuthed } from "./context";
 
 export { ORPCError };

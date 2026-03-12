@@ -40,19 +40,21 @@ export class GcsStorageAdapter {
     const gcsPath = `products/${productId}/images/${uniqueName}`;
     const file = this.storage.bucket(this.bucketName).file(gcsPath);
 
-    return Result.tryPromise(
-      {
-        try: () =>
-          file
-            .save(buffer, { contentType, metadata: { productId, originalFilename }, predefinedAcl: "publicRead" })
-            .then(() => ({
-              publicUrl: this.buildPublicUrl(gcsPath),
-              gcsPath,
-              filename: uniqueName,
-            })),
-        catch: (e) => new GcsUploadError({ message: String(e) }),
-      },
-    );
+    return Result.tryPromise({
+      try: () =>
+        file
+          .save(buffer, {
+            contentType,
+            metadata: { productId, originalFilename },
+            predefinedAcl: "publicRead",
+          })
+          .then(() => ({
+            publicUrl: this.buildPublicUrl(gcsPath),
+            gcsPath,
+            filename: uniqueName,
+          })),
+      catch: (e) => new GcsUploadError({ message: String(e) }),
+    });
   }
 
   deleteProductImage(urlOrPath: string): Promise<Result<void, GcsDeleteError>> {
@@ -62,7 +64,11 @@ export class GcsStorageAdapter {
 
     return Result.tryPromise({
       try: () =>
-        this.storage.bucket(this.bucketName).file(gcsPath).delete({ ignoreNotFound: true }).then(() => undefined),
+        this.storage
+          .bucket(this.bucketName)
+          .file(gcsPath)
+          .delete({ ignoreNotFound: true })
+          .then(() => undefined),
       catch: (e) => new GcsDeleteError({ message: String(e) }),
     });
   }

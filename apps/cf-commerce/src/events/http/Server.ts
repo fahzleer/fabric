@@ -65,7 +65,7 @@ export const registerEventsRoutes = (app: Hono, config: ServerConfig): void => {
       last_event_at: p.lastEventAt,
     });
   });
-  
+
   app.get("/sse/:userId", (c) => {
     const userId = c.req.param("userId");
 

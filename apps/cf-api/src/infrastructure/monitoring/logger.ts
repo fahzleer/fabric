@@ -16,6 +16,8 @@ const IS_DEV =
   process.env.NODE_ENV === "test" ||
   process.env.FUNCTIONS_EMULATOR === "true";
 
+const IS_SILENT = process.env.LOG_SILENT === "true";
+
 const ANSI = {
   reset: "\x1b[0m",
   bold: "\x1b[1m",
@@ -27,6 +29,7 @@ const ANSI = {
 } as const;
 
 function emit(entry: LogEntry): void {
+  if (IS_SILENT) return;
   if (IS_DEV) {
     const color = ANSI[entry.severity as keyof typeof ANSI] ?? ANSI.reset;
     const { severity, service, message, ...rest } = entry;

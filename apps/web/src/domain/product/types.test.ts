@@ -161,11 +161,7 @@ describe("isProductSizeAvailable", () => {
 describe("getProductAvailableSizes", () => {
   test("returns only sizes with available stock", () => {
     const product = makeProduct({
-      stock: [
-        makeStockInfo("M", 10, 2),
-        makeStockInfo("L", 0, 0),
-        makeStockInfo("XL", 5, 1),
-      ],
+      stock: [makeStockInfo("M", 10, 2), makeStockInfo("L", 0, 0), makeStockInfo("XL", 5, 1)],
     });
     const sizes = getProductAvailableSizes(product);
     expect(sizes).toContain("M");

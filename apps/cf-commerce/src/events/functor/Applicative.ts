@@ -18,7 +18,7 @@ export const map2 = <A, B, C>(
     programB
   );
 
-  export const map3 = <A, B, C, D>(
+export const map3 = <A, B, C, D>(
   f: (a: A, b: B, c: C) => D,
   pa: EventOp<A>,
   pb: EventOp<B>,
@@ -32,9 +32,9 @@ export const map2 = <A, B, C>(
     pc
   );
 
-  export const liftA2 = map2;
+export const liftA2 = map2;
 
-  export const sequence = <A>(programs: ReadonlyArray<EventOp<A>>): EventOp<ReadonlyArray<A>> => {
+export const sequence = <A>(programs: ReadonlyArray<EventOp<A>>): EventOp<ReadonlyArray<A>> => {
   if (programs.length === 0) return { _tag: "Pure", value: [] };
   const [head, ...rest] = programs as [EventOp<A>, ...EventOp<A>[]];
   return map2((h: A, t: ReadonlyArray<A>) => [h, ...t], head, sequence(rest));

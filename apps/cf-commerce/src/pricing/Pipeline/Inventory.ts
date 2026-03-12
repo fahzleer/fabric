@@ -56,7 +56,7 @@ const buildReservation = ({
     expiresInSeconds: req.reservationTtlSeconds,
     availableAfterReserve: available - req.quantity,
   });
-  
+
 export const reserveStock = (req: ReservationRequest): Either.Either<Reservation, PricingError> =>
   pipe(
     Either.right(req),

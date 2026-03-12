@@ -39,7 +39,7 @@ export const dexieCartAdapter = {
       try: async () => {
         const key = makeItemKey(productId.value, size);
         const existing = await cartDb.cartItems.get(key);
-        
+
         const newQty = existing
           ? new BigNumber(existing.quantity).plus(quantity).toNumber()
           : quantity;
@@ -49,9 +49,10 @@ export const dexieCartAdapter = {
           productId: productId.value,
           size,
           quantity: newQty,
-          unitPriceCents: priceSnapshot?.amount != null
-            ? Math.round(priceSnapshot.amount * 100)
-            : (existing?.unitPriceCents ?? 0),
+          unitPriceCents:
+            priceSnapshot?.amount != null
+              ? Math.round(priceSnapshot.amount * 100)
+              : (existing?.unitPriceCents ?? 0),
           currency: priceSnapshot?.currency ?? existing?.currency ?? "THB",
           productName: priceSnapshot?.productName ?? existing?.productName ?? "",
           productImageUrl: priceSnapshot?.productImageUrl ?? existing?.productImageUrl ?? "",

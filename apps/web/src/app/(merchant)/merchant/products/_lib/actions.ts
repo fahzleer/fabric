@@ -29,7 +29,8 @@ function parseImages(formData: FormData) {
 }
 
 function mapCreateProductError(tag: string, fallback: string): string {
-  if (tag === "SubscriptionInactive") return "Your plan is inactive. Please activate billing first.";
+  if (tag === "SubscriptionInactive")
+    return "Your plan is inactive. Please activate billing first.";
   if (tag === "PlanLimitExceeded") return "Product limit reached. Please upgrade your plan.";
   if (tag === "MerchantNotFound") return "Merchant profile not found. Please complete onboarding.";
   return fallback;

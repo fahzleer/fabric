@@ -12,8 +12,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "biome lint ./src",
     "format": "biome format --write ./src",
-    "deploy": "firebase deploy --only functions:cfApi",
-    "preinstall": "bunx --bun only-allow bun"
+    "deploy": "firebase deploy --only functions:cfApi"
   },
   "dependencies": {
     "@fabric/cache": "*",

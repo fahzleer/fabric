@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
 test("Button default renders and is clickable", async ({ page }) => {
   await page.goto("/iframe.html?id=ui-button--default");

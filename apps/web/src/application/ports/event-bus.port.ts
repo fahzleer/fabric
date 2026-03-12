@@ -7,7 +7,7 @@ export type ClientDomainEvent = ProductViewed | CartDomainEvent | OrderDomainEve
 
 export interface ClientEventBusPort {
   publish(event: ClientDomainEvent): Effect.Effect<void, never>;
-  
+
   subscribe(
     eventType: ClientDomainEvent["_type"],
     handler: (event: ClientDomainEvent) => void

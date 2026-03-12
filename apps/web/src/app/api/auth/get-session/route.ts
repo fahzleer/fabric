@@ -19,8 +19,7 @@ export async function GET() {
 
   const user = session.user as { id: string; email: string; role?: string };
 
-  const pasetoRole =
-    user.role === "user" || !user.role ? "customer" : user.role;
+  const pasetoRole = user.role === "user" || !user.role ? "customer" : user.role;
 
   try {
     const res = await fetch(`${API_BASE}/internal/issue-token`, {

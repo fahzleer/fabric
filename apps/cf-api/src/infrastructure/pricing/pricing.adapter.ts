@@ -35,7 +35,7 @@ export class HttpPricingAdapter implements PricingPort {
         shippingAddress,
         currency,
       };
-      
+
       const signal = composeSignals(requestSignal, 5000);
 
       const res = await fetch(`${this.baseUrl}/checkout/calculate`, {

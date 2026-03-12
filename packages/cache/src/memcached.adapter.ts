@@ -1,5 +1,5 @@
-import Memcached from "memcached";
 import { Result, TaggedError } from "better-result";
+import Memcached from "memcached";
 
 export class MemcachedGetError extends TaggedError("MemcachedGetError")<{ message: string }>() {}
 export class MemcachedSetError extends TaggedError("MemcachedSetError")<{ message: string }>() {}
@@ -17,6 +17,7 @@ export const CacheKeys = {
   products: () => "products:all",
   cart: (id: string) => `cart:${id}`,
   user: (id: string) => `user:${id}`,
+  rateLimitKey: (ip: string, path: string) => `rate_limit:${path}:${ip}`,
 } as const;
 
 export class MemcachedAdapter {
@@ -39,7 +40,11 @@ export class MemcachedAdapter {
     });
   }
 
-  set(key: string, value: unknown, ttlSeconds: number): Promise<Result<boolean, MemcachedSetError>> {
+  set(
+    key: string,
+    value: unknown,
+    ttlSeconds: number
+  ): Promise<Result<boolean, MemcachedSetError>> {
     return Result.tryPromise({
       try: () =>
         new Promise<boolean>((resolve, reject) => {
@@ -68,7 +73,7 @@ export class MemcachedAdapter {
   async getOrSet<T>(
     key: string,
     ttlSeconds: number,
-    factory: () => Promise<T>,
+    factory: () => Promise<T>
   ): Promise<Result<T, MemcachedGetError | MemcachedSetError>> {
     const cached = await this.get<T>(key);
 
@@ -84,6 +89,45 @@ export class MemcachedAdapter {
     }
 
     return Result.ok(value);
+  }
+
+  /**
+   * Atomically increments a counter key by 1, creating it with the given TTL if it
+   * does not yet exist. Returns the new counter value, or null on any cache error
+   * (fail-open: callers should treat null as "no limit exceeded").
+   */
+  async increment(key: string, ttlSeconds: number): Promise<number | null> {
+    // Attempt to increment an existing key.
+    // Memcached incr returns a number on success, false when the key doesn't exist.
+    const incr = await new Promise<number | boolean>((resolve, reject) => {
+      this.client.incr(key, 1, (err, result) => {
+        if (err) reject(err);
+        else resolve(result);
+      });
+    }).catch(() => null);
+
+    if (typeof incr === "number") return incr;
+
+    // Key didn't exist — create it atomically (add is a no-op if key already exists).
+    const added = await new Promise<number | boolean>((resolve, reject) => {
+      this.client.add(key, 1, ttlSeconds, (err, result) => {
+        if (err) reject(err);
+        else resolve(result);
+      });
+    }).catch(() => null);
+
+    if (added === null) return null; // cache error → fail open
+    if (added === true) return 1; // successfully created with value 1
+
+    // Race: another request created the key between our incr and add — retry once.
+    const retry = await new Promise<number | boolean>((resolve, reject) => {
+      this.client.incr(key, 1, (err, result) => {
+        if (err) reject(err);
+        else resolve(result);
+      });
+    }).catch(() => null);
+
+    return typeof retry === "number" ? retry : null;
   }
 
   quit(): void {

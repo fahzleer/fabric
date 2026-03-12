@@ -27,6 +27,6 @@ export interface CartPort {
     size: ProductSize,
     newQuantity: number
   ): Effect.Effect<ShoppingCart, CartItemNotFoundError | CartInvalidQuantityError | NetworkError>;
-  
+
   clearCart(): Effect.Effect<ShoppingCart, NetworkError>;
 }

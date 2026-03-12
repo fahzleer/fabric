@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
 test("Card default renders with title and content", async ({ page }) => {
   await page.goto("/iframe.html?id=ui-card--default");

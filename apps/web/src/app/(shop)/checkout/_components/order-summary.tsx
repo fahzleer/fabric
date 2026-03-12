@@ -228,7 +228,7 @@ export function OrderSummary({ cart, onNext, onBack }: OrderSummaryProps) {
   }
 
   const hasPreview = isSome(preview);
-  
+
   const subtotalAmount = hasPreview ? preview.value.subtotalCents / 100 : getCartTotal(cart.value);
   const discountAmount = hasPreview ? preview.value.discountCents / 100 : 0;
   const shippingAmount = hasPreview ? preview.value.shippingCents / 100 : 0;

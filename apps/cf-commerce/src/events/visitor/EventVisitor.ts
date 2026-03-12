@@ -66,8 +66,7 @@ export const routingVisitor = (): EventVisitor<ReadonlyArray<string>> => ({
   onProductUpdated: (_, p) => [p.ownerId],
   onProductArchived: (_, p) => [p.ownerId],
   onProductStockUpdated: (_, p) => [p.ownerId],
-  onOrderPlaced: (_, p) =>
-    [...new Set(p.lines.map((line) => line.ownerId))],
+  onOrderPlaced: (_, p) => [...new Set(p.lines.map((line) => line.ownerId))],
   onOrderConfirmed: () => [],
   onOrderCancelled: () => [],
 });

@@ -67,7 +67,6 @@ async function onboardMerchantProfile(storeName: string): Promise<void> {
 }
 
 export async function registerStoreAction(formData: FormData) {
-
   await validateCsrfOrigin();
 
   const name = String(formData.get("name") ?? "").trim();

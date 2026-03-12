@@ -1,7 +1,7 @@
+import { Result, TaggedError } from "better-result";
 import { type App, type Credential, cert, getApps, initializeApp } from "firebase-admin/app";
 import { type Database, getDatabase } from "firebase-admin/database";
 import { type Storage, getStorage } from "firebase-admin/storage";
-import { Result, TaggedError } from "better-result";
 
 export class FirebaseInitError extends TaggedError("FirebaseInitError")<{ message: string }>() {}
 
@@ -27,7 +27,9 @@ export interface FirebaseClients {
 let _app: App | undefined;
 let _clients: FirebaseClients | undefined;
 
-export function createFirebaseAdmin(config: FirebaseConfig): Result<FirebaseClients, FirebaseInitError> {
+export function createFirebaseAdmin(
+  config: FirebaseConfig
+): Result<FirebaseClients, FirebaseInitError> {
   return Result.try({
     try: () => {
       if (_app === undefined) {
@@ -85,7 +87,8 @@ export function createFirebaseFromEnv(): Result<FirebaseClients, FirebaseInitErr
 
       return result.value;
     },
-    catch: (e) => (e instanceof FirebaseInitError ? e : new FirebaseInitError({ message: String(e) })),
+    catch: (e) =>
+      e instanceof FirebaseInitError ? e : new FirebaseInitError({ message: String(e) }),
   });
 }
 

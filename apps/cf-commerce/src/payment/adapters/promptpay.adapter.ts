@@ -94,7 +94,10 @@ export class PromptPayAdapter {
   async getStatus(chargeId: string): Promise<PromptPayStatusResult> {
     const cached = statusCache.get(chargeId);
     if (cached && Date.now() - cached.fetchedAt < STATUS_CACHE_TTL_MS) {
-      return { status: cached.status, ...(cached.paidAt !== undefined && { paidAt: cached.paidAt }) };
+      return {
+        status: cached.status,
+        ...(cached.paidAt !== undefined && { paidAt: cached.paidAt }),
+      };
     }
 
     try {
@@ -110,7 +113,11 @@ export class PromptPayAdapter {
       const status = omiseStatusToPromptPay(charge.status);
       const paidAt = status === "successful" ? charge.paid_at : undefined;
 
-      statusCache.set(chargeId, { status, fetchedAt: Date.now(), ...(paidAt !== undefined && { paidAt }) });
+      statusCache.set(chargeId, {
+        status,
+        fetchedAt: Date.now(),
+        ...(paidAt !== undefined && { paidAt }),
+      });
 
       return { status, ...(paidAt !== undefined && { paidAt }) };
     } catch (cause) {

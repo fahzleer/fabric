@@ -1,11 +1,11 @@
 import type {
   CurrencyCode,
   NonEmptyArray,
+  ProductCategory,
   ProductImage,
   ProductSize,
-  Result,
-  ProductCategory,
   ProductStatus,
+  Result,
 } from "@fabric/types";
 import {
   Err,

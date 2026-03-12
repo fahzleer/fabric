@@ -47,6 +47,6 @@ export async function registerAction(formData: FormData) {
 
   revalidateTag("user-session", {});
   revalidateTag("user-profile", {});
-  
+
   redirect("/products");
 }

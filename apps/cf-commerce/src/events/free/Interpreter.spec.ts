@@ -57,8 +57,20 @@ const orderPayload: OrderPlacedPayload = {
   totalInCents: 100000,
   currency: "THB",
   lines: [
-    { productId: "prod-001", productName: "Test Shirt", ownerId: "owner-001", quantity: 2, unitPriceCents: 50000 },
-    { productId: "prod-002", productName: "Test Hoodie", ownerId: "owner-002", quantity: 1, unitPriceCents: 80000 },
+    {
+      productId: "prod-001",
+      productName: "Test Shirt",
+      ownerId: "owner-001",
+      quantity: 2,
+      unitPriceCents: 50000,
+    },
+    {
+      productId: "prod-002",
+      productName: "Test Hoodie",
+      ownerId: "owner-002",
+      quantity: 1,
+      unitPriceCents: 80000,
+    },
   ],
 };
 

@@ -342,7 +342,14 @@ export function X402PaymentForm({ cart, onBack }: X402PaymentFormProps) {
         shippingAddressOption.value,
         address as `0x${string}`,
         isOnCorrectChain,
-        { setStatus, setError, setPlacedOrderId, push: router.push, switchChainAsync, signTypedDataAsync }
+        {
+          setStatus,
+          setError,
+          setPlacedOrderId,
+          push: router.push,
+          switchChainAsync,
+          signTypedDataAsync,
+        }
       );
     } catch (e) {
       setError(Some(resolveErrorMessage(e)));
@@ -350,7 +357,9 @@ export function X402PaymentForm({ cart, onBack }: X402PaymentFormProps) {
     }
   };
 
-  const isLoading = ["connecting", "switching", "probing", "signing", "submitting"].includes(status);
+  const isLoading = ["connecting", "switching", "probing", "signing", "submitting"].includes(
+    status
+  );
 
   const loadingLabel: Partial<Record<Status, string>> = {
     connecting: "Connecting wallet...",

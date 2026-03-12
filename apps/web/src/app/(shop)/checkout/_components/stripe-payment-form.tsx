@@ -52,9 +52,7 @@ interface StripePaymentFormProps {
 
 type StripeStatus = "idle" | "tokenizing" | "processing" | "failed";
 
-type OrderResult =
-  | { success: true; orderId: string }
-  | { success: false; error: string };
+type OrderResult = { success: true; orderId: string } | { success: false; error: string };
 
 type StripeOrderDeps = {
   setStatus: (s: StripeStatus) => void;

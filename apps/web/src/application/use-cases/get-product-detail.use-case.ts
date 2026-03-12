@@ -24,7 +24,7 @@ export const getProductDetailUseCase = (
 ): Effect.Effect<GetProductDetailOutput, ProductNotFoundError | NetworkError> =>
   Effect.gen(function* () {
     const product = yield* deps.productApi.getProduct(input.productId);
-    
+
     yield* Effect.forkDaemon(
       deps.eventBus.publish(
         makeProductViewed({

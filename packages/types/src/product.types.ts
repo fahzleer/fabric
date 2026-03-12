@@ -42,8 +42,11 @@ export const makeProductPrice = (
   return { __brand: "ProductPrice", amount, currency };
 };
 
-export const makeProductPriceFromCents = (cents: number, currency: CurrencyCode): ProductPrice =>
-  ({ __brand: "ProductPrice", amount: cents / 100, currency });
+export const makeProductPriceFromCents = (cents: number, currency: CurrencyCode): ProductPrice => ({
+  __brand: "ProductPrice",
+  amount: cents / 100,
+  currency,
+});
 
 export const formatProductPrice = (price: ProductPrice): string => {
   return new Intl.NumberFormat("th-TH", {

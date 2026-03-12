@@ -74,7 +74,7 @@ export default async function MerchantDashboardPage() {
   const api = maybeApi.value;
 
   const billingResult = await api.getBillingStatus();
-  
+
   const isOnboarded =
     billingResult.ok &&
     isSome(billingResult.value.onboarded) &&

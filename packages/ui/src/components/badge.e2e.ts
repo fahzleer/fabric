@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
 test("Badge default renders with text", async ({ page }) => {
   await page.goto("/iframe.html?id=ui-badge--default");

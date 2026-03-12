@@ -80,7 +80,6 @@ const eventToProgram = (ev: DomainEvent) => {
     case "OrderPlaced":
       return handleOrderPlaced(ev.meta, ev.payload);
     default:
-
       return persist(ev);
   }
 };
