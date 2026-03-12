@@ -1,7 +1,7 @@
 {
   "projects": {
     "default": "demo-fabric-local",
-    "production": "fabric-production-e2534",
+    "production": "fabric-production-21af4",
     "staging": "YOUR_FIREBASE_STAGING_PROJECT_ID"
   }
 }
