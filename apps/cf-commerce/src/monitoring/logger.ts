@@ -12,6 +12,7 @@ export interface LogEntry {
 const SERVICE_NAME = process.env.K_SERVICE ?? "cf-commerce";
 
 function emit(entry: LogEntry): void {
+  if (process.env["LOG_SILENT"] === "true") return;
   console.log(JSON.stringify(entry));
 }
 

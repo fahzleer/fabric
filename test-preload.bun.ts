@@ -1,6 +1,8 @@
 import { JSDOM } from "jsdom";
 import { afterEach, beforeEach } from "bun:test";
 
+process.env["LOG_SILENT"] ??= "true";
+
 const dom = new JSDOM("<!DOCTYPE html><html><body></body></html>", {
   url: "http://localhost/",
   pretendToBeVisual: true,

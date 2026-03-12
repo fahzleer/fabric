@@ -91,14 +91,7 @@ export class MemcachedAdapter {
     return Result.ok(value);
   }
 
-  /**
-   * Atomically increments a counter key by 1, creating it with the given TTL if it
-   * does not yet exist. Returns the new counter value, or null on any cache error
-   * (fail-open: callers should treat null as "no limit exceeded").
-   */
   async increment(key: string, ttlSeconds: number): Promise<number | null> {
-    // Attempt to increment an existing key.
-    // Memcached incr returns a number on success, false when the key doesn't exist.
     const incr = await new Promise<number | boolean>((resolve, reject) => {
       this.client.incr(key, 1, (err, result) => {
         if (err) reject(err);
@@ -108,7 +101,6 @@ export class MemcachedAdapter {
 
     if (typeof incr === "number") return incr;
 
-    // Key didn't exist — create it atomically (add is a no-op if key already exists).
     const added = await new Promise<number | boolean>((resolve, reject) => {
       this.client.add(key, 1, ttlSeconds, (err, result) => {
         if (err) reject(err);
@@ -116,10 +108,9 @@ export class MemcachedAdapter {
       });
     }).catch(() => null);
 
-    if (added === null) return null; // cache error → fail open
-    if (added === true) return 1; // successfully created with value 1
+    if (added === null) return null;
+    if (added === true) return 1;
 
-    // Race: another request created the key between our incr and add — retry once.
     const retry = await new Promise<number | boolean>((resolve, reject) => {
       this.client.incr(key, 1, (err, result) => {
         if (err) reject(err);
