@@ -10,7 +10,7 @@ routes = [
 [vars]
 CF_API_URL = "https://asia-east1-YOUR_PROJECT_ID.cloudfunctions.net/cfApi"
 CF_COMMERCE_URL = "https://asia-east1-YOUR_PROJECT_ID.cloudfunctions.net/cfCommerce"
-FIREBASE_HOSTING_URL = "https://YOUR_PROJECT_ID.web.app"
+FIREBASE_HOSTING_URL = "https://your-app.vercel.app"
 
 [build]
 command = "bun run build"

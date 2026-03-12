@@ -579,8 +579,8 @@
           <span class="v">GET</span> https://fabric.cool/api/health<br/><br/>
           <span class="c"># cf-commerce</span><br/>
           <span class="v">GET</span> https://fabric.cool/events/health<br/><br/>
-          <span class="c"># web</span><br/>
-          <span class="v">GET</span> https://fabric.cool/api/health&nbsp;&nbsp;<span class="c">(Next.js route)</span>
+          <span class="c"># web (Next.js — no dedicated health route;</span><br/>
+          <span class="c"># /api/* routes to cfApi, not web. verify via Vercel dashboard or GET /)</span>
         </div>
       </div>
     </div>

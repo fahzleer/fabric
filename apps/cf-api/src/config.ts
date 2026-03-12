@@ -35,7 +35,7 @@ export function loadConfig(secrets?: SecretsMap): CfApiConfig {
     memcachedServers: get("MEMCACHED_SERVERS") ?? "localhost:11211",
     internalSecret: get("INTERNAL_SECRET") as string,
     eventsServiceUrl: get("EVENTS_SERVICE_URL") ?? "http://localhost:8082",
-    commerceServiceUrl: get("COMMERCE_SERVICE_URL") ?? "http://localhost:8083",
+    commerceServiceUrl: get("COMMERCE_SERVICE_URL") ?? "http://localhost:8082",
     pricingServiceUrl: get("PRICING_SERVICE_URL") ?? "http://localhost:8082",
     paymentServiceUrl: get("PAYMENT_SERVICE_URL") ?? "http://localhost:8082",
     googleClientId: get("GOOGLE_CLIENT_ID") ?? "",
