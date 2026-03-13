@@ -9,11 +9,13 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "placehold.co" },
     ],
   },
-  turbopack: {
-    root: "../../",
-    resolveAlias: {
-      "@effect/platform/MsgPack": "./src/empty-module.ts",
-    },
+  webpack(config) {
+    config.resolve = config.resolve ?? {};
+    config.resolve.alias = {
+      ...(config.resolve.alias as Record<string, string> | undefined),
+      "@effect/platform/MsgPack": false,
+    };
+    return config;
   },
 };
 
