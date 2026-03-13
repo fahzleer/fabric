@@ -14,3 +14,9 @@ const deployPkg = {
 
 await Bun.write("dist/package.json", JSON.stringify(deployPkg, null, 2));
 console.log("✓ dist/package.json written");
+
+const envProd = Bun.file(".env.production");
+if (await envProd.exists()) {
+  await Bun.write("dist/.env.production", envProd);
+  console.log("✓ dist/.env.production copied");
+}

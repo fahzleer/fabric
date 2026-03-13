@@ -48,3 +48,4 @@ project/project/
 .firebase/
 firebase-debug.log
 ui-debug.log
+.vercel

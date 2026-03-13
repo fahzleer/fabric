@@ -75,9 +75,9 @@ export function createFirebaseFromEnv(): Result<FirebaseClients, FirebaseInitErr
         : undefined;
 
       const result = createFirebaseAdmin({
-        projectId: process.env.FIREBASE_PROJECT_ID ?? "",
-        databaseURL: process.env.FIREBASE_DATABASE_URL ?? "",
-        storageBucket: process.env.FIREBASE_STORAGE_BUCKET ?? "",
+        projectId: process.env.FIREBASE_PROJECT_ID ?? process.env.GCP_PROJECT_ID ?? "",
+        databaseURL: process.env.FIREBASE_DATABASE_URL ?? process.env.RTDB_URL ?? "",
+        storageBucket: process.env.FIREBASE_STORAGE_BUCKET ?? process.env.GCS_BUCKET ?? "",
         ...(serviceAccount !== undefined && { serviceAccount }),
       });
 

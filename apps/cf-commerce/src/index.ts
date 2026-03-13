@@ -94,7 +94,30 @@ export const cfCommerce = onRequest(
   (req, res): Promise<void> => {
     return (async (): Promise<void> => {
       const { app } = await boot();
-      const honoRes = await Promise.resolve(app.fetch(req as unknown as Request));
+
+      const protocol = (req.headers["x-forwarded-proto"] as string | undefined) ?? "https";
+      const host = req.headers.host ?? req.hostname;
+      const url = `${protocol}://${host}${req.url}`;
+
+      const headers = new Headers();
+      for (const [key, value] of Object.entries(req.headers)) {
+        if (value !== undefined) {
+          if (Array.isArray(value)) {
+            for (const v of value) headers.append(key, v);
+          } else {
+            headers.set(key, value);
+          }
+        }
+      }
+
+      const hasBody = req.method !== "GET" && req.method !== "HEAD";
+      const webReq = new Request(url, {
+        method: req.method,
+        headers,
+        body: hasBody ? JSON.stringify(req.body) : undefined,
+      });
+
+      const honoRes = await app.fetch(webReq);
       res.status(honoRes.status);
       honoRes.headers.forEach((value: string, key: string) => res.setHeader(key, value));
       const body = await honoRes.text();
