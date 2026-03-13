@@ -1,4 +1,5 @@
 import { formatPrice } from "@/lib/price";
+import { connection } from "next/server";
 import { getInvoices } from "./_lib/queries";
 import type { InvoiceStatus } from "./_lib/types";
 
@@ -9,6 +10,7 @@ const statusStyles: Record<InvoiceStatus, string> = {
 };
 
 export default async function InvoicesPage() {
+  await connection();
   const invoices = await getInvoices();
 
   const totalByStatus = invoices.reduce(
