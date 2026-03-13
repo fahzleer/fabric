@@ -114,8 +114,8 @@ firebase deploy
 firebase deploy --only functions
 
 # Deploy specific function
-firebase deploy --only functions:cfApi
-firebase deploy --only functions:cfCommerce
+firebase deploy --only functions:cf-api:cfApi
+firebase deploy --only functions:cf-commerce:cfCommerce
 
 # Deploy only hosting (web app)
 firebase deploy --only hosting
@@ -363,7 +363,7 @@ firebase functions:log  # Check recent deploys
 
 # Rollback is not native in Firebase Functions — redeploy previous tag
 git checkout <previous-tag>
-firebase deploy --only functions:cfApi
+firebase deploy --only functions:cf-api:cfApi
 ```
 
 ### Cloudflare Worker

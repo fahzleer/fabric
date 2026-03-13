@@ -67,7 +67,7 @@ Look for import errors, `SyntaxError`, or configuration errors that appeared aft
 **Rollback:**
 ```bash
 git checkout <previous-commit>
-firebase deploy --only functions:cfApi
+firebase deploy --only functions:cf-api:cfApi
 ```
 
 ---
@@ -178,7 +178,7 @@ If `PASETO_KEY` is wrong length or changed without token migration: all existing
 
 ```bash
 firebase functions:config:set stripe.price_starter="price_..."
-firebase deploy --only functions:cfApi
+firebase deploy --only functions:cf-api:cfApi
 
 # Manually trigger the upgrade for affected merchants:
 firebase database:update /merchants/<userId> \
@@ -323,7 +323,7 @@ If SSE is critical, configure Cloudflare to allow streaming responses (disable r
 firebase functions:log --only cfApi --follow
 
 # Deploy single function
-firebase deploy --only functions:cfApi
+firebase deploy --only functions:cf-api:cfApi
 
 # Get function config
 firebase functions:config:get

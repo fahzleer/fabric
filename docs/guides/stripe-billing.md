@@ -97,7 +97,7 @@ firebase functions:config:set \
 Then deploy:
 
 ```bash
-firebase deploy --only functions:cfApi
+firebase deploy --only functions:cf-api:cfApi
 ```
 
 ---

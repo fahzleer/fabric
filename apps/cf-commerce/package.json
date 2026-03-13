@@ -12,7 +12,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "biome lint ./src",
     "format": "biome format --write ./src",
-    "deploy": "firebase deploy --only functions:cfCommerce"
+    "deploy": "firebase deploy --only functions:cf-commerce:cfCommerce"
   },
   "dependencies": {
     "@fabric/firebase": "*",

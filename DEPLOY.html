@@ -203,7 +203,7 @@
         Stripe billing · Payouts · Internal token bridge<br/>
         512 MiB · 60s timeout · minInstances: 1 (via <code>CF_MIN_INSTANCES</code>) · concurrency: 80
       </div>
-      <div class="cmd"><b>firebase deploy --only functions:cfApi</b></div>
+      <div class="cmd"><b>firebase deploy --only functions:cf-api:cfApi</b></div>
     </div>
 
     <hr/>
@@ -220,7 +220,7 @@
         Payment — Omise card + PromptPay QR<br/>
         512 MiB · 120s timeout · minInstances: 0 · concurrency: 80
       </div>
-      <div class="cmd"><b>firebase deploy --only functions:cfCommerce</b></div>
+      <div class="cmd"><b>firebase deploy --only functions:cf-commerce:cfCommerce</b></div>
     </div>
 
     <hr/>
