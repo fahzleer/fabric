@@ -50,16 +50,16 @@
   },
   "functions": [
     {
-      "source": "apps/cf-api",
+      "source": "apps/cf-api/dist",
       "codebase": "cf-api",
       "runtime": "nodejs22",
-      "ignore": ["node_modules", ".git", "**/*.test.ts", "**/*.spec.ts", "dist"]
+      "ignore": ["node_modules", ".git"]
     },
     {
-      "source": "apps/cf-commerce",
+      "source": "apps/cf-commerce/dist",
       "codebase": "cf-commerce",
       "runtime": "nodejs22",
-      "ignore": ["node_modules", ".git", "**/*.test.ts", "**/*.spec.ts", "dist"]
+      "ignore": ["node_modules", ".git"]
     }
   ],
   "database": {

@@ -44,7 +44,9 @@ import {
   setupGracefulShutdown,
 } from "./infrastructure/shutdown/graceful-shutdown";
 
-const bootPromise = (async () => {
+let bootPromise: ReturnType<typeof startBoot> | null = null;
+
+async function startBoot() {
   const secrets = await loadSecrets();
   const config = loadConfig(secrets);
   const DEPLOY_REGIONS = (process.env.CLOUD_FUNCTION_REGIONS ?? "asia-east1")
@@ -153,10 +155,15 @@ const bootPromise = (async () => {
   });
 
   return { app, config, DEPLOY_REGIONS };
-})();
+}
 
-if (!process.env.K_SERVICE) {
-  bootPromise.then(({ app }) => {
+function boot() {
+  if (!bootPromise) bootPromise = startBoot();
+  return bootPromise;
+}
+
+if (typeof Bun !== "undefined") {
+  boot().then(({ app }) => {
     const port = Number.parseInt(process.env.PORT ?? "3010", 10);
     Bun.serve({ fetch: app.fetch.bind(app), port });
     console.log(`[cf-api] dev server running on http://localhost:${port}`);
@@ -175,7 +182,7 @@ export const cfApi = onRequest(
     concurrency: 80,
   },
   async (req, res) => {
-    const { app } = await bootPromise;
+    const { app } = await boot();
     const honoRes = await Promise.resolve(app.fetch(req as unknown as Request));
     res.status(honoRes.status);
     honoRes.headers.forEach((value: string, key: string) => res.setHeader(key, value));

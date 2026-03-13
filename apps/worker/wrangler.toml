@@ -4,12 +4,12 @@ compatibility_date = "2025-01-01"
 compatibility_flags = ["nodejs_compat"]
 
 routes = [
-  { pattern = "yourdomain.com/*", zone_name = "yourdomain.com" }
+  { pattern = "fabric.cool/*", zone_name = "fabric.cool" }
 ]
 
 [vars]
-CF_API_URL = "https://asia-east1-YOUR_PROJECT_ID.cloudfunctions.net/cfApi"
-CF_COMMERCE_URL = "https://asia-east1-YOUR_PROJECT_ID.cloudfunctions.net/cfCommerce"
+CF_API_URL = "https://asia-east1-fabric-production-21af4.cloudfunctions.net/cfApi"
+CF_COMMERCE_URL = "https://asia-east1-fabric-production-21af4.cloudfunctions.net/cfCommerce"
 FIREBASE_HOSTING_URL = "https://your-app.vercel.app"
 
 [build]
