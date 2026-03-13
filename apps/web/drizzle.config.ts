@@ -11,12 +11,13 @@ const databaseUrl =
 
 
 export default defineConfig({
-	
+	schema: './src/lib/auth-schema.ts',
 	out: './drizzle',
 	dialect: 'postgresql',
 	dbCredentials: {
 		url: databaseUrl
 	},
+	tablesFilter: ['user', 'session', 'account', 'verification'],
 	verbose: true,
 	strict: true
 })
