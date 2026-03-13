@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "ulimit -n 65536 && next dev",
-    "build": "TURBOPACK=0 next build",
+    "build": "next build",
     "start": "next start",
     "lint": "biome lint ./src",
     "format": "biome format --write ./src",

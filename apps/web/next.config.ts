@@ -7,11 +7,6 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "placehold.co" },
     ],
   },
-  turbopack: {
-    root: "../../",
-  },
-
-
   webpack(config) {
     config.resolve = config.resolve ?? {};
     config.resolve.alias = {
