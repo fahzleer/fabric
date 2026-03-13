@@ -8,7 +8,7 @@ routes = [
 ]
 
 [vars]
-CF_API_URL = "https://asia-east1-fabric-production-21af4.cloudfunctions.net/cfApi"
-CF_COMMERCE_URL = "https://asia-east1-fabric-production-21af4.cloudfunctions.net/cfCommerce"
+CF_API_URL = "https://cfapi-trougmmi5q-de.a.run.app"
+CF_COMMERCE_URL = "https://cfcommerce-trougmmi5q-de.a.run.app"
 FIREBASE_HOSTING_URL = "https://fabric.cool"
 
