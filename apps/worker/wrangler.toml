@@ -10,5 +10,5 @@ routes = [
 [vars]
 CF_API_URL = "https://cfapi-trougmmi5q-de.a.run.app"
 CF_COMMERCE_URL = "https://cfcommerce-trougmmi5q-de.a.run.app"
-FIREBASE_HOSTING_URL = "https://fabric.cool"
+FIREBASE_HOSTING_URL = "https://fabric-web-seven.vercel.app"
 
