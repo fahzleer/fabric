@@ -18,7 +18,7 @@ export interface CfApiConfig {
   readonly stripePortalReturnUrl: string;
 }
 
-const REQUIRED_VARS = ["PASETO_KEY", "INTERNAL_SECRET"] as const;
+const REQUIRED_VARS = ["PASETO_KEY", "INTERNAL_SECRET", "CORS_ORIGIN"] as const;
 
 export function loadConfig(secrets?: SecretsMap): CfApiConfig {
   const get = (key: string): string | undefined =>
@@ -31,7 +31,7 @@ export function loadConfig(secrets?: SecretsMap): CfApiConfig {
 
   return {
     pasetoKey: get("PASETO_KEY") as string,
-    corsOrigin: get("CORS_ORIGIN") ?? "*",
+    corsOrigin: get("CORS_ORIGIN") as string,
     memcachedServers: get("MEMCACHED_SERVERS") ?? "localhost:11211",
     internalSecret: get("INTERNAL_SECRET") as string,
     eventsServiceUrl: get("EVENTS_SERVICE_URL") ?? "http://localhost:8082",
