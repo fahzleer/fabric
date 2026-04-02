@@ -38,47 +38,30 @@ export function ProductListClient({ initialProducts }: { initialProducts: Mercha
 
   return (
     <div className="space-y-5">
-      {/* Legend */}
-      <div className="truncate rounded-xl border border-white/10 bg-gray-900/40 px-5 py-3 text-xs text-gray-500">
-        <span className="font-semibold text-gray-300">@effect-atom/atom-react</span>
-        {" — "}
-        <code className="text-teal-400">① Atom.fn + Stream.scan</code>
-        <span className="hidden sm:inline">
-          {"  ·  "}
-          <code className="text-blue-400">② Atom.pull + rechunk({PAGE_SIZE})</code>
-          {"  ·  "}
-          <code className="text-purple-400">③ Atom.fn + get.set</code>
-        </span>
-        <span className="ml-3 text-gray-600">({initialProducts.length} products)</span>
-      </div>
-
       {/* Tab bar */}
       <div className="flex gap-1.5 rounded-xl border border-white/10 bg-gray-800/50 p-1">
         {(
           [
             {
               key: "stream",
-              label: "① Stream",
-              sub: "Atom.fn + Stream.scan",
+              label: "Stream",
               on: "bg-teal-500/20 text-teal-300",
               off: "text-gray-500 hover:text-teal-400",
             },
             {
               key: "paginate",
-              label: "② Pull",
-              sub: `Atom.pull + rechunk(${PAGE_SIZE})`,
+              label: "Pull",
               on: "bg-blue-500/20 text-blue-300",
               off: "text-gray-500 hover:text-blue-400",
             },
             {
               key: "filter",
-              label: "③ Filter",
-              sub: "Atom.fn + get.set",
+              label: "Filter",
               on: "bg-purple-500/20 text-purple-300",
               off: "text-gray-500 hover:text-purple-400",
             },
           ] as const
-        ).map(({ key, label, sub, on, off }) => (
+        ).map(({ key, label, on, off }) => (
           <button
             key={key}
             type="button"
@@ -86,7 +69,6 @@ export function ProductListClient({ initialProducts }: { initialProducts: Mercha
             className={`flex-1 min-w-0 truncate rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${tab === key ? on : off}`}
           >
             {label}
-            <span className="hidden sm:inline ml-1.5 text-xs opacity-60">— {sub}</span>
           </button>
         ))}
       </div>
@@ -104,19 +86,7 @@ function StreamTab({ total }: { total: number }) {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h3 className="text-sm font-semibold text-white">
-            Pattern 1 —{" "}
-            <code className="rounded bg-teal-500/10 px-1.5 py-0.5 text-xs text-teal-300">
-              Atom.fn + Stream.scan
-            </code>
-          </h3>
-          <p className="mt-1 text-xs text-gray-500">
-            fn returns a Stream; <code className="text-teal-300">Stream.scan</code> accumulates
-            items into a growing array. Atom value rerenders on every emission.
-          </p>
-        </div>
+      <div className="flex items-start justify-end gap-4">
         <button
           type="button"
           onClick={() => startStream("")}
@@ -172,20 +142,6 @@ function PullTab({ total }: { total: number }) {
 
   return (
     <div className="space-y-4">
-      <div>
-        <h3 className="text-sm font-semibold text-white">
-          Pattern 2 —{" "}
-          <code className="rounded bg-blue-500/10 px-1.5 py-0.5 text-xs text-blue-300">
-            Atom.pull + rechunk({PAGE_SIZE})
-          </code>
-        </h3>
-        <p className="mt-1 text-xs text-gray-500">
-          <code className="text-blue-300">Stream.rechunk({PAGE_SIZE})</code> groups the stream into
-          chunks. Each <code className="text-blue-300">loadMore()</code> pull delivers {PAGE_SIZE}{" "}
-          more items. Items accumulate in <code className="text-blue-300">PullResult.items</code>.
-        </p>
-      </div>
-
       {Result.match(result, {
         onInitial: (r) => (
           <div className="flex flex-col items-center justify-center gap-4 py-14">
@@ -225,7 +181,7 @@ function PullTab({ total }: { total: number }) {
 
               <ProductTable products={Array.from(loaded)} accent="blue" />
 
-              {isDone ? (
+              {isDone || loaded.length >= total ? (
                 <p className="text-center text-xs text-gray-600">
                   — all {loaded.length} products loaded in {pageCount} pull
                   {pageCount !== 1 ? "s" : ""} —
@@ -239,7 +195,7 @@ function PullTab({ total }: { total: number }) {
                 >
                   {r.waiting
                     ? "Loading…"
-                    : `Load more  (+${PAGE_SIZE} · page ${pageCount + 1} of ${Math.ceil(total / PAGE_SIZE)})`}
+                    : `Load more (+${Math.min(PAGE_SIZE, total - loaded.length)} · page ${pageCount + 1} of ${Math.ceil(total / PAGE_SIZE)})`}
                 </button>
               )}
             </div>
@@ -276,21 +232,6 @@ function FilterTab() {
 
   return (
     <div className="space-y-4">
-      <div>
-        <h3 className="text-sm font-semibold text-white">
-          Pattern 3 —{" "}
-          <code className="rounded bg-purple-500/10 px-1.5 py-0.5 text-xs text-purple-300">
-            Atom.fn + get.set
-          </code>
-        </h3>
-        <p className="mt-1 line-clamp-2 text-xs text-gray-500">
-          fn runs <code className="text-purple-300">Effect.gen</code>; calls{" "}
-          <code className="text-purple-300">get.set(resultsAtom, [...])</code> to clear, then
-          appends each product via <code className="text-purple-300">Effect.sync</code> — no scan,
-          no pull — pure imperative writes.
-        </p>
-      </div>
-
       {/* Controls */}
       <div className="flex flex-wrap gap-3">
         <input
