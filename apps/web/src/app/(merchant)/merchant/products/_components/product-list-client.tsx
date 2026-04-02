@@ -223,6 +223,10 @@ function FilterTab() {
       ...overrides,
     } satisfies ProductFilterArg);
 
+  useLayoutEffect(() => {
+    runSearch({ query: "", category: "all", status: "all" });
+  }, [runSearch]);
+
   const categories = ["all", ...Array.from(new Set(allProducts.map((p) => p.category))).sort()];
 
   const isRunning = actionResult.waiting;
