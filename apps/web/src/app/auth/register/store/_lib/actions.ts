@@ -96,6 +96,11 @@ export async function registerStoreAction(formData: FormData) {
     redirect(`/auth/register/store?error=${encodeURIComponent(roleError.value)}`);
   }
 
+  await auth.api.signInEmail({
+    body: { email, password },
+    headers: await headers(),
+  });
+
   await onboardMerchantProfile(storeName);
 
   redirect("/merchant/dashboard");
