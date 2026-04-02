@@ -24,10 +24,12 @@ const filterStatusAtom = Atom.make("all");
 
 export function ProductListClient({ initialProducts }: { initialProducts: MerchantProduct[] }) {
   const [, setAllProducts] = useAtom(merchantAllProductsAtom);
+  const [, runSearch] = useAtom(merchantSearchAtom);
 
   useLayoutEffect(() => {
     setAllProducts(initialProducts);
-  }, [initialProducts, setAllProducts]);
+    runSearch({ query: "", category: "all", status: "all" });
+  }, [initialProducts, setAllProducts, runSearch]);
 
   return <FilterView />;
 }
@@ -43,11 +45,6 @@ function FilterView() {
 
   const search = (overrides?: Partial<ProductFilterArg>) =>
     runSearch({ query, category, status, ...overrides } satisfies ProductFilterArg);
-
-  // Show all products on mount
-  useLayoutEffect(() => {
-    runSearch({ query: "", category: "all", status: "all" });
-  }, [runSearch]);
 
   const categories = ["all", ...Array.from(new Set(allProducts.map((p) => p.category))).sort()];
   const isRunning = actionResult.waiting;
