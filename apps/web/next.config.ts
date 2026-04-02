@@ -7,6 +7,9 @@ const nextConfig: NextConfig = {
     dangerouslyAllowSVG: true,
     remotePatterns: [
       { protocol: "https", hostname: "placehold.co" },
+      { protocol: "https", hostname: "storage.googleapis.com" },
+      { protocol: "https", hostname: "firebasestorage.googleapis.com" },
+      { protocol: "https", hostname: "images.unsplash.com" },
     ],
   },
   webpack(config) {

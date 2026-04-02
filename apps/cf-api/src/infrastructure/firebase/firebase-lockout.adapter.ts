@@ -67,7 +67,7 @@ export class FirebaseLockoutAdapter implements ILockoutStorePort {
         const lockedUntil =
           newCount >= MAX_ATTEMPTS
             ? now.add({ seconds: LOCKOUT_SECONDS }).toString()
-            : current.lockedUntil;
+            : (current.lockedUntil ?? null);
 
         if (newCount >= MAX_ATTEMPTS) nowLocked = true;
 
