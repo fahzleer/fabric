@@ -8,5 +8,5 @@ jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
-      - name: Ping Neon via health check
-        run: curl -sf https://fabric.cool/api/health?deep=true || true
+      - name: Ping Neon via Vercel health check
+        run: curl -sf "https://fabric-web-seven.vercel.app/api/health?deep=true" || true
