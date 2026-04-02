@@ -1,0 +1,9 @@
+20:27:19.000 [NamespaceSystem-akka.actor.default-dispatcher-5] INFO akka.event.slf4j.Slf4jLogger - Slf4jLogger started
+20:27:19.094 [main] INFO com.firebase.server.forge.App$ - Listening at 127.0.0.1:9000
+20:27:19.772 [NamespaceSystem-akka.actor.default-dispatcher-5] INFO com.firebase.core.namespace.NamespaceActor - demo-fabric-local-default-rtdb successfully activated FBKV (SurveyIdle(0)) wait: 73ms, init: 0ms
+20:27:19.825 [NamespaceSystem-blocking-namespace-operation-dispatcher-7] INFO com.firebase.core.namespace.StateManager - Namespace demo-fabric-local-default-rtdb status Active to Active
+22:07:37.220 [FirebaseWorkerPool-1-3] WARN com.firebase.core.persistence.backend.dummy.EmulatorMetadataPersistence - Multiple projectIds are not recommended in single project mode. Requested 
+namespace demo-fabric-local, but the emulator is configured for demo-fabric-local-default-rtdb. To 
+opt-out of single project mode add/set the singleProjectMode: false property in 
+the firebase.json emulators config. 
+22:07:37.279 [NamespaceSystem-akka.actor.default-dispatcher-13] INFO com.firebase.core.namespace.NamespaceActor - demo-fabric-local successfully activated FBKV (SurveyIdle(0)) wait: 20ms, init: 0ms

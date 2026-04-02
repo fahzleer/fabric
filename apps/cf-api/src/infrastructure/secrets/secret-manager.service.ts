@@ -26,6 +26,12 @@ export async function loadSecrets(): Promise<SecretsMap> {
     return new EnvSecretsMap();
   }
 
+  // If Firebase Functions already bound secrets as env vars, use them directly
+  // (avoids redundant Secret Manager API call and cold-start latency)
+  if (SECRET_NAMES.every((name) => process.env[name])) {
+    return new EnvSecretsMap();
+  }
+
   try {
     const { SecretManagerServiceClient } = await import("@google-cloud/secret-manager");
     const client = new SecretManagerServiceClient();
@@ -35,7 +41,13 @@ export async function loadSecrets(): Promise<SecretsMap> {
     for (const name of SECRET_NAMES) {
       try {
         const secretPath = `projects/${projectId}/secrets/${name}/versions/latest`;
-        const [version] = await client.accessSecretVersion({ name: secretPath });
+        const timeout = new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error("Secret Manager timeout after 10s")), 10_000)
+        );
+        const [version] = await Promise.race([
+          client.accessSecretVersion({ name: secretPath }),
+          timeout,
+        ]);
         const payload = version.payload?.data;
         if (payload) {
           const value =

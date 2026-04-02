@@ -192,6 +192,12 @@ export class BillingService {
     rawBody: string,
     signature: string
   ): Promise<Result<void, BillingError>> {
+    if (!this.config.webhookSecret) {
+      return Err(
+        StripeCallError("webhook_secret_not_configured", "STRIPE_WEBHOOK_SECRET is not configured")
+      );
+    }
+
     let event: StripeWebhookEvent;
 
     try {

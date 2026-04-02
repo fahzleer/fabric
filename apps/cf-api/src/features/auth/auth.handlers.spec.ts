@@ -184,7 +184,7 @@ describe("POST /auth/register — customer registration", () => {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
           email: "newuser@example.com",
-          password: "strongpass123",
+          password: "Strongpass123",
           displayName: "New User",
         }),
       })
@@ -220,7 +220,7 @@ describe("POST /auth/register — customer registration", () => {
       new Request("http://localhost/auth/register", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ email: "user@example.com", password: "strongpass123" }),
+        body: JSON.stringify({ email: "user@example.com", password: "Strongpass123" }),
       })
     );
 
@@ -240,7 +240,7 @@ describe("POST /auth/register — customer registration", () => {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
           email: "existing@example.com",
-          password: "strongpass123",
+          password: "Strongpass123",
           displayName: "Existing User",
         }),
       })
@@ -266,7 +266,7 @@ describe("POST /auth/register — customer registration", () => {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
           email: "user@example.com",
-          password: "strongpass123",
+          password: "Strongpass123",
           displayName: "Test User",
         }),
       })
@@ -290,7 +290,7 @@ describe("POST /auth/register — customer registration", () => {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
           email: "store@example.com",
-          password: "strongpass123",
+          password: "Strongpass123",
           displayName: "Store Owner",
           role: "store_owner",
         }),
@@ -318,7 +318,7 @@ describe("POST /auth/register/store — store owner registration", () => {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
           email: "newstore@example.com",
-          password: "strongpass123",
+          password: "Strongpass123",
           displayName: "Store Name",
         }),
       })
@@ -341,7 +341,7 @@ describe("POST /auth/register/store — store owner registration", () => {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
           email: "existing@example.com",
-          password: "strongpass123",
+          password: "Strongpass123",
           displayName: "Store",
         }),
       })

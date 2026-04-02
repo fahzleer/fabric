@@ -68,17 +68,18 @@ export const registerEventsRoutes = (app: Hono, config: ServerConfig): void => {
 
   app.get("/sse/:userId", (c) => {
     const userId = c.req.param("userId");
+    const encoder = new TextEncoder();
 
     const stream = new ReadableStream({
       start(controller) {
         config.hub.register(userId, (msg: string) => {
           try {
-            controller.enqueue(`data: ${msg}\n\n`);
+            controller.enqueue(encoder.encode(`data: ${msg}\n\n`));
           } catch {
             config.hub.deregister(userId);
           }
         });
-        controller.enqueue(": connected\n\n");
+        controller.enqueue(encoder.encode(": connected\n\n"));
       },
       cancel() {
         config.hub.deregister(userId);

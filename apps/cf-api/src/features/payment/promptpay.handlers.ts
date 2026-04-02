@@ -14,8 +14,11 @@ export function registerPromptPayRoutes(
   orderService: OrderService,
   verifier: PasetoVerifierService
 ): void {
-  const commerceUrl = process.env.COMMERCE_SERVICE_URL ?? "http://localhost:8083";
-  const internalSecret = process.env.INTERNAL_SECRET ?? "dev-secret";
+  const commerceUrl = process.env.COMMERCE_SERVICE_URL ?? "http://localhost:8082";
+  const internalSecret = process.env.INTERNAL_SECRET;
+  if (!internalSecret) {
+    throw new Error("INTERNAL_SECRET env var is required — set it before starting the api service");
+  }
 
   app.post("/api/payment/promptpay/create", requireAuth(verifier), async (c) => {
     const body = await c.req.json();

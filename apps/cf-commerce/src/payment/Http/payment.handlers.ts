@@ -1,4 +1,4 @@
-import { createHmac } from "node:crypto";
+import { createHmac, timingSafeEqual } from "node:crypto";
 import { Either } from "effect";
 import type { Context, Hono } from "hono";
 import { log } from "../../monitoring/logger";
@@ -18,12 +18,15 @@ interface OmiseWebhookEvent {
 }
 
 const CF_API_URL = process.env.CF_API_URL ?? "http://localhost:3010";
-const INTERNAL_SECRET = process.env.INTERNAL_SECRET as string;
+const INTERNAL_SECRET = process.env.INTERNAL_SECRET ?? "";
 
 function verifyOmiseSignature(secret: string, rawBody: string, signature: string): boolean {
   if (!secret) return true;
   const expected = createHmac("sha256", secret).update(rawBody).digest("hex");
-  return signature === expected;
+  return (
+    signature.length === expected.length &&
+    timingSafeEqual(Buffer.from(signature), Buffer.from(expected))
+  );
 }
 
 function parseOmiseEvent(rawBody: string): OmiseWebhookEvent | null {
@@ -160,8 +163,12 @@ export const registerPaymentRoutes = (
       return c.json({ ok: false, error: "PromptPay not configured" }, 503);
     }
 
-    const secret = c.req.header("x-internal-secret");
-    if (secret !== INTERNAL_SECRET) {
+    const secret = c.req.header("x-internal-secret") ?? "";
+    if (
+      !INTERNAL_SECRET ||
+      secret.length !== INTERNAL_SECRET.length ||
+      !timingSafeEqual(Buffer.from(secret), Buffer.from(INTERNAL_SECRET))
+    ) {
       return c.json({ error: "Unauthorized" }, 401);
     }
 

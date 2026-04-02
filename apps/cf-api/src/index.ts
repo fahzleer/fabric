@@ -61,7 +61,10 @@ async function startBoot() {
   const firebase = firebaseResult.value;
   const { db } = firebase;
 
-  const memcached = new MemcachedAdapter({ servers: config.memcachedServers });
+  const memcached = new MemcachedAdapter({
+    servers: config.memcachedServers,
+    options: { timeout: 500, retries: 0, reconnect: 100 },
+  });
   const productRepo = new FirebaseProductRepository(db);
   const orderRepo = new FirebaseOrderRepository(db);
   const cartRepo = new FirebaseCartRepository(db);
@@ -177,7 +180,7 @@ export const cfApi = onRequest(
       .map((r) => r.trim())
       .filter(Boolean),
     memory: "512MiB",
-    timeoutSeconds: 60,
+    timeoutSeconds: 120,
     minInstances: Number.parseInt(process.env.CF_MIN_INSTANCES ?? "1", 10),
     concurrency: 80,
     secrets: ["PASETO_KEY", "INTERNAL_SECRET"],

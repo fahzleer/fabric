@@ -44,6 +44,64 @@ function getAccessTtl(): number {
 function getRefreshTtl(): number {
   return Number.parseInt(process.env.REFRESH_TOKEN_TTL_SECONDS ?? "604800", 10);
 }
+function isPasswordComplex(password: string): boolean {
+  return /[A-Z]/.test(password) && /[0-9]/.test(password);
+}
+
+async function handleRegister(
+  validated: {
+    email: string;
+    password: string;
+    displayName: string;
+    role?: "customer" | "store_owner";
+  },
+  forceRole: "customer" | "store_owner" | undefined,
+  userAdapter: FirebaseUserAdapter,
+  activityRepo: FirebaseActivityRepository,
+  ip: string,
+  userAgent: string
+) {
+  if (!isPasswordComplex(validated.password)) {
+    return {
+      error: "Password must contain at least one uppercase letter and one number",
+      status: 400 as const,
+    };
+  }
+
+  const hashResult = await hashPassword(validated.password);
+  if (hashResult._tag === "Err") {
+    return { error: hashResult.error.message, status: 500 as const };
+  }
+
+  const role = forceRole ?? validated.role ?? "customer";
+  const userId = crypto.randomUUID();
+  const result = await userAdapter.createUser({
+    id: userId,
+    email: validated.email.toLowerCase(),
+    passwordHash: hashResult.value,
+    role,
+    displayName: validated.displayName,
+  });
+
+  if (result._tag === "Err") {
+    const status = result.error.message.includes("already registered")
+      ? (409 as const)
+      : (500 as const);
+    const error = status === 409 ? "Email already registered" : result.error.message;
+    return { error, status };
+  }
+
+  void activityRepo.track({
+    id: crypto.randomUUID(),
+    userId,
+    eventType: "user_registered",
+    eventData: { role, method: "email" },
+    ipAddress: ip,
+    userAgent,
+  });
+
+  return { registered: true as const, status: 201 as const };
+}
 
 export function registerAuthRoutes(
   app: Hono,
@@ -56,6 +114,7 @@ export function registerAuthRoutes(
 ): void {
   const loginRateLimit = throttle(memcached, { limit: 10, windowMs: 60_000 });
   const registerRateLimit = throttle(memcached, { limit: 5, windowMs: 60_000 });
+  const refreshRateLimit = throttle(memcached, { limit: 30, windowMs: 60_000 });
 
   app.post("/auth/login", loginRateLimit, async (c) => {
     const body = await c.req.json();
@@ -104,37 +163,18 @@ export function registerAuthRoutes(
       return c.json({ error: validated.summary }, 400);
     }
 
-    const hashResult = await hashPassword(validated.password);
-    if (hashResult._tag === "Err") {
-      return c.json({ error: hashResult.error.message }, 500);
-    }
-
-    const userId = crypto.randomUUID();
-    const result = await userAdapter.createUser({
-      id: userId,
-      email: validated.email.toLowerCase(),
-      passwordHash: hashResult.value,
-      role: validated.role ?? "customer",
-      displayName: validated.displayName,
-    });
-
-    if (result._tag === "Err") {
-      if (result.error.message.includes("already registered")) {
-        return c.json({ error: "Email already registered" }, 409);
-      }
-      return c.json({ error: result.error.message }, 500);
-    }
-
-    void activityRepo.track({
-      id: crypto.randomUUID(),
-      userId,
-      eventType: "user_registered",
-      eventData: { role: validated.role ?? "customer", method: "email" },
-      ipAddress: c.req.header("x-real-ip") ?? c.req.header("x-forwarded-for") ?? "",
-      userAgent: c.req.header("user-agent") ?? "",
-    });
-
-    return c.json({ registered: true }, 201);
+    const ip = c.req.header("x-real-ip") ?? c.req.header("x-forwarded-for") ?? "";
+    const userAgent = c.req.header("user-agent") ?? "";
+    const out = await handleRegister(
+      validated,
+      undefined,
+      userAdapter,
+      activityRepo,
+      ip,
+      userAgent
+    );
+    if ("error" in out) return c.json({ error: out.error }, out.status);
+    return c.json({ registered: out.registered }, out.status);
   });
 
   app.post("/auth/register/store", registerRateLimit, async (c) => {
@@ -144,40 +184,21 @@ export function registerAuthRoutes(
       return c.json({ error: validated.summary }, 400);
     }
 
-    const hashResult = await hashPassword(validated.password);
-    if (hashResult._tag === "Err") {
-      return c.json({ error: hashResult.error.message }, 500);
-    }
-
-    const userId = crypto.randomUUID();
-    const result = await userAdapter.createUser({
-      id: userId,
-      email: validated.email.toLowerCase(),
-      passwordHash: hashResult.value,
-      role: "store_owner",
-      displayName: validated.displayName,
-    });
-
-    if (result._tag === "Err") {
-      if (result.error.message.includes("already registered")) {
-        return c.json({ error: "Email already registered" }, 409);
-      }
-      return c.json({ error: result.error.message }, 500);
-    }
-
-    void activityRepo.track({
-      id: crypto.randomUUID(),
-      userId,
-      eventType: "user_registered",
-      eventData: { role: "store_owner", method: "email" },
-      ipAddress: c.req.header("x-real-ip") ?? c.req.header("x-forwarded-for") ?? "",
-      userAgent: c.req.header("user-agent") ?? "",
-    });
-
-    return c.json({ registered: true }, 201);
+    const ip = c.req.header("x-real-ip") ?? c.req.header("x-forwarded-for") ?? "";
+    const userAgent = c.req.header("user-agent") ?? "";
+    const out = await handleRegister(
+      validated,
+      "store_owner",
+      userAdapter,
+      activityRepo,
+      ip,
+      userAgent
+    );
+    if ("error" in out) return c.json({ error: out.error }, out.status);
+    return c.json({ registered: out.registered }, out.status);
   });
 
-  app.post("/auth/refresh", async (c) => {
+  app.post("/auth/refresh", refreshRateLimit, async (c) => {
     const body = await c.req.json().catch(() => undefined);
     if (!body || typeof body.refreshToken !== "string") {
       return c.json({ error: "refreshToken is required" }, 400);
