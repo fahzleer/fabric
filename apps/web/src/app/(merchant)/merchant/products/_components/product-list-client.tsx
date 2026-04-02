@@ -1,17 +1,14 @@
 "use client";
 
 import {
-  PAGE_SIZE,
   type ProductFilterArg,
   merchantAllProductsAtom,
   merchantManualResultsAtom,
-  merchantPageAtom,
   merchantSearchAtom,
-  merchantStreamAtom,
 } from "@/application/atoms/merchant-products.atoms";
 import type { MerchantProduct } from "@/lib/merchant-api";
 import { formatPrice } from "@/lib/price";
-import { Atom, Result, useAtom, useAtomValue } from "@effect-atom/atom-react";
+import { Atom, useAtom, useAtomValue } from "@effect-atom/atom-react";
 import Link from "next/link";
 import { useLayoutEffect } from "react";
 
@@ -21,192 +18,21 @@ const STATUS_BADGE: Record<string, string> = {
   archived: "bg-red-500/20 text-red-400 border-red-500/40",
 };
 
-type Tab = "stream" | "paginate" | "filter";
-
-const activeTabAtom = Atom.make<Tab>("stream");
 const filterQueryAtom = Atom.make("");
 const filterCategoryAtom = Atom.make("all");
 const filterStatusAtom = Atom.make("all");
 
 export function ProductListClient({ initialProducts }: { initialProducts: MerchantProduct[] }) {
-  const [tab, setTab] = useAtom(activeTabAtom);
   const [, setAllProducts] = useAtom(merchantAllProductsAtom);
 
   useLayoutEffect(() => {
     setAllProducts(initialProducts);
   }, [initialProducts, setAllProducts]);
 
-  return (
-    <div className="space-y-5">
-      {/* Tab bar */}
-      <div className="flex gap-1.5 rounded-xl border border-white/10 bg-gray-800/50 p-1">
-        {(
-          [
-            {
-              key: "stream",
-              label: "Stream",
-              on: "bg-teal-500/20 text-teal-300",
-              off: "text-gray-500 hover:text-teal-400",
-            },
-            {
-              key: "paginate",
-              label: "Pull",
-              on: "bg-blue-500/20 text-blue-300",
-              off: "text-gray-500 hover:text-blue-400",
-            },
-            {
-              key: "filter",
-              label: "Filter",
-              on: "bg-purple-500/20 text-purple-300",
-              off: "text-gray-500 hover:text-purple-400",
-            },
-          ] as const
-        ).map(({ key, label, on, off }) => (
-          <button
-            key={key}
-            type="button"
-            onClick={() => setTab(key as Tab)}
-            className={`flex-1 min-w-0 truncate rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${tab === key ? on : off}`}
-          >
-            {label}
-          </button>
-        ))}
-      </div>
-
-      {/* Content */}
-      {tab === "stream" && <StreamTab total={initialProducts.length} />}
-      {tab === "paginate" && <PullTab total={initialProducts.length} />}
-      {tab === "filter" && <FilterTab />}
-    </div>
-  );
+  return <FilterView />;
 }
 
-function StreamTab({ total }: { total: number }) {
-  const [result, startStream] = useAtom(merchantStreamAtom);
-
-  return (
-    <div className="space-y-4">
-      <div className="flex items-start justify-end gap-4">
-        <button
-          type="button"
-          onClick={() => startStream("")}
-          className="shrink-0 rounded-lg bg-teal-600/20 border border-teal-500/30 px-4 py-2 text-xs font-medium text-teal-300 hover:bg-teal-600/30"
-        >
-          ▶ Start stream
-        </button>
-      </div>
-
-      {Result.match(result, {
-        onInitial: (r) => (
-          <div className="flex items-center justify-center gap-2.5 py-14">
-            {r.waiting ? (
-              <>
-                <Dot colour="teal" />
-                <span className="text-sm text-gray-500">Streaming…</span>
-              </>
-            ) : (
-              <span className="text-sm text-gray-500">Click "Start stream" to begin</span>
-            )}
-          </div>
-        ),
-        onFailure: () => <p className="py-6 text-center text-sm text-red-400">Stream error</p>,
-        onSuccess: (r) => (
-          <div className="space-y-3">
-            {/* Progress bar */}
-            <div className="flex items-center gap-3">
-              <div className="flex-1 h-1.5 overflow-hidden rounded-full bg-gray-700">
-                <div
-                  className="h-full rounded-full bg-teal-500 transition-all duration-75"
-                  style={{ width: total > 0 ? `${(r.value.length / total) * 100}%` : "0%" }}
-                />
-              </div>
-              <span className="shrink-0 text-xs tabular-nums text-gray-500">
-                {r.value.length} / {total}
-                {r.value.length < total ? (
-                  <span className="ml-1.5 animate-pulse text-teal-400">▸ streaming</span>
-                ) : (
-                  <span className="ml-1.5 text-gray-600"> complete</span>
-                )}
-              </span>
-            </div>
-            <ProductTable products={r.value} accent="teal" />
-          </div>
-        ),
-      })}
-    </div>
-  );
-}
-
-function PullTab({ total }: { total: number }) {
-  const [result, loadMore] = useAtom(merchantPageAtom);
-
-  return (
-    <div className="space-y-4">
-      {Result.match(result, {
-        onInitial: (r) => (
-          <div className="flex flex-col items-center justify-center gap-4 py-14">
-            {r.waiting ? (
-              <>
-                <Dot colour="blue" />
-                <span className="text-sm text-gray-500">Loading first page…</span>
-              </>
-            ) : (
-              <button
-                type="button"
-                onClick={() => loadMore()}
-                className="rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-medium text-white hover:bg-blue-500"
-              >
-                Load products
-              </button>
-            )}
-          </div>
-        ),
-        onFailure: () => (
-          <p className="py-6 text-center text-sm text-red-400">Failed to load products</p>
-        ),
-        onSuccess: (r) => {
-          const loaded = r.value.items;
-          const isDone = r.value.done;
-          const pageCount = Math.ceil(loaded.length / PAGE_SIZE);
-
-          return (
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-gray-500">
-                  {loaded.length} / {total} products
-                  {isDone && <span className="ml-1 text-gray-600">· all loaded</span>}
-                </span>
-                {r.waiting && <Dot colour="blue" />}
-              </div>
-
-              <ProductTable products={Array.from(loaded)} accent="blue" />
-
-              {isDone || loaded.length >= total ? (
-                <p className="text-center text-xs text-gray-600">
-                  — all {loaded.length} products loaded in {pageCount} pull
-                  {pageCount !== 1 ? "s" : ""} —
-                </p>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => loadMore()}
-                  disabled={r.waiting}
-                  className="w-full rounded-lg border border-blue-500/30 py-2.5 text-sm font-medium text-blue-400 transition-colors hover:bg-blue-500/10 disabled:opacity-50"
-                >
-                  {r.waiting
-                    ? "Loading…"
-                    : `Load more (+${Math.min(PAGE_SIZE, total - loaded.length)} · page ${pageCount + 1} of ${Math.ceil(total / PAGE_SIZE)})`}
-                </button>
-              )}
-            </div>
-          );
-        },
-      })}
-    </div>
-  );
-}
-
-function FilterTab() {
+function FilterView() {
   const results = useAtomValue(merchantManualResultsAtom);
   const [actionResult, runSearch] = useAtom(merchantSearchAtom);
   const allProducts = useAtomValue(merchantAllProductsAtom);
@@ -216,27 +42,22 @@ function FilterTab() {
   const [status, setStatus] = useAtom(filterStatusAtom);
 
   const search = (overrides?: Partial<ProductFilterArg>) =>
-    runSearch({
-      query,
-      category,
-      status,
-      ...overrides,
-    } satisfies ProductFilterArg);
+    runSearch({ query, category, status, ...overrides } satisfies ProductFilterArg);
 
+  // Show all products on mount
   useLayoutEffect(() => {
     runSearch({ query: "", category: "all", status: "all" });
   }, [runSearch]);
 
   const categories = ["all", ...Array.from(new Set(allProducts.map((p) => p.category))).sort()];
-
   const isRunning = actionResult.waiting;
 
   const inputCls =
-    "rounded-lg border border-white/10 bg-gray-800 px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500";
+    "rounded-lg border border-white/10 bg-gray-800 px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500";
 
   return (
     <div className="space-y-4">
-      {/* Controls */}
+      {/* Search controls */}
       <div className="flex flex-wrap gap-3">
         <input
           type="text"
@@ -276,56 +97,33 @@ function FilterTab() {
         <button
           type="button"
           onClick={() => search()}
-          className="rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-500"
+          className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-500"
         >
           Search
         </button>
       </div>
 
-      {/* Results — read directly from merchantManualResultsAtom */}
-      {Result.isInitial(actionResult) && !actionResult.waiting ? (
-        <div className="flex items-center justify-center py-14">
-          <span className="text-sm text-gray-500">Enter a query and press Search</span>
-        </div>
-      ) : (
-        <div className="space-y-3">
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-gray-500">
-              {results.length} result{results.length !== 1 ? "s" : ""}
-            </span>
-            {isRunning && (
-              <>
-                <Dot colour="purple" />
-                <span className="text-xs text-gray-500">appending…</span>
-              </>
-            )}
-          </div>
-          {results.length === 0 && !isRunning ? (
-            <p className="py-10 text-center text-sm text-gray-500">No products match</p>
-          ) : (
-            <ProductTable products={results} accent="purple" />
+      <div className="space-y-3">
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-gray-500">
+            {results.length} result{results.length !== 1 ? "s" : ""}
+          </span>
+          {isRunning && (
+            <span className="inline-block h-2 w-2 animate-pulse rounded-full bg-emerald-400" />
           )}
         </div>
-      )}
+        {results.length === 0 && !isRunning ? (
+          <p className="py-10 text-center text-sm text-gray-500">No products match</p>
+        ) : (
+          <ProductTable products={results} />
+        )}
+      </div>
     </div>
   );
 }
 
-function ProductTable({
-  products,
-  accent,
-}: {
-  products: MerchantProduct[];
-  accent: "teal" | "blue" | "purple";
-}) {
+function ProductTable({ products }: { products: MerchantProduct[] }) {
   if (products.length === 0) return null;
-
-  const linkCls =
-    accent === "teal"
-      ? "text-teal-400 hover:text-teal-300"
-      : accent === "blue"
-        ? "text-blue-400 hover:text-blue-300"
-        : "text-purple-400 hover:text-purple-300";
 
   return (
     <div className="overflow-hidden rounded-xl border border-white/10 bg-gray-800/50">
@@ -386,7 +184,7 @@ function ProductTable({
                 <td className="px-5 py-4">
                   <Link
                     href={`/merchant/products/${p.id}/edit`}
-                    className={`text-xs font-medium ${linkCls}`}
+                    className="text-xs font-medium text-emerald-400 hover:text-emerald-300"
                   >
                     Edit →
                   </Link>
@@ -398,10 +196,4 @@ function ProductTable({
       </table>
     </div>
   );
-}
-
-function Dot({ colour }: { colour: "teal" | "blue" | "purple" }) {
-  const cls =
-    colour === "teal" ? "bg-teal-400" : colour === "blue" ? "bg-blue-400" : "bg-purple-400";
-  return <span className={`inline-block h-2 w-2 animate-pulse rounded-full ${cls}`} />;
 }
