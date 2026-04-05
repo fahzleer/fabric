@@ -1,22 +1,38 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "../e2e/fixtures";
 
-test("Dialog default shows trigger button", async ({ page }) => {
-  await page.goto("/iframe.html?id=ui-dialog--default");
-  await expect(page.getByRole("button", { name: "Open Dialog" })).toBeVisible();
-});
+test.describe("Dialog", () => {
+  test("shows trigger button", async ({ dialogPOM }) => {
+    await dialogPOM.goto("ui-dialog--default");
+    await expect(dialogPOM.trigger).toBeVisible();
+  });
 
-test("Dialog opens when trigger is clicked", async ({ page }) => {
-  await page.goto("/iframe.html?id=ui-dialog--default");
-  await page.getByRole("button", { name: "Open Dialog" }).click();
-  await expect(page.getByText("Dialog Title")).toBeVisible();
-  await expect(page.getByText("This is the dialog description.")).toBeVisible();
-  await expect(page.getByText("Dialog body content here.")).toBeVisible();
-});
+  test("opens when trigger is clicked", async ({ dialogPOM }) => {
+    await dialogPOM.goto("ui-dialog--default");
+    await dialogPOM.open();
+    await expect(dialogPOM.title).toBeVisible();
+    await expect(dialogPOM.description).toBeVisible();
+    await expect(dialogPOM.body).toBeVisible();
+  });
 
-test("Dialog closes when cancel is clicked", async ({ page }) => {
-  await page.goto("/iframe.html?id=ui-dialog--default");
-  await page.getByRole("button", { name: "Open Dialog" }).click();
-  await expect(page.getByText("Dialog Title")).toBeVisible();
-  await page.getByRole("button", { name: "Cancel" }).click();
-  await expect(page.getByText("Dialog Title")).not.toBeVisible();
+  test("closes when cancel is clicked", async ({ dialogPOM }) => {
+    await dialogPOM.goto("ui-dialog--default");
+    await dialogPOM.open();
+    await expect(dialogPOM.title).toBeVisible();
+    await dialogPOM.cancel();
+    await expect(dialogPOM.title).not.toBeVisible();
+  });
+
+  test("confirm button is visible when opened", async ({ dialogPOM }) => {
+    await dialogPOM.goto("ui-dialog--default");
+    await dialogPOM.open();
+    await expect(dialogPOM.confirmButton).toBeVisible();
+  });
+
+  test("closes when Escape key is pressed", async ({ dialogPOM }) => {
+    await dialogPOM.goto("ui-dialog--default");
+    await dialogPOM.open();
+    await expect(dialogPOM.title).toBeVisible();
+    await dialogPOM.closeViaEscape();
+    await expect(dialogPOM.title).not.toBeVisible();
+  });
 });

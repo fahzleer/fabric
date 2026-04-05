@@ -18,6 +18,9 @@
     "test:ui": "vitest --ui",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
+    "test:e2e:visual": "playwright test src/e2e/visual-regression.e2e.ts",
+    "test:e2e:a11y": "playwright test src/e2e/accessibility.e2e.ts",
+    "test:e2e:update-snapshots": "playwright test --update-snapshots",
     "coverage": "vitest run --coverage"
   },
   "dependencies": {
@@ -30,7 +33,9 @@
     "tailwind-merge": "^2.6.0"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.10.0",
     "@playwright/test": "^1.52.0",
+    "http-server": "^14.1.1",
     "@storybook/addon-vitest": "^9.1.19",
     "@storybook/react-vite": "^9.1.19",
     "@tailwindcss/vite": "^4.2.1",

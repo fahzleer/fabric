@@ -1,35 +1,46 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "../e2e/fixtures";
 
-test("Input default renders with placeholder", async ({ page }) => {
-  await page.goto("/iframe.html?id=ui-input--default");
-  await expect(page.getByPlaceholder("Enter text...")).toBeVisible();
-});
+test.describe("Input", () => {
+  test("default renders with placeholder", async ({ inputPOM }) => {
+    await inputPOM.goto("ui-input--default");
+    await expect(inputPOM.getByPlaceholder("Enter text...")).toBeVisible();
+  });
 
-test("Input accepts typed text", async ({ page }) => {
-  await page.goto("/iframe.html?id=ui-input--default");
-  const input = page.getByPlaceholder("Enter text...");
-  await input.fill("hello world");
-  await expect(input).toHaveValue("hello world");
-});
+  test("accepts typed text", async ({ inputPOM }) => {
+    await inputPOM.goto("ui-input--default");
+    const input = inputPOM.getByPlaceholder("Enter text...");
+    await input.fill("hello world");
+    await expect(input).toHaveValue("hello world");
+  });
 
-test("Input email type renders", async ({ page }) => {
-  await page.goto("/iframe.html?id=ui-input--with-type");
-  await expect(page.getByPlaceholder("email@example.com")).toBeVisible();
-});
+  test("email type renders", async ({ inputPOM }) => {
+    await inputPOM.goto("ui-input--with-type");
+    const input = inputPOM.getByPlaceholder("email@example.com");
+    await expect(input).toBeVisible();
+    await expect(input).toHaveAttribute("type", "email");
+  });
 
-test("Input password type renders", async ({ page }) => {
-  await page.goto("/iframe.html?id=ui-input--password");
-  const input = page.getByPlaceholder("Password");
-  await expect(input).toBeVisible();
-  await expect(input).toHaveAttribute("type", "password");
-});
+  test("password type renders with masked input", async ({ inputPOM }) => {
+    await inputPOM.goto("ui-input--password");
+    const input = inputPOM.getByPlaceholder("Password");
+    await expect(input).toBeVisible();
+    await expect(input).toHaveAttribute("type", "password");
+  });
 
-test("Input disabled state cannot be edited", async ({ page }) => {
-  await page.goto("/iframe.html?id=ui-input--disabled");
-  await expect(page.getByPlaceholder("Disabled")).toBeDisabled();
-});
+  test("disabled state cannot be edited", async ({ inputPOM }) => {
+    await inputPOM.goto("ui-input--disabled");
+    await expect(inputPOM.getByPlaceholder("Disabled")).toBeDisabled();
+  });
 
-test("Input with value has prefilled content", async ({ page }) => {
-  await page.goto("/iframe.html?id=ui-input--with-value");
-  await expect(page.locator("input")).toHaveValue("Prefilled value");
+  test("prefilled value renders correctly", async ({ inputPOM }) => {
+    await inputPOM.goto("ui-input--with-value");
+    await expect(inputPOM.input).toHaveValue("Prefilled value");
+  });
+
+  test("custom className is applied", async ({ inputPOM }) => {
+    await inputPOM.goto("ui-input--with-class-name");
+    const input = inputPOM.getByPlaceholder("Error state");
+    await expect(input).toBeVisible();
+    await expect(input).toHaveClass(/border-red-500/);
+  });
 });

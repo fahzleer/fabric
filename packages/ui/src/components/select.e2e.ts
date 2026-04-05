@@ -1,28 +1,40 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "../e2e/fixtures";
 
-test("Select default renders trigger with placeholder", async ({ page }) => {
-  await page.goto("/iframe.html?id=ui-select--default");
-  await expect(page.getByText("Select option")).toBeVisible();
-});
+test.describe("Select", () => {
+  test("renders trigger with placeholder", async ({ selectPOM }) => {
+    const select = selectPOM("Select option");
+    await select.goto("ui-select--default");
+    await expect(select.trigger).toBeVisible();
+  });
 
-test("Select opens and shows options when clicked", async ({ page }) => {
-  await page.goto("/iframe.html?id=ui-select--default");
-  await page.getByText("Select option").click();
-  await expect(page.getByText("Apple")).toBeVisible();
-  await expect(page.getByText("Banana")).toBeVisible();
-  await expect(page.getByText("Orange")).toBeVisible();
-});
+  test("opens and shows options when clicked", async ({ page, selectPOM }) => {
+    const select = selectPOM("Select option");
+    await select.goto("ui-select--default");
+    await select.open();
+    await expect(page.getByText("Apple")).toBeVisible();
+    await expect(page.getByText("Banana")).toBeVisible();
+    await expect(page.getByText("Orange")).toBeVisible();
+  });
 
-test("Select with groups shows group label", async ({ page }) => {
-  await page.goto("/iframe.html?id=ui-select--with-groups");
-  await page.getByText("Select fruit").click();
-  await expect(page.getByText("Fruits")).toBeVisible();
-  await expect(page.getByText("Apple")).toBeVisible();
-  await expect(page.getByText("Banana")).toBeVisible();
-});
+  test("selects an option and displays it", async ({ page, selectPOM }) => {
+    const select = selectPOM("Select option");
+    await select.goto("ui-select--default");
+    await select.selectOption("Apple");
+    await expect(page.getByText("Apple")).toBeVisible();
+  });
 
-test("Select disabled trigger is not clickable", async ({ page }) => {
-  await page.goto("/iframe.html?id=ui-select--disabled");
-  const trigger = page.getByText("Disabled");
-  await expect(trigger.locator("..")).toBeDisabled();
+  test("with groups shows group label", async ({ page, selectPOM }) => {
+    const select = selectPOM("Select fruit");
+    await select.goto("ui-select--with-groups");
+    await select.open();
+    await expect(page.getByText("Fruits")).toBeVisible();
+    await expect(page.getByText("Apple")).toBeVisible();
+    await expect(page.getByText("Banana")).toBeVisible();
+  });
+
+  test("disabled trigger is not clickable", async ({ selectPOM }) => {
+    const select = selectPOM("Disabled");
+    await select.goto("ui-select--disabled");
+    expect(await select.isTriggerDisabled()).toBe(true);
+  });
 });

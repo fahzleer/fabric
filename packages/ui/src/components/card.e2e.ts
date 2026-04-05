@@ -1,14 +1,16 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "../e2e/fixtures";
 
-test("Card default renders with title and content", async ({ page }) => {
-  await page.goto("/iframe.html?id=ui-card--default");
-  await expect(page.getByText("Card Title")).toBeVisible();
-  await expect(page.getByText("Card description goes here.")).toBeVisible();
-  await expect(page.getByText("Card content area.")).toBeVisible();
-  await expect(page.getByRole("button", { name: "Action" })).toBeVisible();
-});
+test.describe("Card", () => {
+  test("default renders with title, description, content, and footer", async ({ cardPOM }) => {
+    await cardPOM.goto("ui-card--default");
+    await expect(cardPOM.title).toBeVisible();
+    await expect(cardPOM.description).toBeVisible();
+    await expect(cardPOM.content).toBeVisible();
+    await expect(cardPOM.actionButton).toBeVisible();
+  });
 
-test("Card with custom class name renders content", async ({ page }) => {
-  await page.goto("/iframe.html?id=ui-card--with-custom-class-name");
-  await expect(page.getByText("Custom className applied.")).toBeVisible();
+  test("custom className variant renders content", async ({ page, cardPOM }) => {
+    await cardPOM.goto("ui-card--with-custom-class-name");
+    await expect(page.getByText("Custom className applied.")).toBeVisible();
+  });
 });
