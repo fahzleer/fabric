@@ -1,4 +1,6 @@
+import { MemcachedAdapter } from "@fabric/cache/memcached";
 import { createFirebaseFromEnv } from "@fabric/firebase";
+import { throttle } from "@fabric/middleware";
 import { Result } from "better-result";
 import { deleteApp } from "firebase-admin/app";
 import { onRequest } from "firebase-functions/v2/https";
@@ -13,7 +15,7 @@ import {
   registerCleanup,
   setupGracefulShutdown,
 } from "./infrastructure/shutdown/graceful-shutdown";
-import { logError, requestLogger } from "./monitoring/logger";
+import { attachCorrelationIds, logError, requestLogger } from "./monitoring/logger";
 import { registerPaymentRoutes } from "./payment/Http/payment.handlers.ts";
 import { MockPaymentGateway } from "./payment/adapters/mock-payment-gateway.adapter.ts";
 import { MockPromptPayAdapter } from "./payment/adapters/mock-promptpay.adapter.ts";
@@ -48,16 +50,34 @@ async function startBoot() {
       ? new PromptPayAdapter(config.omiseSecretKey)
       : (new MockPromptPayAdapter() as unknown as PromptPayAdapter);
 
+  const memcached = new MemcachedAdapter({
+    servers: config.memcachedServers,
+    options: { timeout: 500, retries: 0, reconnect: 100 },
+  });
+
   registerCleanup("firebase", () => deleteApp(firebase.app));
   registerCleanup("sse-hub", () => hub.closeAll());
+  registerCleanup("memcached", () => memcached.quit());
   setupGracefulShutdown();
+
+  const paymentRateLimit = throttle(memcached, { limit: 10, windowMs: 60_000 });
+  const checkoutRateLimit = throttle(memcached, { limit: 60, windowMs: 60_000 });
+  const voucherRateLimit = throttle(memcached, { limit: 20, windowMs: 60_000 });
 
   const app = new Hono();
   app.use("*", cors({ origin: config.corsOrigin, credentials: true }));
+  app.use("*", attachCorrelationIds());
   app.use("*", requestLogger());
-  registerPricingRoutes(app);
+  registerPricingRoutes(app, { checkout: checkoutRateLimit, voucher: voucherRateLimit });
   registerEventsRoutes(app, { router, aggregator, hub });
-  registerPaymentRoutes(app, gateway, promptPay);
+  registerPaymentRoutes(app, {
+    gateway,
+    promptPay,
+    cfApiUrl: config.cfApiUrl,
+    internalSecret: config.internalSecret,
+    omiseWebhookSecret: config.omiseWebhookSecret,
+    rateLimit: paymentRateLimit,
+  });
   app.onError((err, c) => {
     const status = "status" in err ? (err as { status: number }).status : 500;
     if (status >= 500) {
@@ -66,7 +86,7 @@ async function startBoot() {
     return c.json({ error: err.message }, status as never);
   });
 
-  return { app };
+  return { app, config };
 }
 
 function boot() {
@@ -75,10 +95,9 @@ function boot() {
 }
 
 if (typeof Bun !== "undefined") {
-  boot().then(({ app }) => {
-    const port = Number.parseInt(process.env.PORT ?? "8082", 10);
-    Bun.serve({ fetch: app.fetch.bind(app), port });
-    console.log(`[cf-commerce] dev server running on http://localhost:${port}`);
+  boot().then(({ app, config }) => {
+    Bun.serve({ fetch: app.fetch.bind(app), port: config.port });
+    console.log(`[cf-commerce] dev server running on http://localhost:${config.port}`);
   });
 }
 

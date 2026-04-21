@@ -35,7 +35,7 @@ export const makeProduct = (data: {
   care: string;
 }): Result<Product, { _tag: "ProductConstructionError"; message: string }> => {
   const nameResult = makeProductName(data.name);
-  if ("_tag" in nameResult)
+  if (typeof nameResult !== "string")
     return Err({ _tag: "ProductConstructionError", message: nameResult.message });
 
   const priceResult = makeProductPrice(data.priceInDollars, data.currency);

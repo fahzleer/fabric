@@ -35,10 +35,7 @@ export type UpdateProductInput = Partial<Omit<CreateProductInput, "ownerId">> & 
 
 function buildStock(raw: Record<string, number>): Product["stock"] {
   return Object.fromEntries(
-    Object.entries(raw).map(([size, qty]) => [
-      size,
-      { __brand: "StockQuantity" as const, value: qty },
-    ])
+    Object.entries(raw).map(([size, qty]) => [size, qty])
   ) as Product["stock"];
 }
 
@@ -64,7 +61,7 @@ function buildImages(
 function resolveName(existing: Product, input: UpdateProductInput): Product["name"] | never {
   if (input.name === undefined) return existing.name;
   const r = makeProductName(input.name);
-  if ("_tag" in r) return presentDomainError(r);
+  if (typeof r !== "string") return presentDomainError(r);
   return r;
 }
 
@@ -104,7 +101,7 @@ export class ProductService {
 
   async createProduct(input: CreateProductInput) {
     const nameResult = makeProductName(input.name);
-    if ("_tag" in nameResult) return presentDomainError(nameResult);
+    if (typeof nameResult !== "string") return presentDomainError(nameResult);
 
     const priceResult = makeProductPrice(input.price, input.priceCurrency as CurrencyCode);
     if ("_tag" in priceResult) return presentDomainError(priceResult);
@@ -131,14 +128,14 @@ export class ProductService {
     void this.eventPublisher.publish({
       event_id: crypto.randomUUID(),
       event_type: "ProductCreated",
-      aggregate_id: product.id.value,
+      aggregate_id: product.id,
       occurred_at: now.toString(),
       schema_version: 1,
       payload: {
-        product_id: product.id.value,
+        product_id: product.id,
         owner_id: product.ownerId,
-        name: product.name.value,
-        price: product.price.amount,
+        name: product.name,
+        price: product.price.displayAmount,
         currency: product.price.currency,
         category: product.category,
         status: product.status,
@@ -151,8 +148,8 @@ export class ProductService {
       userId: input.ownerId,
       eventType: "product_created",
       eventData: {
-        productId: product.id.value,
-        name: product.name.value,
+        productId: product.id,
+        name: product.name,
         category: product.category,
       },
     });
@@ -201,14 +198,14 @@ export class ProductService {
     void this.eventPublisher.publish({
       event_id: crypto.randomUUID(),
       event_type: "ProductUpdated",
-      aggregate_id: updated.id.value,
+      aggregate_id: updated.id,
       occurred_at: now.toString(),
       schema_version: 1,
       payload: {
-        product_id: updated.id.value,
+        product_id: updated.id,
         owner_id: updated.ownerId,
-        name: updated.name.value,
-        price: updated.price.amount,
+        name: updated.name,
+        price: updated.price.displayAmount,
         currency: updated.price.currency,
         category: updated.category,
         status: updated.status,
@@ -220,7 +217,7 @@ export class ProductService {
       id: crypto.randomUUID(),
       ...(callerId !== undefined && { userId: callerId }),
       eventType: "product_updated",
-      eventData: { productId: updated.id.value, changes: Object.keys(input) },
+      eventData: { productId: updated.id, changes: Object.keys(input) },
     });
 
     return result.value;
@@ -237,11 +234,11 @@ export class ProductService {
     void this.eventPublisher.publish({
       event_id: crypto.randomUUID(),
       event_type: "ProductArchived",
-      aggregate_id: id.value,
+      aggregate_id: id,
       occurred_at: now.toString(),
       schema_version: 1,
       payload: {
-        product_id: id.value,
+        product_id: id,
         owner_id: current.value.ownerId,
         rev: 0,
       },
@@ -251,7 +248,7 @@ export class ProductService {
       id: crypto.randomUUID(),
       ...(callerId !== undefined && { userId: callerId }),
       eventType: "product_deleted",
-      eventData: { productId: id.value, ownerId: current.value.ownerId },
+      eventData: { productId: id, ownerId: current.value.ownerId },
     });
 
     return { deleted: true };

@@ -13,14 +13,14 @@ import type { ProductService } from "./product.service";
 
 function productToJson(p: Product) {
   return {
-    id: p.id.value,
-    name: p.name.value,
+    id: p.id,
+    name: p.name,
     description: p.description,
-    price: p.price.amount,
+    price: p.price.displayAmount,
     priceCurrency: p.price.currency,
     category: p.category,
     status: p.status,
-    stock: Object.fromEntries(Object.entries(p.stock).map(([size, qty]) => [size, qty.value])),
+    stock: Object.fromEntries(Object.entries(p.stock).map(([size, qty]) => [size, qty])),
     images: p.images.map((img) => ({
       url: img.url,
       alt: img.altText,
@@ -35,9 +35,9 @@ function productToJson(p: Product) {
 
 function productSummaryToJson(s: ProductSummary) {
   return {
-    id: s.id.value,
-    name: s.name.value,
-    price: s.price.amount,
+    id: s.id,
+    name: s.name,
+    price: s.price.displayAmount,
     priceCurrency: s.price.currency,
     category: s.category,
     status: s.status,

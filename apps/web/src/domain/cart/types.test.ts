@@ -43,7 +43,7 @@ const makeCart = (items: CartItem[]): ShoppingCart => ({
 });
 
 describe("getCartItemLineTotal", () => {
-  test("returns unitPrice.amount * quantity", () => {
+  test("returns unitPrice.displayAmount * quantity", () => {
     const item = makeItem("prod-1", 3, PRICE);
     expect(getCartItemLineTotal(item)).toBe(300);
   });

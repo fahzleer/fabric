@@ -21,8 +21,8 @@ export interface IUserReaderPort {
 
 function recordToAuthUser(record: FirebaseUserRecord): AuthUser {
   return {
-    id: { __brand: "UserId" as const, value: record.id } as UserId,
-    email: { __brand: "Email" as const, value: record.email } as Email,
+    id: record.id as UserId,
+    email: record.email as Email,
     role: record.role,
     passwordHash: record.passwordHash ? Some(record.passwordHash) : None<string>(),
   };

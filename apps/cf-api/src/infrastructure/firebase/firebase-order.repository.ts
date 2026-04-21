@@ -50,19 +50,14 @@ function makeReserveStockTx(
   state: ReserveTxState
 ) {
   return (current: FirebaseProductRecord | null): FirebaseProductRecord | undefined => {
-    const product = resolveProductFromTx(current, item.id.value, preReads, state);
+    const product = resolveProductFromTx(current, item.id, preReads, state);
     if (product === null) {
-      state.domainError = ProductNotFoundError(item.id.value);
+      state.domainError = ProductNotFoundError(item.id);
       return undefined;
     }
     const currentQty = product.stock[item.size] ?? 0;
     if (currentQty < item.quantity) {
-      state.domainError = ProductOutOfStockError(
-        item.id.value,
-        item.size,
-        item.quantity,
-        currentQty
-      );
+      state.domainError = ProductOutOfStockError(item.id, item.size, item.quantity, currentQty);
       return undefined;
     }
     return { ...product, stock: { ...product.stock, [item.size]: currentQty - item.quantity } };
@@ -75,7 +70,7 @@ function fromRecord(record: FirebaseOrderRecord): Order {
     productName: item.productName,
     unitPrice: {
       __brand: "ProductPrice" as const,
-      amount: item.unitPriceCents / 100,
+      displayAmount: item.unitPriceCents / 100,
       currency: record.currency as Order["lines"][number]["unitPrice"]["currency"],
     },
     size: item.size as ProductSize,
@@ -85,8 +80,8 @@ function fromRecord(record: FirebaseOrderRecord): Order {
     ? (lineEntries as unknown as NonEmptyArray<(typeof lineEntries)[number]>)
     : (lineEntries as unknown as NonEmptyArray<(typeof lineEntries)[number]>);
   return {
-    id: { __brand: "OrderId" as const, value: record.id } as OrderId,
-    userId: { __brand: "UserId" as const, value: record.userId } as UserId,
+    id: record.id as OrderId,
+    userId: record.userId as UserId,
     cartId: record.cartId,
     lines,
     status: record.status as Order["status"],
@@ -105,18 +100,18 @@ function fromRecord(record: FirebaseOrderRecord): Order {
 function toRecord(order: Order): FirebaseOrderRecord {
   const items: FirebaseOrderRecord["items"] = {};
   for (const line of order.lines) {
-    const key = `${line.productId.value}_${line.size}`;
+    const key = `${line.productId}_${line.size}`;
     items[key] = {
-      productId: line.productId.value,
+      productId: line.productId,
       productName: line.productName,
       size: line.size,
       quantity: line.quantity,
-      unitPriceCents: Math.round(line.unitPrice.amount * 100),
+      unitPriceCents: Math.round(line.unitPrice.displayAmount * 100),
     };
   }
   return {
-    id: order.id.value,
-    userId: order.userId.value,
+    id: order.id,
+    userId: order.userId,
     cartId: order.cartId,
     status: order.status as FirebaseOrderRecord["status"],
     totalCents: order.totalAmountInCents,
@@ -141,13 +136,13 @@ export class FirebaseOrderRepository implements OrderRepositoryPort {
 
   async findById(id: OrderId): Promise<Result<Order, OrderNotFoundErrorType | RepositoryError>> {
     try {
-      const snap = await firebaseQuery(this.db.ref(`orders/${id.value}`).once("value"));
+      const snap = await firebaseQuery(this.db.ref(`orders/${id}`).once("value"));
       if (!snap.exists()) {
-        return { _tag: "Err", error: OrderNotFoundError(id.value) };
+        return { _tag: "Err", error: OrderNotFoundError(id) };
       }
       return { _tag: "Ok", value: fromRecord(snap.val() as FirebaseOrderRecord) };
     } catch (cause) {
-      return { _tag: "Err", error: makeRepositoryError(`Failed to find order ${id.value}`, cause) };
+      return { _tag: "Err", error: makeRepositoryError(`Failed to find order ${id}`, cause) };
     }
   }
 
@@ -157,7 +152,7 @@ export class FirebaseOrderRepository implements OrderRepositoryPort {
   ): Promise<Result<PaginatedResult<OrderSummary>, RepositoryError>> {
     try {
       const snap = await firebaseQuery(
-        this.db.ref("orders").orderByChild("userId").equalTo(userId.value).once("value")
+        this.db.ref("orders").orderByChild("userId").equalTo(userId).once("value")
       );
       const orders: Order[] = [];
       snap.forEach((child) => {
@@ -179,19 +174,19 @@ export class FirebaseOrderRepository implements OrderRepositoryPort {
     } catch (cause) {
       return {
         _tag: "Err",
-        error: makeRepositoryError(`Failed to find orders for user ${userId.value}`, cause),
+        error: makeRepositoryError(`Failed to find orders for user ${userId}`, cause),
       };
     }
   }
 
   async save(order: Order): Promise<Result<Order, RepositoryError>> {
     try {
-      await this.db.ref(`orders/${order.id.value}`).set(toRecord(order));
+      await this.db.ref(`orders/${order.id}`).set(toRecord(order));
       return { _tag: "Ok", value: order };
     } catch (cause) {
       return {
         _tag: "Err",
-        error: makeRepositoryError(`Failed to save order ${order.id.value}`, cause),
+        error: makeRepositoryError(`Failed to save order ${order.id}`, cause),
       };
     }
   }
@@ -209,7 +204,7 @@ export class FirebaseOrderRepository implements OrderRepositoryPort {
       let existingOrder: Order | undefined;
       existingSnap.forEach((child) => {
         const rec = child.val() as FirebaseOrderRecord;
-        if (rec.userId === order.userId.value) {
+        if (rec.userId === order.userId) {
           existingOrder = fromRecord(rec);
         }
       });
@@ -220,11 +215,11 @@ export class FirebaseOrderRepository implements OrderRepositoryPort {
       const yieldToEventLoop = (): Promise<void> => new Promise((resolve) => setImmediate(resolve));
       const preReads = new Map<string, FirebaseProductRecord>();
       for (const item of stockItems) {
-        const preSnap = await this.db.ref(`product_current/${item.id.value}`).once("value");
+        const preSnap = await this.db.ref(`product_write/${item.id}`).once("value");
         if (!preSnap.exists()) {
-          return { _tag: "Err", error: ProductNotFoundError(item.id.value) };
+          return { _tag: "Err", error: ProductNotFoundError(item.id) };
         }
-        preReads.set(item.id.value, preSnap.val() as FirebaseProductRecord);
+        preReads.set(item.id, preSnap.val() as FirebaseProductRecord);
       }
 
       const reserved: Array<{ id: string; size: string; qty: number }> = [];
@@ -232,13 +227,13 @@ export class FirebaseOrderRepository implements OrderRepositoryPort {
         await yieldToEventLoop();
         const state: ReserveTxState = { receivedRealData: false, domainError: null };
         await this.db
-          .ref(`product_current/${item.id.value}`)
+          .ref(`product_write/${item.id}`)
           .transaction(makeReserveStockTx(item, preReads, state));
         if (state.domainError !== null) {
           await Promise.allSettled(
             reserved.map((r) =>
               this.db
-                .ref(`product_current/${r.id}`)
+                .ref(`product_write/${r.id}`)
                 .transaction((current: FirebaseProductRecord | null) => {
                   if (current === null) return current;
                   return {
@@ -250,16 +245,16 @@ export class FirebaseOrderRepository implements OrderRepositoryPort {
           );
           return { _tag: "Err", error: state.domainError };
         }
-        reserved.push({ id: item.id.value, size: item.size, qty: item.quantity });
+        reserved.push({ id: item.id, size: item.size, qty: item.quantity });
       }
 
       try {
-        await this.db.ref(`orders/${order.id.value}`).set(toRecord(order));
+        await this.db.ref(`orders/${order.id}`).set(toRecord(order));
       } catch (saveCause) {
         await Promise.allSettled(
           reserved.map((r) =>
             this.db
-              .ref(`product_current/${r.id}`)
+              .ref(`product_write/${r.id}`)
               .transaction((current: FirebaseProductRecord | null) => {
                 if (current === null) return current;
                 return {
@@ -272,7 +267,7 @@ export class FirebaseOrderRepository implements OrderRepositoryPort {
         return {
           _tag: "Err",
           error: makeRepositoryError(
-            `Failed to save order ${order.id.value} — stock rolled back`,
+            `Failed to save order ${order.id} — stock rolled back`,
             saveCause
           ),
         };
@@ -283,7 +278,7 @@ export class FirebaseOrderRepository implements OrderRepositoryPort {
       return {
         _tag: "Err",
         error: makeRepositoryError(
-          `Failed to atomically reserve and save order ${order.id.value}`,
+          `Failed to atomically reserve and save order ${order.id}`,
           cause
         ),
       };

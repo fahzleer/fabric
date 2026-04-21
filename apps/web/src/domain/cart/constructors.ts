@@ -11,7 +11,7 @@ export const makeEmptyCart = (id: string): ShoppingCart => ({
 
 export const addItemToCart = (cart: ShoppingCart, item: CartItem): ShoppingCart => {
   const existingIdx = cart.items.findIndex(
-    (i) => i.productId.value === item.productId.value && i.size === item.size
+    (i) => i.productId === item.productId && i.size === item.size
   );
 
   const newItems =
@@ -34,7 +34,7 @@ export const removeItemFromCart = (
   size: ProductSize
 ): ShoppingCart => ({
   ...cart,
-  items: cart.items.filter((i) => !(i.productId.value === productId.value && i.size === size)),
+  items: cart.items.filter((i) => !(i.productId === productId && i.size === size)),
   updatedAt: Temporal.Now.instant().toString(),
 });
 

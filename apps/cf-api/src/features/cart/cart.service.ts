@@ -1,4 +1,5 @@
 import { Some } from "@fabric/types";
+import { makeCartId } from "@fabric/types";
 import { Temporal } from "@js-temporal/polyfill";
 import type { ActivityRepositoryPort } from "../../application/ports/activity.repository.port";
 import type { CartRepositoryPort } from "../../application/ports/cart.repository.port";
@@ -9,7 +10,6 @@ import {
   removeItemFromCart,
   updateCartItemQuantity,
 } from "../../domain/cart/cart.entity";
-import type { CartId } from "../../domain/cart/cart.value-objects";
 import type { ProductSize } from "../../domain/product/product.value-objects";
 import { makeProductId } from "../../domain/product/product.value-objects";
 import type { UserId } from "../../domain/user/user.value-objects";
@@ -30,10 +30,7 @@ export class CartService {
       return result.value.value;
     }
 
-    const newCart = makeEmptyCart(
-      { __brand: "CartId" as const, value: crypto.randomUUID() } as CartId,
-      Some(userId)
-    );
+    const newCart = makeEmptyCart(makeCartId(crypto.randomUUID()), Some(userId));
     const saved = await this.carts.save(newCart);
     if (saved._tag === "Err") return presentDomainError(saved.error);
     return newCart;
@@ -48,7 +45,7 @@ export class CartService {
 
     const addResult = addItemToCart(cart, {
       productId: makeProductId(productId),
-      productName: product.name.value,
+      productName: product.name,
       unitPrice: product.price,
       size: size as ProductSize,
       quantity,
@@ -60,7 +57,7 @@ export class CartService {
 
     void this.activity.track({
       id: crypto.randomUUID(),
-      userId: userId.value,
+      userId: userId,
       eventType: "cart_item_added",
       eventData: { productId, size, quantity },
     });
@@ -79,7 +76,7 @@ export class CartService {
 
     void this.activity.track({
       id: crypto.randomUUID(),
-      userId: userId.value,
+      userId: userId,
       eventType: "cart_item_removed",
       eventData: { productId, size },
     });
@@ -103,7 +100,7 @@ export class CartService {
 
     void this.activity.track({
       id: crypto.randomUUID(),
-      userId: userId.value,
+      userId: userId,
       eventType: "cart_item_quantity_updated",
       eventData: { productId, size, quantity },
     });

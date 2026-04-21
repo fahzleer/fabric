@@ -1,5 +1,5 @@
 import { Either, pipe } from "effect";
-import type { Hono } from "hono";
+import type { Hono, MiddlewareHandler } from "hono";
 import { checkoutFlow } from "../Pipeline/Checkout.ts";
 import { reserveStock } from "../Pipeline/Inventory.ts";
 import { validatePricing } from "../Pipeline/Pricing.ts";
@@ -17,8 +17,11 @@ import {
   encodeVoucherResult,
 } from "./Codec.ts";
 
-export const registerPricingRoutes = (app: Hono): void => {
-  app.post("/checkout/calculate", async (c) => {
+export const registerPricingRoutes = (
+  app: Hono,
+  limits: { checkout: MiddlewareHandler; voucher: MiddlewareHandler }
+): void => {
+  app.post("/checkout/calculate", limits.checkout, async (c) => {
     const body = await c.req.json();
     const result = pipe(decodeCheckoutRequest(body), Either.flatMap(checkoutFlow));
     return c.json(encodeResult(result, encodeCheckoutResult));
@@ -36,7 +39,7 @@ export const registerPricingRoutes = (app: Hono): void => {
     return c.json(encodeResult(result, encodeInventoryResult));
   });
 
-  app.post("/voucher/apply", async (c) => {
+  app.post("/voucher/apply", limits.voucher, async (c) => {
     const body = await c.req.json();
     const result = pipe(
       decodeVoucherApplyRequest(body),

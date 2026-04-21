@@ -68,7 +68,7 @@ function mapSummary(raw: RawProductSummary): ProductSummary {
     tagline: "",
     price: {
       __brand: "ProductPrice" as const,
-      amount: raw.price,
+      displayAmount: raw.price,
       currency: raw.priceCurrency as "THB" | "USD" | "EUR" | "GBP" | "JPY" | "SGD",
     },
     primaryImage: raw.primaryImage
@@ -109,7 +109,7 @@ function mapProduct(raw: RawProduct): Product {
     tagline: "",
     price: {
       __brand: "ProductPrice" as const,
-      amount: raw.price,
+      displayAmount: raw.price,
       currency: raw.priceCurrency as "THB" | "USD" | "EUR" | "GBP" | "JPY" | "SGD",
     },
     category: raw.category as Product["category"],

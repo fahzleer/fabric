@@ -21,8 +21,8 @@ export type LoginDeps = {
     findByEmail(email: string): Promise<
       Result<
         {
-          id: { value: string };
-          email: { value: string };
+          id: string;
+          email: string;
           role: UserRole;
           passwordHash: { _tag: "Some"; value: string } | { _tag: "None" };
         },
@@ -74,5 +74,5 @@ export const login = async (
   }
 
   await deps.lockoutStore.reset(input.email);
-  return deps.tokenService.issue(user.id.value, user.email.value, user.role);
+  return deps.tokenService.issue(user.id, user.email, user.role);
 };

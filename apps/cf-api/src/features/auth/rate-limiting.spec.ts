@@ -139,8 +139,8 @@ describe("throttle middleware — rate limit exceeded", () => {
   });
 });
 
-describe("throttle middleware — fail-open on cache error", () => {
-  test("8. cache returns null → fail-open (next() called, no 429)", async () => {
+describe("throttle middleware — fail-closed on cache error (default)", () => {
+  test("8. cache returns null → fail-closed (503, next() not called)", async () => {
     const cache = makeMockCache(null);
     const middleware = throttle(cache, { limit: 10, windowMs: 60_000 });
     const ctx = makeCtx({ ip: "1.2.3.4" });
@@ -150,19 +150,26 @@ describe("throttle middleware — fail-open on cache error", () => {
       nextCalled = true;
     });
 
-    expect(nextCalled).toBe(true);
-    expect(ctx._jsonResult()).toBeUndefined();
+    expect(nextCalled).toBe(false);
+    const result = ctx._jsonResult();
+    expect(result?.status).toBe(503);
+    expect((result?.data as { _tag: string })._tag).toBe("RateLimiterUnavailable");
+    expect(ctx._headers["Retry-After"]).toBe("60");
   });
 
-  test("8b. null count → no rate-limit headers set", async () => {
+  test("8b. failOpen: true → next() called on null count, no 503", async () => {
     const cache = makeMockCache(null);
-    const middleware = throttle(cache, { limit: 10, windowMs: 60_000 });
+    const middleware = throttle(cache, { limit: 10, windowMs: 60_000, failOpen: true });
     const ctx = makeCtx({ ip: "1.2.3.4" });
+    let nextCalled = false;
 
-    await middleware(ctx, async () => undefined);
+    await middleware(ctx, async () => {
+      nextCalled = true;
+    });
 
+    expect(nextCalled).toBe(true);
+    expect(ctx._jsonResult()).toBeUndefined();
     expect(ctx._headers["X-RateLimit-Limit"]).toBeUndefined();
-    expect(ctx._headers["X-RateLimit-Remaining"]).toBeUndefined();
   });
 });
 

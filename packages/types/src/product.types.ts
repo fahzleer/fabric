@@ -1,13 +1,13 @@
 import { type } from "arktype";
 import type { DomainEvent } from "./events";
-import type { CurrencyCode, TaggedError } from "./kernel";
+import type { Brand, CurrencyCode, TaggedError } from "./kernel";
 
-export type ProductId = { readonly __brand: "ProductId"; readonly value: string };
-export const makeProductId = (value: string): ProductId => ({ __brand: "ProductId", value });
+export type ProductId = Brand<string, "ProductId">;
+export const makeProductId = (value: string): ProductId => value as ProductId;
 export const ProductIdSchema = type("string");
 
 export interface ProductNameError extends TaggedError<"ProductNameError"> {}
-export type ProductName = { readonly __brand: "ProductName"; readonly value: string };
+export type ProductName = Brand<string, "ProductName">;
 
 export const makeProductName = (raw: string): ProductName | ProductNameError => {
   const trimmed = raw.trim();
@@ -17,7 +17,7 @@ export const makeProductName = (raw: string): ProductName | ProductNameError => 
       message: "Product name must be between 2 and 120 characters",
     };
   }
-  return { __brand: "ProductName", value: trimmed };
+  return trimmed as ProductName;
 };
 
 export const ProductNameSchema = type("2 <= string <= 120");
@@ -25,26 +25,26 @@ export const ProductNameSchema = type("2 <= string <= 120");
 export interface ProductPriceError extends TaggedError<"ProductPriceError"> {}
 export type ProductPrice = {
   readonly __brand: "ProductPrice";
-  readonly amount: number;
+  readonly displayAmount: number;
   readonly currency: CurrencyCode;
 };
 
 export const makeProductPrice = (
-  amount: number,
+  displayAmount: number,
   currency: CurrencyCode
 ): ProductPrice | ProductPriceError => {
-  if (!Number.isFinite(amount) || amount < 0) {
+  if (!Number.isFinite(displayAmount) || displayAmount < 0) {
     return {
       _tag: "ProductPriceError",
-      message: `Price must be a non-negative number, got: ${amount}`,
+      message: `Price must be a non-negative number, got: ${displayAmount}`,
     };
   }
-  return { __brand: "ProductPrice", amount, currency };
+  return { __brand: "ProductPrice", displayAmount, currency };
 };
 
 export const makeProductPriceFromCents = (cents: number, currency: CurrencyCode): ProductPrice => ({
   __brand: "ProductPrice",
-  amount: cents / 100,
+  displayAmount: cents / 100,
   currency,
 });
 
@@ -52,11 +52,11 @@ export const formatProductPrice = (price: ProductPrice): string => {
   return new Intl.NumberFormat("th-TH", {
     style: "currency",
     currency: price.currency,
-    minimumFractionDigits: Number.isInteger(price.amount) ? 0 : 2,
-  }).format(price.amount);
+    minimumFractionDigits: Number.isInteger(price.displayAmount) ? 0 : 2,
+  }).format(price.displayAmount);
 };
 
-export const ProductPriceSchema = type({ amount: "number >= 0", currency: "string" });
+export const ProductPriceSchema = type({ displayAmount: "number >= 0", currency: "string" });
 
 export type ProductSize = "XS" | "S" | "M" | "L" | "XL" | "XXL" | "XXXL";
 
@@ -84,7 +84,7 @@ export type ProductCategory = "basic" | "premium" | "limited_edition" | "custom"
 export const ProductCategorySchema = type("'basic' | 'premium' | 'limited_edition' | 'custom'");
 
 export interface StockQuantityError extends TaggedError<"StockQuantityError"> {}
-export type StockQuantity = { readonly __brand: "StockQuantity"; readonly value: number };
+export type StockQuantity = Brand<number, "StockQuantity">;
 
 export const makeStockQuantity = (n: number): StockQuantity | StockQuantityError => {
   if (!Number.isInteger(n) || n < 0) {
@@ -93,7 +93,7 @@ export const makeStockQuantity = (n: number): StockQuantity | StockQuantityError
       message: `Stock quantity must be a non-negative integer, got: ${n}`,
     };
   }
-  return { __brand: "StockQuantity", value: n };
+  return n as StockQuantity;
 };
 
 export const StockQuantitySchema = type("number >= 0");

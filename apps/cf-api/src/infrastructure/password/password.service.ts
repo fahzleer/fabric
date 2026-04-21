@@ -2,13 +2,12 @@ import type { PasswordHashError, Result } from "@fabric/types";
 import { Err, Ok, PasswordHashError as makePasswordHashErr } from "@fabric/types";
 import { hash, compare as verify } from "bcryptjs";
 
-const BCRYPT_ROUNDS = Number.parseInt(process.env.BCRYPT_ROUNDS ?? "12", 10);
-
 export const hashPassword = async (
-  plaintext: string
+  plaintext: string,
+  rounds: number
 ): Promise<Result<string, PasswordHashError>> => {
   try {
-    const hashed = await hash(plaintext, BCRYPT_ROUNDS);
+    const hashed = await hash(plaintext, rounds);
     return Ok(hashed);
   } catch (e) {
     return Err(makePasswordHashErr(`Failed to hash password: ${String(e)}`));

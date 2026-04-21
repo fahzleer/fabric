@@ -5,18 +5,20 @@ import type { ActivityRepositoryPort } from "../../application/ports/activity.re
 import type { CartRepositoryPort } from "../../application/ports/cart.repository.port";
 import type { ProductRepositoryPort } from "../../application/ports/product.repository.port";
 import type { Cart, CartItem } from "../../domain/cart/cart.entity";
-import type { CartId, CartItemQuantity } from "../../domain/cart/cart.value-objects";
+import type { CartItemQuantity } from "../../domain/cart/cart.value-objects";
+import { makeCartId } from "../../domain/cart/cart.value-objects";
 import type { Product } from "../../domain/product/product.entity";
-import type { ProductId, ProductPrice } from "../../domain/product/product.value-objects";
-import type { UserId } from "../../domain/user/user.value-objects";
+import type { ProductPrice } from "../../domain/product/product.value-objects";
+import { makeProductId } from "../../domain/product/product.value-objects";
+import { makeUserId } from "../../domain/user/user.value-objects";
 import { CartService } from "./cart.service";
 
 const REPO_ERR = { _tag: "RepositoryError" as const, message: "db failure" };
-const USER_ID = { __brand: "UserId", value: "user-001" } as unknown as UserId;
+const USER_ID = makeUserId("user-001");
 const PRODUCT_ID = "prod-001";
 
 const EMPTY_CART: Cart = {
-  id: { __brand: "CartId", value: "cart-001" } as unknown as CartId,
+  id: makeCartId("cart-001"),
   userId: Some(USER_ID),
   items: [],
   createdAt: Temporal.Now.instant(),
@@ -27,7 +29,7 @@ const CART_WITH_ITEM: Cart = {
   ...EMPTY_CART,
   items: [
     {
-      productId: { __brand: "ProductId", value: PRODUCT_ID } as unknown as ProductId,
+      productId: makeProductId(PRODUCT_ID),
       productName: "Test Shirt",
       unitPrice: {
         __brand: "ProductPrice",
@@ -35,7 +37,7 @@ const CART_WITH_ITEM: Cart = {
         currency: "USD",
       } as unknown as ProductPrice,
       size: "M" as const,
-      quantity: { __brand: "CartItemQuantity", value: 2 } as unknown as CartItemQuantity,
+      quantity: 2 as CartItemQuantity,
     } as CartItem,
   ],
 };
@@ -158,7 +160,7 @@ describe("CartService.addItem", () => {
     const { svc, activity } = makeDeps();
     const result = await svc.addItem(USER_ID, PRODUCT_ID, "M", 1);
     expect(result.items).toHaveLength(1);
-    expect(result.items[0]?.productId.value).toBe(PRODUCT_ID);
+    expect(result.items[0]?.productId).toBe(PRODUCT_ID);
 
     await Promise.resolve();
     expect(activity.track).toHaveBeenCalledTimes(1);
@@ -232,8 +234,8 @@ describe("CartService.updateItemQty", () => {
       findByUserId: async () => ({ _tag: "Ok", value: Some(CART_WITH_ITEM) }),
     });
     const result = await svc.updateItemQty(USER_ID, PRODUCT_ID, "M", 5);
-    const item = result.items.find((i) => i.productId.value === PRODUCT_ID && i.size === "M");
-    expect(item?.quantity.value).toBe(5);
+    const item = result.items.find((i) => i.productId === PRODUCT_ID && i.size === "M");
+    expect(item?.quantity).toBe(5);
     await Promise.resolve();
     expect(activity.track).toHaveBeenCalledWith(
       expect.objectContaining({ eventType: "cart_item_quantity_updated" })

@@ -11,16 +11,19 @@ import type { PricingPort } from "../../application/ports/pricing.port";
 import type { ProductRepositoryPort } from "../../application/ports/product.repository.port";
 import type { VoucherRepositoryPort } from "../../application/ports/voucher.repository.port";
 import type { Cart } from "../../domain/cart/cart.entity";
-import type { CartId, CartItemQuantity } from "../../domain/cart/cart.value-objects";
+import type { CartItemQuantity } from "../../domain/cart/cart.value-objects";
+import { makeCartId } from "../../domain/cart/cart.value-objects";
 import type { Order } from "../../domain/order/order.entity";
-import type { OrderId, OrderStatus, ShippingAddress } from "../../domain/order/order.value-objects";
-import type { ProductId, ProductPrice } from "../../domain/product/product.value-objects";
-import type { UserId } from "../../domain/user/user.value-objects";
+import { makeOrderId } from "../../domain/order/order.value-objects";
+import type { OrderStatus, ShippingAddress } from "../../domain/order/order.value-objects";
+import { makeProductId } from "../../domain/product/product.value-objects";
+import type { ProductPrice } from "../../domain/product/product.value-objects";
+import { makeUserId } from "../../domain/user/user.value-objects";
 import { OrderService } from "./order.service";
 
 const now = Temporal.Now.instant();
 
-const USER_ID = { __brand: "UserId" as const, value: "user-001" } as UserId;
+const USER_ID = makeUserId("user-001");
 const SHIPPING: ShippingAddress = {
   recipientName: "Test User",
   street: "1 Test Street",
@@ -34,24 +37,21 @@ const SHIPPING: ShippingAddress = {
 
 function makeCartItem(productId: string, priceCents: number, qty = 1) {
   return {
-    productId: { __brand: "ProductId" as const, value: productId } as ProductId,
+    productId: makeProductId(productId),
     productName: "Test Item",
     unitPrice: {
       __brand: "ProductPrice" as const,
-      amount: priceCents / 100,
+      displayAmount: priceCents / 100,
       currency: "THB",
     } as unknown as ProductPrice,
     size: "M" as const,
-    quantity: {
-      __brand: "CartItemQuantity" as const,
-      value: qty,
-    } as unknown as CartItemQuantity,
+    quantity: qty as CartItemQuantity,
   };
 }
 
 function makeCart(items: ReturnType<typeof makeCartItem>[]): Cart {
   return {
-    id: { __brand: "CartId" as const, value: "cart-001" } as CartId,
+    id: makeCartId("cart-001"),
     userId: USER_ID as unknown as Cart["userId"],
     items: items as Cart["items"],
     createdAt: now,
@@ -61,7 +61,7 @@ function makeCart(items: ReturnType<typeof makeCartItem>[]): Cart {
 
 function makeOrder(status: OrderStatus = "pending"): Order {
   return {
-    id: { __brand: "OrderId" as const, value: "order-001" } as OrderId,
+    id: makeOrderId("order-001"),
     userId: USER_ID,
     cartId: "cart-001",
     lines: [] as unknown as Order["lines"],
@@ -109,7 +109,10 @@ function makePorts(
             _tag: "Ok" as const,
             value: {
               id: { value: "prod-001" },
-              price: { amount: (overrides.productPriceCents ?? 50000) / 100, currency: "THB" },
+              price: {
+                displayAmount: (overrides.productPriceCents ?? 50000) / 100,
+                currency: "THB",
+              },
             },
           }
     ),

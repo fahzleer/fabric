@@ -1,5 +1,5 @@
 import type { DomainEvent } from "./events";
-import type { TaggedError } from "./kernel";
+import type { Brand, TaggedError } from "./kernel";
 
 const makeDomainEventInternal = <TType extends string, TPayload>(
   _type: TType,
@@ -12,11 +12,11 @@ const makeDomainEventInternal = <TType extends string, TPayload>(
   payload,
 });
 
-export type CartId = { readonly __brand: "CartId"; readonly value: string };
-export const makeCartId = (value: string): CartId => ({ __brand: "CartId", value });
+export type CartId = Brand<string, "CartId">;
+export const makeCartId = (value: string): CartId => value as CartId;
 
 export interface CartItemQuantityError extends TaggedError<"CartItemQuantityError"> {}
-export type CartItemQuantity = { readonly __brand: "CartItemQuantity"; readonly value: number };
+export type CartItemQuantity = Brand<number, "CartItemQuantity">;
 
 export const makeCartItemQuantity = (n: number): CartItemQuantity | CartItemQuantityError => {
   if (!Number.isInteger(n) || n < 1 || n > 99) {
@@ -25,7 +25,7 @@ export const makeCartItemQuantity = (n: number): CartItemQuantity | CartItemQuan
       message: `Cart item quantity must be between 1 and 99, got: ${n}`,
     };
   }
-  return { __brand: "CartItemQuantity", value: n };
+  return n as CartItemQuantity;
 };
 
 export interface CartNotFoundError extends TaggedError<"CartNotFoundError"> {}

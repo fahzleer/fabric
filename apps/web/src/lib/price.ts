@@ -1,14 +1,12 @@
-interface Price {
-  amount: number;
-  currency: string;
-}
+type Price = { currency: string } & ({ displayAmount: number } | { amount: number });
 
 export function formatPrice(price: Price): string {
+  const value = "displayAmount" in price ? price.displayAmount : price.amount;
   return new Intl.NumberFormat(getLocaleForCurrency(price.currency), {
     style: "currency",
     currency: price.currency,
-    minimumFractionDigits: Number.isInteger(price.amount) ? 0 : 2,
-  }).format(price.amount);
+    minimumFractionDigits: Number.isInteger(value) ? 0 : 2,
+  }).format(value);
 }
 
 function getLocaleForCurrency(currency: string): string {

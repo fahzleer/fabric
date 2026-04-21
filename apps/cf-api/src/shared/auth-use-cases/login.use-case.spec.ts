@@ -11,8 +11,8 @@ mock.module("../../infrastructure/password/password.service", () => ({
 const TOKEN_PAIR = { accessToken: "access-tok", refreshToken: "refresh-tok" };
 
 const EXISTING_USER = {
-  id: { value: "user-123" },
-  email: { value: "alice@example.com" },
+  id: "user-123",
+  email: "alice@example.com",
   role: "customer" as const,
   passwordHash: { _tag: "Some" as const, value: "$2b$12$hashedpw" },
 };
@@ -151,8 +151,8 @@ describe("login", () => {
     expect(deps.lockoutStore.reset).toHaveBeenCalledWith("alice@example.com");
     expect(deps.lockoutStore.recordAttempt).not.toHaveBeenCalled();
     expect(deps.tokenService.issue).toHaveBeenCalledWith(
-      EXISTING_USER.id.value,
-      EXISTING_USER.email.value,
+      EXISTING_USER.id,
+      EXISTING_USER.email,
       EXISTING_USER.role
     );
   });

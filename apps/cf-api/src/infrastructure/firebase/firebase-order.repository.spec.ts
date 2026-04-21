@@ -29,27 +29,27 @@ interface MockProductCurrentRecord {
 const now = Temporal.Now.instant();
 
 const ORDER: Order = {
-  id: { __brand: "OrderId" as const, value: "order-001" } as OrderId,
-  userId: { __brand: "UserId" as const, value: "user-001" } as UserId,
+  id: "order-001" as OrderId,
+  userId: "user-001" as UserId,
   cartId: "cart-001",
   lines: [
     {
-      productId: { __brand: "ProductId" as const, value: "prod-001" } as ProductId,
+      productId: "prod-001" as ProductId,
       productName: "Test Shirt",
       unitPrice: {
         __brand: "ProductPrice" as const,
-        cents: 50000,
+        displayAmount: 500,
         currency: "THB",
       } as unknown as Order["lines"][number]["unitPrice"],
       size: "M" as const,
       quantity: 1,
     },
     {
-      productId: { __brand: "ProductId" as const, value: "prod-002" } as ProductId,
+      productId: "prod-002" as ProductId,
       productName: "Test Hoodie",
       unitPrice: {
         __brand: "ProductPrice" as const,
-        cents: 80000,
+        displayAmount: 800,
         currency: "THB",
       } as unknown as Order["lines"][number]["unitPrice"],
       size: "L" as const,
@@ -78,16 +78,8 @@ const ORDER: Order = {
 };
 
 const STOCK_ITEMS: StockReserveItem[] = [
-  {
-    id: { __brand: "ProductId" as const, value: "prod-001" } as ProductId,
-    size: "M",
-    quantity: 1,
-  },
-  {
-    id: { __brand: "ProductId" as const, value: "prod-002" } as ProductId,
-    size: "L",
-    quantity: 2,
-  },
+  { id: "prod-001" as ProductId, size: "M", quantity: 1 },
+  { id: "prod-002" as ProductId, size: "L", quantity: 2 },
 ];
 
 const EXISTING_ORDER_RECORD = {
@@ -150,8 +142,8 @@ function makeDb(opts: {
         };
       }
 
-      if (path.startsWith("product_current/")) {
-        const productId = path.replace("product_current/", "");
+      if (path.startsWith("product_write/")) {
+        const productId = path.replace("product_write/", "");
         const baseRecord: MockProductCurrentRecord = {
           stock: { M: 10, L: 10 },
           id: productId,
@@ -172,11 +164,7 @@ function makeDb(opts: {
           ) {
             txCallsPerPath[path] = (txCallsPerPath[path] ?? 0) + 1;
             const callCount = txCallsPerPath[path] as number;
-            if (
-              opts.secondItemOutOfStock &&
-              path === "product_current/prod-002" &&
-              callCount === 1
-            ) {
+            if (opts.secondItemOutOfStock && path === "product_write/prod-002" && callCount === 1) {
               cb({ ...baseRecord, stock: { L: 0, M: 10 } });
             } else {
               cb({ ...baseRecord });
@@ -211,10 +199,10 @@ describe("FirebaseOrderRepository.atomicReserveAndSave", () => {
 
     expect(result._tag).toBe("Ok");
     if (result._tag === "Ok") {
-      expect(result.value.id.value).toBe("order-001");
+      expect(result.value.id).toBe("order-001");
     }
-    expect(txCallsPerPath["product_current/prod-001"]).toBe(1);
-    expect(txCallsPerPath["product_current/prod-002"]).toBe(1);
+    expect(txCallsPerPath["product_write/prod-001"]).toBe(1);
+    expect(txCallsPerPath["product_write/prod-002"]).toBe(1);
   });
 
   test("2. idempotency: existing order for same cartId → returns existing, no stock transactions", async () => {
@@ -224,8 +212,8 @@ describe("FirebaseOrderRepository.atomicReserveAndSave", () => {
     const result = await repo.atomicReserveAndSave(ORDER, STOCK_ITEMS);
 
     expect(result._tag).toBe("Ok");
-    expect(txCallsPerPath["product_current/prod-001"]).toBeUndefined();
-    expect(txCallsPerPath["product_current/prod-002"]).toBeUndefined();
+    expect(txCallsPerPath["product_write/prod-001"]).toBeUndefined();
+    expect(txCallsPerPath["product_write/prod-002"]).toBeUndefined();
   });
 
   test("3. out-of-stock on 2nd item: rolls back 1st reservation → Err(ProductOutOfStockError)", async () => {
@@ -238,7 +226,7 @@ describe("FirebaseOrderRepository.atomicReserveAndSave", () => {
     if (result._tag === "Err") {
       expect(result.error._tag).toBe("ProductOutOfStockError");
     }
-    expect(txCallsPerPath["product_current/prod-001"]).toBe(2);
+    expect(txCallsPerPath["product_write/prod-001"]).toBe(2);
   });
 
   test("4. P0: order save throws → ALL reserved stock rolled back → Err(RepositoryError)", async () => {
@@ -251,7 +239,7 @@ describe("FirebaseOrderRepository.atomicReserveAndSave", () => {
     if (result._tag === "Err") {
       expect(result.error._tag).toBe("RepositoryError");
     }
-    expect(txCallsPerPath["product_current/prod-001"]).toBe(2);
-    expect(txCallsPerPath["product_current/prod-002"]).toBe(2);
+    expect(txCallsPerPath["product_write/prod-001"]).toBe(2);
+    expect(txCallsPerPath["product_write/prod-002"]).toBe(2);
   });
 });

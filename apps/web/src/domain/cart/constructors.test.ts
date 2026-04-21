@@ -52,7 +52,7 @@ describe("addItemToCart", () => {
     const cart = makeEmptyCart("cart-1");
     const result = addItemToCart(cart, makeItem());
     expect(result.items).toHaveLength(1);
-    expect(result.items[0]?.productId.value).toBe("prod-1");
+    expect(result.items[0]?.productId).toBe("prod-1");
   });
 
   test("merges quantity when same (productId, size) already exists", () => {
@@ -164,7 +164,7 @@ describe("updateCartItemQuantity", () => {
 
     const result = updateCartItemQuantity(c, PRODUCT_ID, "M", 10);
     if (result._tag === "Ok") {
-      const other = result.value.items.find((i) => i.productId.value === "prod-2");
+      const other = result.value.items.find((i) => i.productId === "prod-2");
       expect(other?.quantity).toBe(2);
     }
   });

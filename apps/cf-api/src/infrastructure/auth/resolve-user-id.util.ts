@@ -13,7 +13,7 @@ export async function resolveUserId(
   const payloadResult = await pasetoVerifier.verify(tokenResult.value);
   if (payloadResult._tag === "Err") return presentDomainError(payloadResult.error);
 
-  return { __brand: "UserId" as const, value: payloadResult.value.sub } as UserId;
+  return payloadResult.value.sub as UserId;
 }
 
 export type ResolvedUser = {
@@ -33,7 +33,7 @@ export async function resolveUser(
 
   const payload = payloadResult.value;
   return {
-    userId: { __brand: "UserId" as const, value: payload.sub } as UserId,
+    userId: payload.sub as UserId,
     role: (payload.role ?? "customer") as UserRole,
   };
 }

@@ -27,9 +27,8 @@ export async function encryptToken(
 export class PasetoVerifierService {
   private readonly keyHex: string;
 
-  constructor() {
-    const keyHex = process.env.PASETO_KEY;
-    if (keyHex === undefined || keyHex.trim().length !== 64) {
+  constructor(keyHex: string) {
+    if (keyHex.trim().length !== 64) {
       throw new Error(
         "PASETO_KEY must be a 64-character hex string (32 bytes). " +
           "Set this env var before starting the api service."

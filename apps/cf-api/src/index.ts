@@ -35,7 +35,7 @@ import { FirebaseUserAdapter } from "./infrastructure/firebase/firebase-user.ada
 import { FirebaseVoucherRepository } from "./infrastructure/firebase/firebase-voucher.repository";
 import { attachRequestSignal } from "./infrastructure/guards/auth.middleware";
 import { csrf } from "./infrastructure/guards/csrf.middleware";
-import { logError, requestLogger } from "./infrastructure/monitoring/logger";
+import { attachCorrelationIds, logError, requestLogger } from "./infrastructure/monitoring/logger";
 import { HttpPaymentAdapter } from "./infrastructure/payment/http-payment.adapter";
 import { HttpPricingAdapter } from "./infrastructure/pricing/pricing.adapter";
 import { loadSecrets } from "./infrastructure/secrets/secret-manager.service";
@@ -76,7 +76,7 @@ async function startBoot() {
   const eventPublisher = new HttpEventPublisherAdapter(config.eventsServiceUrl);
   const pricing = new HttpPricingAdapter(config.pricingServiceUrl);
   const payment = new HttpPaymentAdapter(config.paymentServiceUrl);
-  const verifier = new PasetoVerifierService();
+  const verifier = new PasetoVerifierService(config.pasetoKey);
   const merchantRepo = new FirebaseMerchantRepository(db);
   const stripeAdapter = new StripeBillingAdapter(config.stripeSecretKey);
   const billingService = new BillingService(stripeAdapter, stripeAdapter, merchantRepo, {
@@ -93,7 +93,7 @@ async function startBoot() {
   registerCleanup("memcached", () => memcached.quit());
   setupGracefulShutdown();
 
-  const payoutRepo = new FirebasePayoutRepository(db);
+  const payoutRepo = new FirebasePayoutRepository(db, config.platformFeePct);
   const payoutService = new PayoutService(payoutRepo);
   const productService = new ProductService(productRepo, eventPublisher, activityRepo);
   const cartService = new CartService(cartRepo, productRepo, activityRepo);
@@ -111,6 +111,7 @@ async function startBoot() {
 
   const app = new Hono();
   app.use("*", cors({ origin: config.corsOrigin, credentials: true }));
+  app.use("*", attachCorrelationIds());
   app.use("*", requestLogger());
   app.use("*", attachRequestSignal());
   app.use(
@@ -135,13 +136,25 @@ async function startBoot() {
 
   registerProductRoutes(app, productService, verifier, merchantRepo);
   registerCartRoutes(app, cartService, verifier);
-  registerOrderRoutes(app, orderService, verifier);
-  registerAuthRoutes(app, userAdapter, tokenRepo, lockoutStore, verifier, activityRepo, memcached);
+  registerOrderRoutes(app, orderService, verifier, config.internalSecret);
+  registerAuthRoutes(app, userAdapter, tokenRepo, lockoutStore, verifier, activityRepo, memcached, {
+    pasetoKey: config.pasetoKey,
+    accessTokenTtlSeconds: config.accessTokenTtlSeconds,
+    refreshTokenTtlSeconds: config.refreshTokenTtlSeconds,
+    bcryptRounds: config.bcryptRounds,
+    googleClientId: config.googleClientId,
+  });
   registerBillingRoutes(app, billingService, verifier);
-  registerPromptPayRoutes(app, orderService, verifier);
+  registerPromptPayRoutes(
+    app,
+    orderService,
+    verifier,
+    config.commerceServiceUrl,
+    config.internalSecret
+  );
   registerInternalRoutes(app, config.pasetoKey, config.internalSecret);
   registerStoreRoutes(app, merchantRepo, productRepo);
-  registerPayoutRoutes(app, payoutService, verifier);
+  registerPayoutRoutes(app, payoutService, verifier, config.payoutsEnabled);
   app.get("/api/health", (c) =>
     c.json({ status: "ok", service: "cf-api", regions: DEPLOY_REGIONS })
   );

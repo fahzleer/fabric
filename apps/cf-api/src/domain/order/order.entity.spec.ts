@@ -1,5 +1,6 @@
 import { describe, expect, it } from "bun:test";
 import { None, Some } from "@fabric/types";
+import { makeOrderId, makeProductId, makeUserId } from "@fabric/types";
 import { Temporal } from "@js-temporal/polyfill";
 import type { Order, OrderLine } from "./order.entity";
 import {
@@ -12,17 +13,17 @@ import {
 } from "./order.entity";
 
 const makeLine = (overrides: Partial<OrderLine> = {}): OrderLine => ({
-  productId: { __brand: "ProductId", value: "prod-1" },
+  productId: makeProductId("prod-1"),
   productName: "Test Shirt",
-  unitPrice: { __brand: "ProductPrice", amount: 499, currency: "THB" },
+  unitPrice: { __brand: "ProductPrice", displayAmount: 499, currency: "THB" },
   size: "M",
   quantity: 2,
   ...overrides,
 });
 
 const makeOrder = (overrides: Partial<Order> = {}): Order => ({
-  id: { __brand: "OrderId", value: "order-1" },
-  userId: { __brand: "UserId", value: "user-1" },
+  id: makeOrderId("order-1"),
+  userId: makeUserId("user-1"),
   cartId: "cart-1",
   lines: [makeLine()],
   status: "pending",
@@ -48,7 +49,7 @@ const makeOrder = (overrides: Partial<Order> = {}): Order => ({
 });
 
 describe("getOrderLineTotal", () => {
-  it("multiplies unitPrice.amount by quantity", () => {
+  it("multiplies unitPrice.displayAmount by quantity", () => {
     const line = makeLine({ quantity: 3 });
     expect(getOrderLineTotal(line)).toBe(1497);
   });
@@ -64,7 +65,7 @@ describe("calculateOrderTotal", () => {
     const lines: OrderLine[] = [
       makeLine({ quantity: 2 }),
       makeLine({
-        unitPrice: { __brand: "ProductPrice", amount: 100, currency: "THB" },
+        unitPrice: { __brand: "ProductPrice", displayAmount: 100, currency: "THB" },
         quantity: 3,
       }),
     ];

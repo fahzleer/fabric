@@ -182,8 +182,8 @@ describe("toProductSummary", () => {
     const product = makeProduct({ status: "active" });
     const summary = toProductSummary(product);
 
-    expect(summary.id.value).toBe("prod-1");
-    expect(summary.name.value).toBe("Test Shirt");
+    expect(summary.id).toBe("prod-1");
+    expect(summary.name).toEqual(makeName("Test Shirt"));
     expect(summary.category).toBe("basic");
     expect(summary.status).toBe("active");
     expect(summary.inStock).toBe(true);

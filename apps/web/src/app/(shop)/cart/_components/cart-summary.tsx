@@ -18,7 +18,9 @@ export function CartSummary({ cart }: CartSummaryProps) {
 
       <div className="space-y-2">
         {cart.items.map((item) => {
-          const lineAmount = new BigNumber(item.productSnapshot.price.amount).times(item.quantity);
+          const lineAmount = new BigNumber(item.productSnapshot.price.displayAmount).times(
+            item.quantity
+          );
           return (
             <div
               key={`${item.productId.value}:${item.size}`}

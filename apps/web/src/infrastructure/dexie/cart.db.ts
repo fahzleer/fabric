@@ -41,7 +41,7 @@ export function dexieItemsToCart(items: DexieCartItem[]): ShoppingCart {
           } as CartItem["productSnapshot"]["name"],
           price: {
             __brand: "ProductPrice",
-            amount: item.unitPriceCents / 100,
+            displayAmount: item.unitPriceCents / 100,
             currency: item.currency,
           } as CartItem["productSnapshot"]["price"],
           image: {

@@ -59,9 +59,9 @@ const PRODUCT_ID = makeProductId("prod-abc-123");
 const MOCK_PRODUCT: Product = {
   id: PRODUCT_ID,
   ownerId: "owner-001",
-  name: { __brand: "ProductName" as const, value: "Test T-Shirt" },
+  name: "Test T-Shirt" as import("@fabric/types").ProductName,
   description: "A great t-shirt",
-  price: { amount: 29.99, currency: "THB" as const, __brand: "ProductPrice" as const },
+  price: { displayAmount: 29.99, currency: "THB" as const, __brand: "ProductPrice" as const },
   category: "basic",
   status: "draft",
   stock: {},
@@ -305,7 +305,7 @@ describe("ProductService.updateProduct", () => {
 
     await service.updateProduct(PRODUCT_ID, { name: "New Name" });
 
-    expect(savedProduct?.name.value).toBe("New Name");
+    expect(savedProduct?.name).toBe("New Name");
   });
 
   test("20. publishes ProductUpdated event (fire-and-forget)", async () => {
@@ -374,7 +374,7 @@ describe("ProductService.deleteProduct", () => {
 
     const call = (publisher.publish as ReturnType<typeof mock>).mock.calls[0];
     expect(call?.[0].event_type).toBe("ProductArchived");
-    expect(call?.[0].aggregate_id).toBe(PRODUCT_ID.value);
+    expect(call?.[0].aggregate_id).toBe(PRODUCT_ID);
   });
 
   test("25. records product_deleted activity (fire-and-forget)", async () => {

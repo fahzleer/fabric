@@ -1,5 +1,5 @@
 import type { DomainEvent } from "./events";
-import type { TaggedError } from "./kernel";
+import type { Brand, TaggedError } from "./kernel";
 
 const makeDomainEventInternal = <TType extends string, TPayload>(
   _type: TType,
@@ -12,8 +12,8 @@ const makeDomainEventInternal = <TType extends string, TPayload>(
   payload,
 });
 
-export type OrderId = { readonly __brand: "OrderId"; readonly value: string };
-export const makeOrderId = (value: string): OrderId => ({ __brand: "OrderId", value });
+export type OrderId = Brand<string, "OrderId">;
+export const makeOrderId = (value: string): OrderId => value as OrderId;
 
 export type OrderStatus =
   | "pending"

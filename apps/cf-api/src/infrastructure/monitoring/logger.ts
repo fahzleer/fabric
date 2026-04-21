@@ -1,4 +1,8 @@
 import type { MiddlewareHandler } from "hono";
+import {
+  getCorrelationIds,
+  runWithCorrelation,
+} from "../../shared/correlation/correlation-context";
 
 export type LogLevel = "DEBUG" | "INFO" | "WARN" | "ERROR";
 
@@ -28,16 +32,20 @@ const ANSI = {
 
 function emit(entry: LogEntry): void {
   if (process.env.LOG_SILENT === "true") return;
+  const correlation = getCorrelationIds();
+  const enriched: LogEntry = correlation
+    ? { ...entry, requestId: correlation.requestId, traceId: correlation.traceId }
+    : entry;
   if (IS_DEV) {
-    const color = ANSI[entry.severity as keyof typeof ANSI] ?? ANSI.reset;
-    const { severity, service, message, ...rest } = entry;
+    const color = ANSI[enriched.severity as keyof typeof ANSI] ?? ANSI.reset;
+    const { severity, service, message, ...rest } = enriched;
     const meta =
       Object.keys(rest).length > 0 ? ` ${ANSI.dim}${JSON.stringify(rest)}${ANSI.reset}` : "";
     console.log(
       `${color}${ANSI.bold}[${severity}]${ANSI.reset} ${ANSI.dim}${service}${ANSI.reset} ${message}${meta}`
     );
   } else {
-    console.log(JSON.stringify(entry));
+    console.log(JSON.stringify(enriched));
   }
 }
 
@@ -99,6 +107,15 @@ export function logError(
     userId: opts.userId,
     ...opts.context,
   });
+}
+
+export function attachCorrelationIds(): MiddlewareHandler {
+  return async (c, next) => {
+    const requestId = c.req.header("x-request-id") ?? crypto.randomUUID();
+    const traceId = c.req.header("x-trace-id") ?? requestId;
+    c.res.headers.set("x-request-id", requestId);
+    return runWithCorrelation({ requestId, traceId }, () => next());
+  };
 }
 
 export function requestLogger(): MiddlewareHandler {

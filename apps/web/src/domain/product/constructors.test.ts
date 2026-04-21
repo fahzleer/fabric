@@ -28,8 +28,8 @@ describe("makeProduct", () => {
     const result = makeProduct(VALID_DATA);
     expect(result._tag).toBe("Ok");
     if (result._tag === "Ok") {
-      expect(result.value.id.value).toBe("prod-1");
-      expect(result.value.name.value).toBe("Test Shirt");
+      expect(result.value.id).toBe("prod-1");
+      expect(result.value.name).toBe("Test Shirt");
       expect(result.value.stock).toHaveLength(2);
       expect(result.value.images).toHaveLength(2);
     }

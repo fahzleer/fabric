@@ -7,7 +7,7 @@ import { log } from "../monitoring/logger";
 export class HttpEventPublisherAdapter implements EventPublisherPort {
   private readonly url: string;
 
-  constructor(eventsUrl: string = process.env.EVENTS_SERVICE_URL ?? "http://localhost:8082") {
+  constructor(eventsUrl: string) {
     this.url = `${eventsUrl}/events`;
   }
 

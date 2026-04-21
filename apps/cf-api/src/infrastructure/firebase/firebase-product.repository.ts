@@ -22,18 +22,16 @@ import { firebaseQuery } from "../../shared/abort/abort-context";
 
 function toFirebaseRecord(product: Product, rev: number): FirebaseProductRecord {
   return {
-    id: product.id.value,
+    id: product.id,
     rev,
     ownerId: product.ownerId,
-    name: product.name.value,
+    name: product.name,
     description: product.description,
-    price: product.price.amount,
+    price: product.price.displayAmount,
     currency: product.price.currency,
     category: product.category,
     status: product.status,
-    stock: Object.fromEntries(
-      Object.entries(product.stock).map(([size, qty]) => [size, qty.value])
-    ),
+    stock: Object.fromEntries(Object.entries(product.stock).map(([size, qty]) => [size, qty])),
     imageUrls: product.images.map((img) => img.url as string),
     isPrimaryImageFirst: product.images[0]?.isPrimary ?? true,
     createdAt: product.createdAt.toString(),
@@ -43,10 +41,7 @@ function toFirebaseRecord(product: Product, rev: number): FirebaseProductRecord 
 
 function fromFirebaseRecord(record: FirebaseProductRecord): Product {
   const stock = Object.fromEntries(
-    Object.entries(record.stock).map(([size, qty]) => [
-      size,
-      { __brand: "StockQuantity" as const, value: qty },
-    ])
+    Object.entries(record.stock).map(([size, qty]) => [size, qty])
   ) as Product["stock"];
 
   const placeholderImage: ProductImage = {
@@ -73,13 +68,13 @@ function fromFirebaseRecord(record: FirebaseProductRecord): Product {
     : [placeholderImage];
 
   return Object.freeze({
-    id: Object.freeze({ __brand: "ProductId" as const, value: record.id }),
+    id: record.id as Product["id"],
     ownerId: record.ownerId,
-    name: Object.freeze({ __brand: "ProductName" as const, value: record.name }),
+    name: record.name as Product["name"],
     description: record.description,
     price: Object.freeze({
       __brand: "ProductPrice" as const,
-      amount: record.price,
+      displayAmount: record.price,
       currency: record.currency as Product["price"]["currency"],
     }),
     category: record.category as Product["category"],
@@ -98,15 +93,15 @@ export class FirebaseProductRepository implements ProductRepositoryPort {
     id: ProductId
   ): Promise<Result<Product, ReturnType<typeof ProductNotFoundError> | RepositoryError>> {
     try {
-      const snap = await firebaseQuery(this.db.ref(`product_current/${id.value}`).once("value"));
+      const snap = await firebaseQuery(this.db.ref(`product_write/${id}`).once("value"));
       if (!snap.exists()) {
-        return { _tag: "Err", error: ProductNotFoundError(id.value) };
+        return { _tag: "Err", error: ProductNotFoundError(id) };
       }
       return { _tag: "Ok", value: fromFirebaseRecord(snap.val() as FirebaseProductRecord) };
     } catch (cause) {
       return {
         _tag: "Err",
-        error: makeRepositoryError(`Failed to find product ${id.value}`, cause),
+        error: makeRepositoryError(`Failed to find product ${id}`, cause),
       };
     }
   }
@@ -123,7 +118,7 @@ export class FirebaseProductRepository implements ProductRepositoryPort {
   ): Promise<Result<PaginatedResult<ProductSummary>, RepositoryError>> {
     try {
       const snap = await firebaseQuery(
-        this.db.ref("product_current").orderByChild("status").equalTo("active").once("value")
+        this.db.ref("product_write").orderByChild("status").equalTo("active").once("value")
       );
 
       const allProducts: Product[] = [];
@@ -133,15 +128,15 @@ export class FirebaseProductRepository implements ProductRepositoryPort {
 
       const filtered = allProducts.filter((p) => {
         if (filter.category !== undefined && p.category !== filter.category) return false;
-        if (filter.minPrice !== undefined && p.price.amount < filter.minPrice) return false;
-        if (filter.maxPrice !== undefined && p.price.amount > filter.maxPrice) return false;
+        if (filter.minPrice !== undefined && p.price.displayAmount < filter.minPrice) return false;
+        if (filter.maxPrice !== undefined && p.price.displayAmount > filter.maxPrice) return false;
         return true;
       });
 
       if (filter.sort === "price_asc") {
-        filtered.sort((a, b) => a.price.amount - b.price.amount);
+        filtered.sort((a, b) => a.price.displayAmount - b.price.displayAmount);
       } else if (filter.sort === "price_desc") {
-        filtered.sort((a, b) => b.price.amount - a.price.amount);
+        filtered.sort((a, b) => b.price.displayAmount - a.price.displayAmount);
       } else {
         filtered.sort((a, b) => Temporal.Instant.compare(b.createdAt, a.createdAt));
       }
@@ -168,10 +163,10 @@ export class FirebaseProductRepository implements ProductRepositoryPort {
   async create(product: Product): Promise<Result<Product, RepositoryError>> {
     try {
       const record = toFirebaseRecord(product, 1);
-      const revKey = `${product.id.value}_1`;
+      const revKey = `${product.id}_1`;
       await this.db.ref().update({
-        [`product_current/${product.id.value}`]: record,
-        [`product_revisions/${revKey}`]: record,
+        [`product_write/${product.id}`]: record,
+        [`product_write_history/${revKey}`]: record,
       });
       return { _tag: "Ok", value: product };
     } catch (cause) {
@@ -181,17 +176,17 @@ export class FirebaseProductRepository implements ProductRepositoryPort {
 
   async save(product: Product): Promise<Result<Product, RepositoryError>> {
     try {
-      const currentSnap = await this.db.ref(`product_current/${product.id.value}`).once("value");
+      const currentSnap = await this.db.ref(`product_write/${product.id}`).once("value");
       const currentRev = currentSnap.exists()
         ? ((currentSnap.val() as FirebaseProductRecord).rev ?? 1)
         : 1;
       const nextRev = currentRev + 1;
 
       const record = toFirebaseRecord(product, nextRev);
-      const revKey = `${product.id.value}_${nextRev}`;
+      const revKey = `${product.id}_${nextRev}`;
       await this.db.ref().update({
-        [`product_current/${product.id.value}`]: record,
-        [`product_revisions/${revKey}`]: record,
+        [`product_write/${product.id}`]: record,
+        [`product_write_history/${revKey}`]: record,
       });
       return { _tag: "Ok", value: product };
     } catch (cause) {
@@ -203,23 +198,23 @@ export class FirebaseProductRepository implements ProductRepositoryPort {
     id: ProductId
   ): Promise<Result<DeletedResult, ReturnType<typeof ProductNotFoundError> | RepositoryError>> {
     try {
-      const currentSnap = await this.db.ref(`product_current/${id.value}`).once("value");
+      const currentSnap = await this.db.ref(`product_write/${id}`).once("value");
       if (!currentSnap.exists()) {
-        return { _tag: "Err", error: ProductNotFoundError(id.value) };
+        return { _tag: "Err", error: ProductNotFoundError(id) };
       }
       const current = currentSnap.val() as FirebaseProductRecord;
       const nextRev = current.rev + 1;
       const archived = { ...current, status: "archived", rev: nextRev };
-      const revKey = `${id.value}_${nextRev}`;
+      const revKey = `${id}_${nextRev}`;
       await this.db.ref().update({
-        [`product_current/${id.value}`]: archived,
-        [`product_revisions/${revKey}`]: archived,
+        [`product_write/${id}`]: archived,
+        [`product_write_history/${revKey}`]: archived,
       });
       return { _tag: "Ok", value: Deleted };
     } catch (cause) {
       return {
         _tag: "Err",
-        error: makeRepositoryError(`Failed to delete product ${id.value}`, cause),
+        error: makeRepositoryError(`Failed to delete product ${id}`, cause),
       };
     }
   }
@@ -237,7 +232,7 @@ export class FirebaseProductRepository implements ProductRepositoryPort {
     >
   > {
     try {
-      const ref = this.db.ref(`product_current/${id.value}`);
+      const ref = this.db.ref(`product_write/${id}`);
       let domainError:
         | ReturnType<typeof ProductNotFoundError>
         | ReturnType<typeof ProductOutOfStockError>
@@ -245,12 +240,12 @@ export class FirebaseProductRepository implements ProductRepositoryPort {
 
       await ref.transaction((current: FirebaseProductRecord | null) => {
         if (current === null) {
-          domainError = ProductNotFoundError(id.value);
+          domainError = ProductNotFoundError(id);
           return;
         }
         const currentQty = current.stock[size] ?? 0;
         if (currentQty < quantity) {
-          domainError = ProductOutOfStockError(id.value, size, quantity, currentQty);
+          domainError = ProductOutOfStockError(id, size, quantity, currentQty);
           return;
         }
         return { ...current, stock: { ...current.stock, [size]: currentQty - quantity } };
@@ -265,7 +260,7 @@ export class FirebaseProductRepository implements ProductRepositoryPort {
     } catch (cause) {
       return {
         _tag: "Err",
-        error: makeRepositoryError(`Failed to reserve stock for ${id.value}`, cause),
+        error: makeRepositoryError(`Failed to reserve stock for ${id}`, cause),
       };
     }
   }
@@ -288,7 +283,7 @@ export class FirebaseProductRepository implements ProductRepositoryPort {
         await Promise.allSettled(
           reserved.map(async (r) => {
             await this.db
-              .ref(`product_current/${r.id}`)
+              .ref(`product_write/${r.id}`)
               .transaction((current: FirebaseProductRecord | null) => {
                 if (current === null) return current;
                 return {
@@ -300,7 +295,7 @@ export class FirebaseProductRepository implements ProductRepositoryPort {
         );
         return { _tag: "Err", error: result.error };
       }
-      reserved.push({ id: item.id.value, size: item.size, qty: item.quantity });
+      reserved.push({ id: item.id, size: item.size, qty: item.quantity });
     }
 
     const products = await Promise.all(items.map((item) => this.findById(item.id)));
@@ -321,7 +316,7 @@ export class FirebaseProductRepository implements ProductRepositoryPort {
   ): Promise<Result<PaginatedResult<ProductSummary>, RepositoryError>> {
     try {
       const snap = await firebaseQuery(
-        this.db.ref("product_current").orderByChild("status").equalTo("active").once("value")
+        this.db.ref("product_write").orderByChild("status").equalTo("active").once("value")
       );
 
       const ownerProducts: Product[] = [];

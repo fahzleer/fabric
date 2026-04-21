@@ -62,7 +62,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       canonical: `/product/${id}`,
     },
     other: {
-      "product:price:amount": String(product.price.amount),
+      "product:price:amount": String(product.price.displayAmount),
       "product:price:currency": product.price.currency,
       "product:availability": product.stock.some((s) => s.quantity - s.reserved > 0)
         ? "in stock"

@@ -14,7 +14,6 @@ import {
 } from "../../application/ports/payout.repository.port";
 import { firebaseQuery } from "../../shared/abort/abort-context";
 
-const PLATFORM_FEE_PCT = Number.parseFloat(process.env.PLATFORM_FEE_PCT ?? "0.05");
 const MIN_PAYOUT_CENTS = 10_000;
 
 interface FirebasePayoutRecord {
@@ -42,7 +41,10 @@ function fromRecord(record: FirebasePayoutRecord): PayoutRequest {
 }
 
 export class FirebasePayoutRepository implements PayoutRepositoryPort {
-  constructor(private readonly db: Database) {}
+  constructor(
+    private readonly db: Database,
+    private readonly platformFeePct: number
+  ) {}
 
   async getBalance(
     userId: string
@@ -57,13 +59,13 @@ export class FirebasePayoutRepository implements PayoutRepositoryPort {
       const paidOutCents = (paidSnap.val() as number | null) ?? 0;
       const availableBalanceCents = Math.max(
         0,
-        Math.floor(totalRevenueCents * (1 - PLATFORM_FEE_PCT)) - paidOutCents
+        Math.floor(totalRevenueCents * (1 - this.platformFeePct)) - paidOutCents
       );
 
       return Ok({
         totalRevenueCents,
         paidOutCents,
-        platformFeePct: PLATFORM_FEE_PCT,
+        platformFeePct: this.platformFeePct,
         availableBalanceCents,
       });
     } catch (cause) {

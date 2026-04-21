@@ -1,6 +1,6 @@
 import { type } from "arktype";
 import type { Hono } from "hono";
-import type { UserId } from "../../domain/user/user.value-objects";
+import { makeUserId } from "../../domain/user/user.value-objects";
 import type { PasetoVerifierService } from "../../infrastructure/auth/paseto-verifier.service";
 import { requireAuth } from "../../infrastructure/guards/auth.middleware";
 import type { OrderService } from "./order.service";
@@ -31,10 +31,10 @@ const PreviewBody = type({
 export function registerOrderRoutes(
   app: Hono,
   service: OrderService,
-  verifier: PasetoVerifierService
+  verifier: PasetoVerifierService,
+  internalSecret: string
 ): void {
-  const userId = (c: import("hono").Context) =>
-    ({ __brand: "UserId" as const, value: c.get("userId") as string }) as UserId;
+  const userId = (c: import("hono").Context) => makeUserId(c.get("userId") as string);
 
   app.post("/api/orders/preview", requireAuth(verifier), async (c) => {
     const body = await c.req.json();
@@ -81,7 +81,7 @@ export function registerOrderRoutes(
 
   app.post("/internal/payment-result", async (c) => {
     const secret = c.req.header("x-internal-secret");
-    if (secret !== process.env.INTERNAL_SECRET) {
+    if (secret !== internalSecret) {
       return c.json({ error: "Unauthorized" }, 401);
     }
     const { orderId, success, reason } = await c.req.json();

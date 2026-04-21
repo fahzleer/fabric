@@ -3,12 +3,15 @@ import type { PaymentCommand } from "../domain/payment.commands";
 import type { PaymentResult } from "../domain/payment.types";
 import type { IPaymentGateway } from "../ports/payment-gateway.port";
 
-const CF_API_URL = process.env.CF_API_URL ?? "http://localhost:3010";
-const INTERNAL_SECRET = process.env.INTERNAL_SECRET as string;
+export interface NotifierConfig {
+  readonly cfApiUrl: string;
+  readonly internalSecret: string;
+}
 
 export const interpretPaymentCommands = async (
   commands: ReadonlyArray<PaymentCommand>,
-  gateway: IPaymentGateway
+  gateway: IPaymentGateway,
+  notifier: NotifierConfig
 ): Promise<PaymentResult> => {
   let paymentId: string | undefined;
   let success = false;
@@ -23,9 +26,9 @@ export const interpretPaymentCommands = async (
         failureReason = result.failureReason;
 
         if (success) {
-          await notifyApiSuccess(cmd.orderId, result.paymentId);
+          await notifyApiSuccess(notifier, cmd.orderId, result.paymentId);
         } else {
-          await notifyApiFailure(cmd.orderId, result.failureReason ?? "Payment declined");
+          await notifyApiFailure(notifier, cmd.orderId, result.failureReason ?? "Payment declined");
         }
         break;
       }
@@ -38,12 +41,12 @@ export const interpretPaymentCommands = async (
       }
 
       case "NotifySuccess": {
-        await notifyApiSuccess(cmd.orderId, cmd.paymentId);
+        await notifyApiSuccess(notifier, cmd.orderId, cmd.paymentId);
         break;
       }
 
       case "NotifyFailure": {
-        await notifyApiFailure(cmd.orderId, cmd.reason);
+        await notifyApiFailure(notifier, cmd.orderId, cmd.reason);
         break;
       }
 
@@ -81,15 +84,19 @@ function getOrderId(cmd: PaymentCommand): string {
 const NOTIFY_RETRIES = 1;
 
 async function notifyWithRetry(
+  notifier: NotifierConfig,
   body: Record<string, unknown>,
   orderId: string,
   label: string
 ): Promise<void> {
   for (let attempt = 0; attempt <= NOTIFY_RETRIES; attempt++) {
     try {
-      await fetch(`${CF_API_URL}/internal/payment-result`, {
+      await fetch(`${notifier.cfApiUrl}/internal/payment-result`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", "x-internal-secret": INTERNAL_SECRET },
+        headers: {
+          "Content-Type": "application/json",
+          "x-internal-secret": notifier.internalSecret,
+        },
         body: JSON.stringify(body),
       });
       return;
@@ -103,10 +110,18 @@ async function notifyWithRetry(
   }
 }
 
-async function notifyApiSuccess(orderId: string, paymentId: string): Promise<void> {
-  await notifyWithRetry({ orderId, paymentId, success: true }, orderId, "success");
+async function notifyApiSuccess(
+  notifier: NotifierConfig,
+  orderId: string,
+  paymentId: string
+): Promise<void> {
+  await notifyWithRetry(notifier, { orderId, paymentId, success: true }, orderId, "success");
 }
 
-async function notifyApiFailure(orderId: string, reason: string): Promise<void> {
-  await notifyWithRetry({ orderId, success: false, reason }, orderId, "failure");
+async function notifyApiFailure(
+  notifier: NotifierConfig,
+  orderId: string,
+  reason: string
+): Promise<void> {
+  await notifyWithRetry(notifier, { orderId, success: false, reason }, orderId, "failure");
 }

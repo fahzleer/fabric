@@ -2,6 +2,7 @@ import { isSome } from "@fabric/types";
 import type { Hono } from "hono";
 import type { MerchantRepositoryPort } from "../../application/ports/merchant.repository.port";
 import type { ProductRepositoryPort } from "../../application/ports/product.repository.port";
+import { makeProductId } from "../../domain/product/product.value-objects";
 
 export function registerStoreRoutes(
   app: Hono,
@@ -79,10 +80,7 @@ export function registerStoreRoutes(
   app.get("/api/products/:id/store", async (c) => {
     const productId = c.req.param("id");
 
-    const productResult = await productRepo.findById({
-      __brand: "ProductId" as const,
-      value: productId,
-    });
+    const productResult = await productRepo.findById(makeProductId(productId));
 
     if (productResult._tag === "Err") {
       if ("_tag" in productResult.error && productResult.error._tag === "ProductNotFoundError") {

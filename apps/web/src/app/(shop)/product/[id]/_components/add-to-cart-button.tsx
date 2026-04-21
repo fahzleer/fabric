@@ -40,7 +40,7 @@ export function AddToCartButton({
 
     Effect.runPromise(
       dexieCartAdapter.addItem(productId, selectedSize.value, quantity, {
-        amount: price.amount,
+        amount: price.displayAmount,
         currency: price.currency,
         productName,
         productImageUrl,

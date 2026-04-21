@@ -17,7 +17,7 @@ interface CartItemRowProps {
 export function CartItemRow({ item }: CartItemRowProps) {
   const setCart = useAtomSet(cartAtom);
 
-  const lineTotal = new BigNumber(item.productSnapshot.price.amount).times(item.quantity);
+  const lineTotal = new BigNumber(item.productSnapshot.price.displayAmount).times(item.quantity);
 
   const formattedLineTotal = formatPrice({
     amount: lineTotal.toNumber(),

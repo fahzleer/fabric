@@ -15,7 +15,10 @@
     "deploy": "firebase deploy --only functions:cf-commerce:cfCommerce"
   },
   "dependencies": {
+    "@fabric/cache": "*",
+    "@fabric/config": "*",
     "@fabric/firebase": "*",
+    "@fabric/middleware": "*",
     "@fabric/types": "*",
     "@js-temporal/polyfill": "^0.5.1",
     "arktype": "^2.1.23",

@@ -1,18 +1,19 @@
 import { makeDomainEvent } from "./events";
 import type { DomainEvent } from "./events";
+import type { Brand } from "./kernel";
 
-export type LotId = { readonly __brand: "LotId"; readonly value: string };
+export type LotId = Brand<string, "LotId">;
 export type LotIdError = { readonly _tag: "LotIdError"; readonly message: string };
 export const makeLotId = (raw: string): LotId | LotIdError =>
   raw.trim().length > 0
-    ? { __brand: "LotId", value: raw.trim() }
+    ? (raw.trim() as LotId)
     : { _tag: "LotIdError", message: "LotId cannot be empty" };
 
-export type AuditId = { readonly __brand: "AuditId"; readonly value: string };
+export type AuditId = Brand<string, "AuditId">;
 export type AuditIdError = { readonly _tag: "AuditIdError"; readonly message: string };
 export const makeAuditId = (raw: string): AuditId | AuditIdError =>
   raw.trim().length > 0
-    ? { __brand: "AuditId", value: raw.trim() }
+    ? (raw.trim() as AuditId)
     : { _tag: "AuditIdError", message: "AuditId cannot be empty" };
 
 export type AuditType = "spot_10pct" | "full_50pct" | "full_100pct";

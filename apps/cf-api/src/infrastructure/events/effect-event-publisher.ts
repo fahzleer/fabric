@@ -21,7 +21,7 @@ const postEvent = (url: string, event: EventEnvelope): Effect.Effect<void, Error
 
 export const publishEventEffect = (
   event: EventEnvelope,
-  baseUrl = process.env.EVENTS_SERVICE_URL ?? "http://localhost:8082"
+  baseUrl: string
 ): Effect.Effect<void, never> => {
   const url = `${baseUrl}/events`;
 
@@ -37,6 +37,6 @@ export const publishEventEffect = (
 
 export const publishEventDaemon = (
   event: EventEnvelope,
-  baseUrl = process.env.EVENTS_SERVICE_URL ?? "http://localhost:8082"
+  baseUrl: string
 ): Effect.Effect<void, never> =>
   Effect.map(Effect.forkDaemon(publishEventEffect(event, baseUrl)), () => undefined);

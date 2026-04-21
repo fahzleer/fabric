@@ -69,7 +69,7 @@ function makeCtx(opts: { authHeader?: string; userRole?: string } = {}) {
 let verifier: PasetoVerifierService;
 
 beforeAll(() => {
-  verifier = new PasetoVerifierService();
+  verifier = new PasetoVerifierService(process.env.PASETO_KEY as string);
 });
 
 describe("PasetoVerifierService.verify — token security", () => {

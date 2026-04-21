@@ -1,9 +1,9 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { Either } from "effect";
-import type { Context, Hono } from "hono";
+import type { Context, Hono, MiddlewareHandler } from "hono";
 import { log } from "../../monitoring/logger";
 import type { PromptPayAdapter } from "../adapters/promptpay.adapter";
-import { interpretPaymentCommands } from "../interpreter/payment.interpreter";
+import { type NotifierConfig, interpretPaymentCommands } from "../interpreter/payment.interpreter";
 import { processPaymentLogic } from "../logic/process-payment.logic";
 import type { IPaymentGateway } from "../ports/payment-gateway.port";
 
@@ -17,11 +17,16 @@ interface OmiseWebhookEvent {
   };
 }
 
-const CF_API_URL = process.env.CF_API_URL ?? "http://localhost:3010";
-const INTERNAL_SECRET = process.env.INTERNAL_SECRET ?? "";
+export interface PaymentRouteDeps {
+  readonly gateway: IPaymentGateway;
+  readonly promptPay?: PromptPayAdapter;
+  readonly cfApiUrl: string;
+  readonly internalSecret: string;
+  readonly omiseWebhookSecret: string;
+  readonly rateLimit: MiddlewareHandler;
+}
 
 function verifyOmiseSignature(secret: string, rawBody: string, signature: string): boolean {
-  if (!secret) return true;
   const expected = createHmac("sha256", secret).update(rawBody).digest("hex");
   return (
     signature.length === expected.length &&
@@ -45,6 +50,7 @@ function resolveWebhookOrderId(
 }
 
 async function notifyPaymentResult(
+  notifier: NotifierConfig,
   orderId: string,
   chargeId: string,
   success: boolean,
@@ -52,11 +58,11 @@ async function notifyPaymentResult(
 ): Promise<void> {
   for (let attempt = 0; attempt <= 1; attempt++) {
     try {
-      await fetch(`${CF_API_URL}/internal/payment-result`, {
+      await fetch(`${notifier.cfApiUrl}/internal/payment-result`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-internal-secret": INTERNAL_SECRET,
+          "x-internal-secret": notifier.internalSecret,
         },
         body: JSON.stringify({ orderId, paymentId: chargeId, success, reason }),
       });
@@ -68,11 +74,14 @@ async function notifyPaymentResult(
   }
 }
 
-async function handleOmiseWebhook(c: Context, promptPay: PromptPayAdapter | undefined) {
-  const webhookSecret = process.env.OMISE_WEBHOOK_SECRET ?? "";
+async function handleOmiseWebhook(
+  c: Context,
+  deps: PaymentRouteDeps,
+  promptPay: PromptPayAdapter | undefined
+) {
   const rawBody = await c.req.text();
   const signature = c.req.header("omise-signature") ?? "";
-  if (!verifyOmiseSignature(webhookSecret, rawBody, signature)) {
+  if (!verifyOmiseSignature(deps.omiseWebhookSecret, rawBody, signature)) {
     log.warn("Omise webhook: invalid signature");
     return c.json({ error: "Invalid signature" }, 401);
   }
@@ -95,16 +104,23 @@ async function handleOmiseWebhook(c: Context, promptPay: PromptPayAdapter | unde
     orderId,
     success,
   });
-  await notifyPaymentResult(orderId, charge.id, success, reason);
+  await notifyPaymentResult(
+    { cfApiUrl: deps.cfApiUrl, internalSecret: deps.internalSecret },
+    orderId,
+    charge.id,
+    success,
+    reason
+  );
   return c.json({ ok: true });
 }
 
-export const registerPaymentRoutes = (
-  app: Hono,
-  gateway: IPaymentGateway,
-  promptPay?: PromptPayAdapter
-): void => {
-  app.post("/payment/initiate", async (c) => {
+export const registerPaymentRoutes = (app: Hono, deps: PaymentRouteDeps): void => {
+  const notifier: NotifierConfig = {
+    cfApiUrl: deps.cfApiUrl,
+    internalSecret: deps.internalSecret,
+  };
+
+  app.post("/payment/initiate", deps.rateLimit, async (c) => {
     const body = (await c.req.json()) as {
       orderId: string;
       totalCents: number;
@@ -127,12 +143,12 @@ export const registerPaymentRoutes = (
       return c.json({ ok: false, error: commandsOrError.left }, 422);
     }
 
-    interpretPaymentCommands(commandsOrError.right, gateway).catch(() => undefined);
+    interpretPaymentCommands(commandsOrError.right, deps.gateway, notifier).catch(() => undefined);
 
     return c.json({ accepted: true }, 202);
   });
 
-  app.post("/payment/process", async (c) => {
+  app.post("/payment/process", deps.rateLimit, async (c) => {
     const body = (await c.req.json()) as {
       orderId: string;
       totalCents: number;
@@ -154,20 +170,20 @@ export const registerPaymentRoutes = (
       return c.json({ ok: false, error: commandsOrError.left }, 422);
     }
 
-    const result = await interpretPaymentCommands(commandsOrError.right, gateway);
+    const result = await interpretPaymentCommands(commandsOrError.right, deps.gateway, notifier);
     return c.json({ ok: result.success, value: result });
   });
 
   app.post("/payment/promptpay/create", async (c) => {
-    if (!promptPay) {
+    if (!deps.promptPay) {
       return c.json({ ok: false, error: "PromptPay not configured" }, 503);
     }
 
     const secret = c.req.header("x-internal-secret") ?? "";
     if (
-      !INTERNAL_SECRET ||
-      secret.length !== INTERNAL_SECRET.length ||
-      !timingSafeEqual(Buffer.from(secret), Buffer.from(INTERNAL_SECRET))
+      !deps.internalSecret ||
+      secret.length !== deps.internalSecret.length ||
+      !timingSafeEqual(Buffer.from(secret), Buffer.from(deps.internalSecret))
     ) {
       return c.json({ error: "Unauthorized" }, 401);
     }
@@ -178,7 +194,7 @@ export const registerPaymentRoutes = (
       currency: string;
     };
 
-    const charge = await promptPay.createCharge(body.orderId, body.amountCents, body.currency);
+    const charge = await deps.promptPay.createCharge(body.orderId, body.amountCents, body.currency);
     if (!charge) {
       return c.json({ ok: false, error: "Failed to create PromptPay charge" }, 502);
     }
@@ -187,14 +203,14 @@ export const registerPaymentRoutes = (
   });
 
   app.get("/payment/promptpay/:chargeId/status", async (c) => {
-    if (!promptPay) {
+    if (!deps.promptPay) {
       return c.json({ ok: false, error: "PromptPay not configured" }, 503);
     }
 
     const chargeId = c.req.param("chargeId");
-    const result = await promptPay.getStatus(chargeId);
+    const result = await deps.promptPay.getStatus(chargeId);
     return c.json({ ok: true, value: result });
   });
 
-  app.post("/payment/omise/webhook", (c) => handleOmiseWebhook(c, promptPay));
+  app.post("/payment/omise/webhook", (c) => handleOmiseWebhook(c, deps, deps.promptPay));
 };

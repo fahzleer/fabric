@@ -1,5 +1,6 @@
 import { type } from "arktype";
 import type { Hono } from "hono";
+import { makeUserId } from "../../domain/user/user.value-objects";
 import type { PasetoVerifierService } from "../../infrastructure/auth/paseto-verifier.service";
 import { requireAuth } from "../../infrastructure/guards/auth.middleware";
 import { log } from "../../infrastructure/monitoring/logger";
@@ -12,25 +13,18 @@ const CreatePromptPayBody = type({
 export function registerPromptPayRoutes(
   app: Hono,
   orderService: OrderService,
-  verifier: PasetoVerifierService
+  verifier: PasetoVerifierService,
+  commerceUrl: string,
+  internalSecret: string
 ): void {
-  const commerceUrl = process.env.COMMERCE_SERVICE_URL ?? "http://localhost:8082";
-  const internalSecret = process.env.INTERNAL_SECRET;
-  if (!internalSecret) {
-    throw new Error("INTERNAL_SECRET env var is required — set it before starting the api service");
-  }
-
   app.post("/api/payment/promptpay/create", requireAuth(verifier), async (c) => {
     const body = await c.req.json();
     const validated = CreatePromptPayBody(body);
     if (validated instanceof type.errors) return c.json({ error: validated.summary }, 400);
 
-    const userId = { __brand: "UserId" as const, value: c.get("userId") as string };
+    const userId = makeUserId(c.get("userId") as string);
 
-    const orderResult = await orderService.getOrder(
-      userId as import("../../domain/user/user.value-objects").UserId,
-      validated.orderId
-    );
+    const orderResult = await orderService.getOrder(userId, validated.orderId);
     if (!orderResult || "error" in orderResult) {
       return c.json({ error: "Order not found" }, 404);
     }

@@ -1,3 +1,5 @@
+export type Brand<T, K extends string> = T & { readonly __brand: K };
+
 export type Some<T> = { readonly _tag: "Some"; readonly value: T };
 export type None = { readonly _tag: "None" };
 export type Maybe<T> = Some<T> | None;
@@ -34,11 +36,6 @@ export type NonEmptyArray<T> = readonly [T, ...T[]];
 export const isNonEmpty = <T>(arr: readonly T[]): arr is NonEmptyArray<T> => arr.length > 0;
 
 export const makeNonEmpty = <T>(head: T, ...tail: T[]): NonEmptyArray<T> => [head, ...tail];
-
-export type BrandedId<TBrand extends string> = {
-  readonly __brand: TBrand;
-  readonly value: string;
-};
 
 export type CurrencyCode = "THB" | "USD" | "EUR" | "GBP" | "JPY" | "SGD";
 

@@ -1,3 +1,4 @@
+import { AsyncLocalStorage } from "node:async_hooks";
 import type { MiddlewareHandler } from "hono";
 
 export type LogLevel = "DEBUG" | "INFO" | "WARN" | "ERROR";
@@ -11,9 +12,24 @@ export interface LogEntry {
 
 const SERVICE_NAME = process.env.K_SERVICE ?? "cf-commerce";
 
+interface CorrelationIds {
+  readonly requestId: string;
+  readonly traceId: string;
+}
+
+const correlationStorage = new AsyncLocalStorage<CorrelationIds>();
+
+export function runWithCorrelation<T>(ids: CorrelationIds, fn: () => Promise<T>): Promise<T> {
+  return correlationStorage.run(ids, fn);
+}
+
 function emit(entry: LogEntry): void {
   if (process.env.LOG_SILENT === "true") return;
-  console.log(JSON.stringify(entry));
+  const correlation = correlationStorage.getStore();
+  const enriched = correlation
+    ? { ...entry, requestId: correlation.requestId, traceId: correlation.traceId }
+    : entry;
+  console.log(JSON.stringify(enriched));
 }
 
 export const log = {
@@ -74,6 +90,15 @@ export function logError(
     userId: opts.userId,
     ...opts.context,
   });
+}
+
+export function attachCorrelationIds(): MiddlewareHandler {
+  return async (c, next) => {
+    const requestId = c.req.header("x-request-id") ?? crypto.randomUUID();
+    const traceId = c.req.header("x-trace-id") ?? requestId;
+    c.res.headers.set("x-request-id", requestId);
+    return runWithCorrelation({ requestId, traceId }, () => next());
+  };
 }
 
 export function requestLogger(): MiddlewareHandler {

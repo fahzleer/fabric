@@ -1,4 +1,6 @@
 import { describe, expect, it } from "bun:test";
+import type { ProductName, StockQuantity } from "@fabric/types";
+import { makeProductId } from "@fabric/types";
 import { Temporal } from "@js-temporal/polyfill";
 import type { Product } from "./product.entity";
 import {
@@ -9,19 +11,19 @@ import {
 } from "./product.entity";
 
 const makeStock = (sizes: Partial<Record<"XS" | "S" | "M" | "L" | "XL", number>>) => {
-  const stock: Record<string, { __brand: "StockQuantity"; value: number }> = {};
+  const stock: Record<string, StockQuantity> = {};
   for (const [size, qty] of Object.entries(sizes)) {
-    stock[size] = { __brand: "StockQuantity", value: qty as number };
+    stock[size] = qty as StockQuantity;
   }
   return stock as Product["stock"];
 };
 
 const makeProduct = (overrides: Partial<Product> = {}): Product => ({
-  id: { __brand: "ProductId", value: "prod-1" },
+  id: makeProductId("prod-1"),
   ownerId: "user-1",
-  name: { __brand: "ProductName", value: "Test Shirt" },
+  name: "Test Shirt" as ProductName,
   description: "A test product",
-  price: { __brand: "ProductPrice", amount: 499, currency: "THB" },
+  price: { __brand: "ProductPrice", displayAmount: 499, currency: "THB" },
   category: "basic",
   status: "active",
   stock: makeStock({ S: 5, M: 10, L: 3 }),
@@ -44,14 +46,14 @@ class InMemoryProductRepository {
   private readonly store = new Map<string, RowWithRev[]>();
 
   create(product: Product): { product: Product; rev: number } {
-    const id = product.id.value;
+    const id = product.id;
     const row: RowWithRev = { product, rev: 1 };
     this.store.set(id, [row]);
     return row;
   }
 
   save(product: Product): { product: Product; rev: number } {
-    const id = product.id.value;
+    const id = product.id;
     const history = this.store.get(id) ?? [];
     const maxRev = history.reduce((m, r) => Math.max(m, r.rev), 0);
     const nextRev = maxRev + 1;
@@ -89,7 +91,7 @@ describe("product update must create new revision not mutate", () => {
 
     const updated: Product = {
       ...original,
-      name: { __brand: "ProductName", value: "Updated Shirt" },
+      name: "Updated Shirt" as ProductName,
       updatedAt: Temporal.Now.instant(),
     };
 
@@ -100,19 +102,19 @@ describe("product update must create new revision not mutate", () => {
   it("original entity object remains unchanged after save()", () => {
     const repo = new InMemoryProductRepository();
     const original = makeProduct();
-    const originalName = original.name.value;
+    const originalName = original.name;
 
     repo.create(original);
 
     const updated: Product = {
       ...original,
-      name: { __brand: "ProductName", value: "Updated Shirt" },
+      name: "Updated Shirt" as ProductName,
       updatedAt: Temporal.Now.instant(),
     };
 
     repo.save(updated);
 
-    expect(original.name.value).toBe(originalName);
+    expect(original.name).toBe(originalName);
   });
 
   it("history grows by one row per save, old rows are preserved", () => {
@@ -123,17 +125,17 @@ describe("product update must create new revision not mutate", () => {
 
     const v2: Product = {
       ...original,
-      name: { __brand: "ProductName", value: "V2 Name" },
+      name: "V2 Name" as ProductName,
     };
     repo.save(v2);
 
     const v3: Product = {
       ...original,
-      name: { __brand: "ProductName", value: "V3 Name" },
+      name: "V3 Name" as ProductName,
     };
     repo.save(v3);
 
-    const history = repo.getHistory(original.id.value);
+    const history = repo.getHistory(original.id);
     expect(history).toHaveLength(3);
     expect(history[0]?.rev).toBe(1);
     expect(history[1]?.rev).toBe(2);
@@ -157,8 +159,8 @@ describe("product update must create new revision not mutate", () => {
     const result = reserveStock(original, "M", 3);
     expect(result._tag).toBe("Ok");
     if (result._tag === "Ok") {
-      expect(result.value.stock.M?.value).toBe(7);
-      expect(original.stock.M?.value).toBe(10);
+      expect(result.value.stock.M).toBe(7);
+      expect(original.stock.M).toBe(10);
     }
   });
 
@@ -166,8 +168,8 @@ describe("product update must create new revision not mutate", () => {
     const original = makeProduct();
     const updated = releaseStock(original, "S", 3);
 
-    expect(updated.stock.S?.value).toBe(8);
-    expect(original.stock.S?.value).toBe(5);
+    expect(updated.stock.S).toBe(8);
+    expect(original.stock.S).toBe(5);
     expect(updated).not.toBe(original);
   });
 });
@@ -178,7 +180,7 @@ describe("product delete must archive not truly delete", () => {
     const product = makeProduct({ status: "active" });
     repo.create(product);
 
-    const result = repo.delete(product.id.value);
+    const result = repo.delete(product.id);
     expect(result).not.toBeNull();
     expect(result?.product.status).toBe("archived");
   });
@@ -188,8 +190,8 @@ describe("product delete must archive not truly delete", () => {
     const product = makeProduct({ status: "active" });
     repo.create(product);
 
-    const result = repo.delete(product.id.value);
-    expect(result?.product.id.value).toBe(product.id.value);
+    const result = repo.delete(product.id);
+    expect(result?.product.id).toBe(product.id);
   });
 
   it("archived revision is NOT undefined or null", () => {
@@ -197,7 +199,7 @@ describe("product delete must archive not truly delete", () => {
     const product = makeProduct({ status: "active" });
     repo.create(product);
 
-    const result = repo.delete(product.id.value);
+    const result = repo.delete(product.id);
     expect(result).toBeDefined();
     expect(result).not.toBeNull();
   });
@@ -207,9 +209,9 @@ describe("product delete must archive not truly delete", () => {
     const product = makeProduct({ status: "active" });
     repo.create(product);
 
-    repo.delete(product.id.value);
+    repo.delete(product.id);
 
-    const history = repo.getHistory(product.id.value);
+    const history = repo.getHistory(product.id);
 
     expect(history).toHaveLength(2);
     expect(history[0]?.product.status).toBe("active");
@@ -221,7 +223,7 @@ describe("product delete must archive not truly delete", () => {
     const product = makeProduct({ status: "active" });
     repo.create(product);
 
-    const result = repo.delete(product.id.value);
+    const result = repo.delete(product.id);
     expect(result?.rev).toBe(2);
   });
 });
@@ -240,7 +242,7 @@ describe("product create must start at rev=1", () => {
     const product = makeProduct();
     repo.create(product);
 
-    expect(repo.getHistory(product.id.value)).toHaveLength(1);
+    expect(repo.getHistory(product.id)).toHaveLength(1);
   });
 
   it("new product starts as the caller-specified status (no forced draft)", () => {
@@ -257,18 +259,18 @@ describe("archived product must still exist (soft delete)", () => {
     const repo = new InMemoryProductRepository();
     const product = makeProduct();
     repo.create(product);
-    const result = repo.delete(product.id.value);
+    const result = repo.delete(product.id);
 
-    expect(result?.product.name.value).toBe(product.name.value);
+    expect(result?.product.name).toBe(product.name);
   });
 
   it("archived product retains its original price", () => {
     const repo = new InMemoryProductRepository();
     const product = makeProduct();
     repo.create(product);
-    const result = repo.delete(product.id.value);
+    const result = repo.delete(product.id);
 
-    expect(result?.product.price.amount).toBe(product.price.amount);
+    expect(result?.product.price.displayAmount).toBe(product.price.displayAmount);
     expect(result?.product.price.currency).toBe(product.price.currency);
   });
 
@@ -276,7 +278,7 @@ describe("archived product must still exist (soft delete)", () => {
     const repo = new InMemoryProductRepository();
     const product = makeProduct();
     repo.create(product);
-    const result = repo.delete(product.id.value);
+    const result = repo.delete(product.id);
 
     expect(result?.product.description).toBe(product.description);
   });
@@ -285,7 +287,7 @@ describe("archived product must still exist (soft delete)", () => {
     const repo = new InMemoryProductRepository();
     const product = makeProduct();
     repo.create(product);
-    const result = repo.delete(product.id.value);
+    const result = repo.delete(product.id);
 
     expect(result?.product.category).toBe(product.category);
   });
@@ -294,7 +296,7 @@ describe("archived product must still exist (soft delete)", () => {
     const repo = new InMemoryProductRepository();
     const product = makeProduct();
     repo.create(product);
-    const result = repo.delete(product.id.value);
+    const result = repo.delete(product.id);
 
     expect(result?.product.ownerId).toBe(product.ownerId);
   });
@@ -303,18 +305,18 @@ describe("archived product must still exist (soft delete)", () => {
     const repo = new InMemoryProductRepository();
     const product = makeProduct();
     repo.create(product);
-    const result = repo.delete(product.id.value);
+    const result = repo.delete(product.id);
 
-    expect(result?.product.stock.S?.value).toBe(5);
-    expect(result?.product.stock.M?.value).toBe(10);
-    expect(result?.product.stock.L?.value).toBe(3);
+    expect(result?.product.stock.S).toBe(5);
+    expect(result?.product.stock.M).toBe(10);
+    expect(result?.product.stock.L).toBe(3);
   });
 
   it("archived product retains its images", () => {
     const repo = new InMemoryProductRepository();
     const product = makeProduct();
     repo.create(product);
-    const result = repo.delete(product.id.value);
+    const result = repo.delete(product.id);
 
     expect(result?.product.images).toHaveLength(product.images.length);
     expect(result?.product.images[0]?.url).toBe(product.images[0]?.url);
@@ -324,7 +326,7 @@ describe("archived product must still exist (soft delete)", () => {
     const repo = new InMemoryProductRepository();
     const product = makeProduct();
     repo.create(product);
-    const archivedRow = repo.delete(product.id.value);
+    const archivedRow = repo.delete(product.id);
 
     if (!archivedRow) throw new Error("Expected archived row");
     const summary = toProductSummary(archivedRow.product);
@@ -332,17 +334,17 @@ describe("archived product must still exist (soft delete)", () => {
     expect(summary.status).toBe("archived");
     expect(summary.isInStock).toBe(false);
 
-    expect(summary.id.value).toBe(product.id.value);
-    expect(summary.name.value).toBe(product.name.value);
+    expect(summary.id).toBe(product.id);
+    expect(summary.name).toBe(product.name);
   });
 
   it("rev=1 row (active) is still readable after soft-delete", () => {
     const repo = new InMemoryProductRepository();
     const product = makeProduct({ status: "active" });
     repo.create(product);
-    repo.delete(product.id.value);
+    repo.delete(product.id);
 
-    const history = repo.getHistory(product.id.value);
+    const history = repo.getHistory(product.id);
     const firstRevRow = history[0];
     expect(firstRevRow?.product.status).toBe("active");
     expect(firstRevRow?.rev).toBe(1);

@@ -16,7 +16,9 @@
   },
   "dependencies": {
     "@fabric/cache": "*",
+    "@fabric/config": "*",
     "@fabric/firebase": "*",
+    "@fabric/middleware": "*",
     "@fabric/types": "*",
     "@fabric/contract": "*",
     "@fabric/orpc": "*",

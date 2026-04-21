@@ -136,15 +136,15 @@ export class OrderService {
     for (const item of cart.items) {
       const productResult = await this.productRepo.findById(item.productId);
       if (productResult._tag === "Err") {
-        log.warn(`placeOrder: cannot validate price for product ${item.productId.value}`);
+        log.warn(`placeOrder: cannot validate price for product ${item.productId}`);
         continue;
       }
-      if (item.unitPrice.amount !== productResult.value.price.amount) {
+      if (item.unitPrice.displayAmount !== productResult.value.price.displayAmount) {
         return presentDomainError(
           makePriceChangedError(
             item.productName,
-            item.unitPrice.amount,
-            productResult.value.price.amount
+            item.unitPrice.displayAmount,
+            productResult.value.price.displayAmount
           )
         );
       }
@@ -172,7 +172,7 @@ export class OrderService {
       const subtotal = cart.items.reduce(
         (acc, item) =>
           acc.plus(
-            new BigNumber(Math.round(item.unitPrice.amount * 100)).times(item.quantity.value)
+            new BigNumber(Math.round(item.unitPrice.displayAmount * 100)).times(item.quantity)
           ),
         new BigNumber(0)
       );
@@ -186,7 +186,7 @@ export class OrderService {
       productName: item.productName,
       unitPrice: item.unitPrice,
       size: item.size,
-      quantity: item.quantity.value,
+      quantity: item.quantity,
     }));
 
     const orderId = crypto.randomUUID();
@@ -194,7 +194,7 @@ export class OrderService {
     const initialStatus = paymentMethod === "crypto" ? "confirmed" : "pending";
 
     const order: Order = {
-      id: { __brand: "OrderId" as const, value: orderId } as OrderId,
+      id: orderId as OrderId,
       userId,
       cartId,
       lines: orderLines as unknown as NonEmptyArray<OrderLine>,
@@ -213,13 +213,13 @@ export class OrderService {
     const stockItems = cart.items.map((item) => ({
       id: item.productId,
       size: item.size,
-      quantity: item.quantity.value,
+      quantity: item.quantity,
     }));
     const atomicResult = await this.orderRepo.atomicReserveAndSave(order, stockItems);
     if (atomicResult._tag === "Err") return presentDomainError(atomicResult.error);
 
     if (paymentMethod === "card") {
-      await this.payment.initiatePayment(orderId, totalCents, currency, userId.value, paymentToken);
+      await this.payment.initiatePayment(orderId, totalCents, currency, userId, paymentToken);
       log.info(`Order placed (pending): orderId=${orderId} total=${totalCents} ${currency}`);
     } else {
       log.info(`Order placed (x402 confirmed): orderId=${orderId} total=${totalCents} ${currency}`);
@@ -236,7 +236,7 @@ export class OrderService {
       schema_version: 1,
       payload: {
         order_id: orderId,
-        user_id: userId.value,
+        user_id: userId,
         total_cents: totalCents,
         currency,
         status: initialStatus,
@@ -245,7 +245,7 @@ export class OrderService {
 
     void this.activity.track({
       id: crypto.randomUUID(),
-      userId: userId.value,
+      userId: userId,
       eventType: "order_placed",
       eventData: { orderId, totalCents, currency, paymentMethod, itemCount: cart.items.length },
     });
@@ -254,12 +254,9 @@ export class OrderService {
   }
 
   async getOrder(userId: UserId, orderId: string): Promise<Order> {
-    const result = await this.orderRepo.findById({
-      __brand: "OrderId" as const,
-      value: orderId,
-    } as OrderId);
+    const result = await this.orderRepo.findById(orderId as OrderId);
     if (result._tag === "Err") return presentDomainError(result.error);
-    if (result.value.userId.value !== userId.value) {
+    if (result.value.userId !== userId) {
       return presentDomainError({
         _tag: "OrderNotFoundError",
         message: `Order ${orderId} not found`,
@@ -275,10 +272,7 @@ export class OrderService {
   }
 
   async confirmOrder(orderId: string): Promise<void> {
-    const result = await this.orderRepo.findById({
-      __brand: "OrderId" as const,
-      value: orderId,
-    } as OrderId);
+    const result = await this.orderRepo.findById(orderId as OrderId);
     if (result._tag === "Err") {
       log.error(`confirmOrder: order not found orderId=${orderId}`);
       return;
@@ -304,7 +298,7 @@ export class OrderService {
           const prev = revenueByOwner.get(prod.value.ownerId) ?? 0;
           revenueByOwner.set(
             prod.value.ownerId,
-            prev + Math.round(line.unitPrice.amount * 100) * line.quantity
+            prev + Math.round(line.unitPrice.displayAmount * 100) * line.quantity
           );
         }
       }
@@ -318,10 +312,7 @@ export class OrderService {
   }
 
   async failOrder(orderId: string, reason: string): Promise<void> {
-    const result = await this.orderRepo.findById({
-      __brand: "OrderId" as const,
-      value: orderId,
-    } as OrderId);
+    const result = await this.orderRepo.findById(orderId as OrderId);
     if (result._tag === "Err") {
       log.error(`failOrder: order not found orderId=${orderId}`);
       return;
@@ -342,7 +333,7 @@ export class OrderService {
 
   private async resolveCart(userId: UserId, cartId: string) {
     if (cartId !== "local") {
-      return this.cartRepo.findById({ __brand: "CartId" as const, value: cartId } as CartId);
+      return this.cartRepo.findById(cartId as CartId);
     }
     const byUserResult = await this.cartRepo.findByUserId(userId);
     if (byUserResult._tag === "Err") return presentDomainError(byUserResult.error);
@@ -383,7 +374,7 @@ export class OrderService {
     currency: string
   ): CheckoutCalculation {
     const subtotalCents = items.reduce(
-      (acc, item) => acc + Math.round(item.unitPrice.amount * 100) * item.quantity.value,
+      (acc, item) => acc + Math.round(item.unitPrice.displayAmount * 100) * item.quantity,
       0
     );
     return {
@@ -393,9 +384,9 @@ export class OrderService {
       totalCents: subtotalCents,
       currency,
       lines: items.map((item) => ({
-        productId: item.productId.value,
-        unitCents: Math.round(item.unitPrice.amount * 100),
-        quantity: item.quantity.value,
+        productId: item.productId,
+        unitCents: Math.round(item.unitPrice.displayAmount * 100),
+        quantity: item.quantity,
       })),
     };
   }

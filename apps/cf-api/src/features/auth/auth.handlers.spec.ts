@@ -11,7 +11,7 @@ import type {
   AuthUser,
   FirebaseUserAdapter,
 } from "../../infrastructure/firebase/firebase-user.adapter";
-import { registerAuthRoutes } from "./auth.handlers";
+import { type AuthConfig, registerAuthRoutes } from "./auth.handlers";
 
 const TEST_KEY_HEX = "a".repeat(64);
 process.env.PASETO_KEY = TEST_KEY_HEX;
@@ -84,13 +84,21 @@ function makeMemcached(): MemcachedAdapter {
   } as unknown as MemcachedAdapter;
 }
 
+const TEST_AUTH_CONFIG: AuthConfig = {
+  pasetoKey: TEST_KEY_HEX,
+  accessTokenTtlSeconds: 900,
+  refreshTokenTtlSeconds: 604800,
+  bcryptRounds: 4,
+  googleClientId: "",
+};
+
 function makeApp(
   userOverrides: Partial<FirebaseUserAdapter> = {},
   tokenOverrides: Partial<FirebaseTokenRepository> = {},
   lockoutOverrides: Partial<FirebaseLockoutAdapter> = {}
 ) {
   const app = new Hono();
-  const verifier = new PasetoVerifierService();
+  const verifier = new PasetoVerifierService(process.env.PASETO_KEY as string);
   const userAdapter = makeUserAdapter(userOverrides);
   const tokenRepo = makeTokenRepo(tokenOverrides);
   const lockoutStore = makeLockoutAdapter(lockoutOverrides);
@@ -103,7 +111,8 @@ function makeApp(
     lockoutStore,
     verifier,
     activityRepo,
-    makeMemcached()
+    makeMemcached(),
+    TEST_AUTH_CONFIG
   );
   return { app, userAdapter, tokenRepo, lockoutStore, activityRepo, verifier };
 }

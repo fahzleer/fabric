@@ -35,15 +35,14 @@ const RegisterBody = type({
   "role?": '"customer" | "store_owner"',
 });
 
-function getPasetoKey(): string {
-  return process.env.PASETO_KEY ?? "";
+export interface AuthConfig {
+  readonly pasetoKey: string;
+  readonly accessTokenTtlSeconds: number;
+  readonly refreshTokenTtlSeconds: number;
+  readonly bcryptRounds: number;
+  readonly googleClientId: string;
 }
-function getAccessTtl(): number {
-  return Number.parseInt(process.env.ACCESS_TOKEN_TTL_SECONDS ?? "900", 10);
-}
-function getRefreshTtl(): number {
-  return Number.parseInt(process.env.REFRESH_TOKEN_TTL_SECONDS ?? "604800", 10);
-}
+
 function isPasswordComplex(password: string): boolean {
   return /[A-Z]/.test(password) && /[0-9]/.test(password);
 }
@@ -59,7 +58,8 @@ async function handleRegister(
   userAdapter: FirebaseUserAdapter,
   activityRepo: FirebaseActivityRepository,
   ip: string,
-  userAgent: string
+  userAgent: string,
+  bcryptRounds: number
 ) {
   if (!isPasswordComplex(validated.password)) {
     return {
@@ -68,7 +68,7 @@ async function handleRegister(
     };
   }
 
-  const hashResult = await hashPassword(validated.password);
+  const hashResult = await hashPassword(validated.password, bcryptRounds);
   if (hashResult._tag === "Err") {
     return { error: hashResult.error.message, status: 500 as const };
   }
@@ -110,8 +110,10 @@ export function registerAuthRoutes(
   lockoutStore: FirebaseLockoutAdapter,
   verifier: PasetoVerifierService,
   activityRepo: FirebaseActivityRepository,
-  memcached: MemcachedAdapter
+  memcached: MemcachedAdapter,
+  config: AuthConfig
 ): void {
+  const verifyGoogleToken = makeGoogleTokenVerifier(config.googleClientId);
   const loginRateLimit = throttle(memcached, { limit: 10, windowMs: 60_000 });
   const registerRateLimit = throttle(memcached, { limit: 5, windowMs: 60_000 });
   const refreshRateLimit = throttle(memcached, { limit: 30, windowMs: 60_000 });
@@ -128,7 +130,11 @@ export function registerAuthRoutes(
 
     const result = await login(
       { email: validated.email, password: validated.password },
-      { userReader: userAdapter, lockoutStore, tokenService: { issue: issueTokensFn(tokenRepo) } }
+      {
+        userReader: userAdapter,
+        lockoutStore,
+        tokenService: { issue: issueTokensFn(tokenRepo, config) },
+      }
     );
 
     if (result._tag === "Err") {
@@ -171,7 +177,8 @@ export function registerAuthRoutes(
       userAdapter,
       activityRepo,
       ip,
-      userAgent
+      userAgent,
+      config.bcryptRounds
     );
     if ("error" in out) return c.json({ error: out.error }, out.status);
     return c.json({ registered: out.registered }, out.status);
@@ -192,7 +199,8 @@ export function registerAuthRoutes(
       userAdapter,
       activityRepo,
       ip,
-      userAgent
+      userAgent,
+      config.bcryptRounds
     );
     if ("error" in out) return c.json({ error: out.error }, out.status);
     return c.json({ registered: out.registered }, out.status);
@@ -230,7 +238,10 @@ export function registerAuthRoutes(
 
     const { Temporal } = await import("@js-temporal/polyfill");
     await tokenRepo.revokeFamily(tokenFamily);
-    await tokenRepo.blacklist(jti, Temporal.Now.instant().add({ seconds: getRefreshTtl() }));
+    await tokenRepo.blacklist(
+      jti,
+      Temporal.Now.instant().add({ seconds: config.refreshTokenTtlSeconds })
+    );
 
     const newPairResult = await issueTokens(
       {
@@ -240,9 +251,9 @@ export function registerAuthRoutes(
       },
       {
         tokenRepo,
-        pasetoKey: getPasetoKey(),
-        accessTokenTtlSeconds: getAccessTtl(),
-        refreshTokenTtlSeconds: getRefreshTtl(),
+        pasetoKey: config.pasetoKey,
+        accessTokenTtlSeconds: config.accessTokenTtlSeconds,
+        refreshTokenTtlSeconds: config.refreshTokenTtlSeconds,
       }
     );
 
@@ -290,7 +301,7 @@ export function registerAuthRoutes(
           displayName: string;
         }) => userAdapter.createUser(input),
       },
-      tokenService: { issue: issueTokensFn(tokenRepo) },
+      tokenService: { issue: issueTokensFn(tokenRepo, config) },
     });
 
     if (result._tag === "Err") {
@@ -334,7 +345,7 @@ export function registerAuthRoutes(
     const userAgent = c.req.header("user-agent") ?? "";
 
     const result = await loginWithGoogle(body.id_token, {
-      verifyGoogleToken: verifyGoogleTokenViaApi,
+      verifyGoogleToken,
       userAdapter: {
         findByEmail: async (email: string) => {
           const found = await userAdapter.findByEmail(email);
@@ -358,7 +369,7 @@ export function registerAuthRoutes(
           displayName: string;
         }) => userAdapter.createUser(input),
       },
-      tokenService: { issue: issueTokensFn(tokenRepo) },
+      tokenService: { issue: issueTokensFn(tokenRepo, config) },
     });
 
     if (result._tag === "Err") {
@@ -403,7 +414,7 @@ export function registerAuthRoutes(
         const { Temporal } = await import("@js-temporal/polyfill");
         await tokenRepo.blacklist(
           payload.jti as string,
-          Temporal.Now.instant().add({ seconds: getAccessTtl() })
+          Temporal.Now.instant().add({ seconds: config.accessTokenTtlSeconds })
         );
       }
     }
@@ -465,70 +476,71 @@ async function verifyFacebookTokenViaGraphApi(
   }
 }
 
-async function verifyGoogleTokenViaApi(
-  idToken: string
-): Promise<Result<GoogleProfile, InvalidGoogleTokenError>> {
-  try {
-    const url = `https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(idToken)}`;
-    const res = await fetch(url);
-    const data = (await res.json()) as {
-      sub?: string;
-      email?: string;
-      name?: string;
-      email_verified?: string;
-      aud?: string;
-      error_description?: string;
-    };
+function makeGoogleTokenVerifier(
+  googleClientId: string
+): (idToken: string) => Promise<Result<GoogleProfile, InvalidGoogleTokenError>> {
+  return async (idToken) => {
+    try {
+      const url = `https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(idToken)}`;
+      const res = await fetch(url);
+      const data = (await res.json()) as {
+        sub?: string;
+        email?: string;
+        name?: string;
+        email_verified?: string;
+        aud?: string;
+        error_description?: string;
+      };
 
-    if (!res.ok || data.error_description || !data.sub) {
+      if (!res.ok || data.error_description || !data.sub) {
+        return {
+          _tag: "Err",
+          error: {
+            _tag: "InvalidGoogleToken",
+            message: data.error_description ?? "Invalid or expired Google ID token",
+          },
+        };
+      }
+
+      if (googleClientId && data.aud !== googleClientId) {
+        return {
+          _tag: "Err",
+          error: {
+            _tag: "InvalidGoogleToken",
+            message: "Google ID token audience mismatch",
+          },
+        };
+      }
+
+      return {
+        _tag: "Ok",
+        value: {
+          sub: data.sub,
+          ...(data.email !== undefined && { email: data.email }),
+          name: data.name ?? "Google User",
+        },
+      };
+    } catch (e) {
       return {
         _tag: "Err",
         error: {
           _tag: "InvalidGoogleToken",
-          message: data.error_description ?? "Invalid or expired Google ID token",
+          message: `Google API request failed: ${String(e)}`,
         },
       };
     }
-
-    const expectedClientId = process.env.GOOGLE_CLIENT_ID;
-    if (expectedClientId && data.aud !== expectedClientId) {
-      return {
-        _tag: "Err",
-        error: {
-          _tag: "InvalidGoogleToken",
-          message: "Google ID token audience mismatch",
-        },
-      };
-    }
-
-    return {
-      _tag: "Ok",
-      value: {
-        sub: data.sub,
-        ...(data.email !== undefined && { email: data.email }),
-        name: data.name ?? "Google User",
-      },
-    };
-  } catch (e) {
-    return {
-      _tag: "Err",
-      error: {
-        _tag: "InvalidGoogleToken",
-        message: `Google API request failed: ${String(e)}`,
-      },
-    };
-  }
+  };
 }
 
-function issueTokensFn(tokenRepo: FirebaseTokenRepository) {
+function issueTokensFn(tokenRepo: FirebaseTokenRepository, config: AuthConfig) {
   return async (userId: string, email: string, role: string) => {
     return issueTokens(
       { userId, email, role: role as import("@fabric/types").UserRole },
       {
         tokenRepo,
-        pasetoKey: getPasetoKey(),
-        accessTokenTtlSeconds: getAccessTtl(),
-        refreshTokenTtlSeconds: getRefreshTtl(),
+        pasetoKey: config.pasetoKey,
+        accessTokenTtlSeconds: config.accessTokenTtlSeconds,
+        refreshTokenTtlSeconds: config.refreshTokenTtlSeconds,
       }
     );
   };

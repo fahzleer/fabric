@@ -26,7 +26,8 @@ function requireAdmin(c: import("hono").Context): boolean {
 export function registerPayoutRoutes(
   app: Hono,
   payoutService: PayoutService,
-  verifier: PasetoVerifierService
+  verifier: PasetoVerifierService,
+  payoutsEnabled: boolean
 ): void {
   app.get("/merchant/payouts/balance", requireAuth(verifier), async (c) => {
     const userId = c.get("userId");
@@ -51,6 +52,13 @@ export function registerPayoutRoutes(
   });
 
   app.post("/merchant/payouts/request", requireAuth(verifier), async (c) => {
+    if (!payoutsEnabled) {
+      return c.json(
+
+        503
+      );
+    }
+
     const body = await c.req.json<unknown>();
     const validated = RequestPayoutBody(body);
     if (validated instanceof type.errors) {

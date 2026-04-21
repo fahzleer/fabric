@@ -4,7 +4,7 @@ import { log } from "../monitoring/logger";
 export class HttpPaymentAdapter implements PaymentPort {
   private readonly baseUrl: string;
 
-  constructor(paymentUrl: string = process.env.PAYMENT_SERVICE_URL ?? "http://localhost:8082") {
+  constructor(paymentUrl: string) {
     this.baseUrl = paymentUrl;
   }
 

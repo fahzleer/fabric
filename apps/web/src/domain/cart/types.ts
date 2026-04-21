@@ -62,7 +62,7 @@ export interface ShoppingCart {
 }
 
 export const getCartItemLineTotal = (item: CartItem): number =>
-  item.productSnapshot.price.amount * item.quantity;
+  item.productSnapshot.price.displayAmount * item.quantity;
 
 export const getCartTotal = (cart: ShoppingCart): number =>
   cart.items.reduce((sum, item) => sum + getCartItemLineTotal(item), 0);

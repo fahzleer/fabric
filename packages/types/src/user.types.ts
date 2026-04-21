@@ -1,28 +1,28 @@
 import { regex } from "arkregex";
 import { type } from "arktype";
 import type { DomainEvent } from "./events";
-import type { TaggedError } from "./kernel";
+import type { Brand, TaggedError } from "./kernel";
 
-export type UserId = { readonly __brand: "UserId"; readonly value: string };
-export const makeUserId = (value: string): UserId => ({ __brand: "UserId", value });
+export type UserId = Brand<string, "UserId">;
+export const makeUserId = (value: string): UserId => value as UserId;
 
 const rEmail = regex("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
 
 export interface EmailError extends TaggedError<"EmailError"> {}
-export type Email = { readonly __brand: "Email"; readonly value: string };
+export type Email = Brand<string, "Email">;
 
 export const makeEmail = (raw: string): Email | EmailError => {
   const trimmed = raw.trim().toLowerCase();
   if (!rEmail.test(trimmed)) {
     return { _tag: "EmailError", message: `Invalid email address: ${raw}` };
   }
-  return { __brand: "Email", value: trimmed };
+  return trimmed as Email;
 };
 
 export const EmailSchema = type("string.email");
 
 export interface DisplayNameError extends TaggedError<"DisplayNameError"> {}
-export type DisplayName = { readonly __brand: "DisplayName"; readonly value: string };
+export type DisplayName = Brand<string, "DisplayName">;
 
 export const makeDisplayName = (raw: string): DisplayName | DisplayNameError => {
   const trimmed = raw.trim();
@@ -32,7 +32,7 @@ export const makeDisplayName = (raw: string): DisplayName | DisplayNameError => 
       message: "Display name must be between 2 and 50 characters",
     };
   }
-  return { __brand: "DisplayName", value: trimmed };
+  return trimmed as DisplayName;
 };
 
 export type UserRole = "customer" | "admin" | "store_owner";

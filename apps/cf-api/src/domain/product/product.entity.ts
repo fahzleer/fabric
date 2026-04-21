@@ -46,7 +46,7 @@ export const getStockForSize = (product: Product, size: ProductSize): Maybe<Stoc
 
 export const getAvailableSizes = (product: Product): readonly ProductSize[] =>
   (Object.entries(product.stock) as [ProductSize, StockQuantity][])
-    .filter(([, qty]) => qty.value > 0)
+    .filter(([, qty]) => qty > 0)
     .map(([size]) => size);
 
 export const isProductAvailable = (product: Product): boolean =>
@@ -54,7 +54,7 @@ export const isProductAvailable = (product: Product): boolean =>
 
 export const isSizeAvailable = (product: Product, size: ProductSize, quantity: number): boolean => {
   const stock = getStockForSize(product, size);
-  return isSome(stock) && stock.value.value >= quantity;
+  return isSome(stock) && stock.value >= quantity;
 };
 
 export const transitionProductStatus = (
@@ -81,19 +81,19 @@ export const reserveStock = (
   if (!isSome(stockMaybe))
     return {
       _tag: "Err",
-      error: ProductOutOfStockError(product.id.value, size, quantity, 0),
+      error: ProductOutOfStockError(product.id, size, quantity, 0),
     };
 
-  const available = stockMaybe.value.value;
+  const available = stockMaybe.value;
   if (available < quantity)
     return {
       _tag: "Err",
-      error: ProductOutOfStockError(product.id.value, size, quantity, available),
+      error: ProductOutOfStockError(product.id, size, quantity, available),
     };
 
   const newStock: StockMap = {
     ...product.stock,
-    [size]: { __brand: "StockQuantity" as const, value: available - quantity },
+    [size]: (available - quantity) as StockQuantity,
   };
 
   return {
@@ -104,10 +104,10 @@ export const reserveStock = (
 
 export const releaseStock = (product: Product, size: ProductSize, quantity: number): Product => {
   const stockEntry = product.stock[size];
-  const current = stockEntry !== undefined ? stockEntry.value : 0;
+  const current = stockEntry !== undefined ? (stockEntry as number) : 0;
   const newStock: StockMap = {
     ...product.stock,
-    [size]: { __brand: "StockQuantity" as const, value: current + quantity },
+    [size]: (current + quantity) as StockQuantity,
   };
   return { ...product, stock: newStock, updatedAt: Temporal.Now.instant() };
 };

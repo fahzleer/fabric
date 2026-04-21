@@ -1,5 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { None, Some } from "@fabric/types";
+import type { CartItemQuantity } from "@fabric/types";
+import { makeCartId, makeProductId, makeUserId } from "@fabric/types";
 import type { Cart, CartItem } from "./cart.entity";
 import {
   addItemToCart,
@@ -14,21 +16,15 @@ import {
   updateCartItemQuantity,
 } from "./cart.entity";
 
-const CART_ID = { __brand: "CartId" as const, value: "cart-test-1" } as Cart["id"];
-const PRODUCT_ID = {
-  __brand: "ProductId" as const,
-  value: "prod-1",
-} as CartItem["productId"];
-const PRODUCT_ID_2 = {
-  __brand: "ProductId" as const,
-  value: "prod-2",
-} as CartItem["productId"];
+const CART_ID = makeCartId("cart-test-1");
+const PRODUCT_ID = makeProductId("prod-1");
+const PRODUCT_ID_2 = makeProductId("prod-2");
 const PRICE = {
   __brand: "ProductPrice" as const,
-  amount: 100,
+  displayAmount: 100,
   currency: "THB",
 } as CartItem["unitPrice"];
-const QTY_2 = { __brand: "CartItemQuantity" as const, value: 2 } as CartItem["quantity"];
+const QTY_2 = 2 as CartItemQuantity;
 
 const makeItem = (overrides: Partial<CartItem> = {}): CartItem => ({
   productId: PRODUCT_ID,
@@ -42,7 +38,7 @@ const makeItem = (overrides: Partial<CartItem> = {}): CartItem => ({
 const emptyCart = (): Cart => makeEmptyCart(CART_ID, None());
 
 describe("getCartItemLineTotal", () => {
-  test("returns unitPrice.amount * quantity.value", () => {
+  test("returns unitPrice.displayAmount * quantity.value", () => {
     const item = makeItem({ unitPrice: PRICE, quantity: QTY_2 });
     expect(getCartItemLineTotal(item)).toBe(200);
   });
@@ -50,7 +46,7 @@ describe("getCartItemLineTotal", () => {
   test("returns 0 when quantity is 0 (edge case with direct mock)", () => {
     const item = makeItem({
       unitPrice: PRICE,
-      quantity: { __brand: "CartItemQuantity" as const, value: 0 } as CartItem["quantity"],
+      quantity: 0 as CartItemQuantity,
     });
     expect(getCartItemLineTotal(item)).toBe(0);
   });
@@ -67,10 +63,10 @@ describe("getCartTotal", () => {
       productId: PRODUCT_ID_2,
       unitPrice: {
         __brand: "ProductPrice" as const,
-        amount: 50,
+        displayAmount: 50,
         currency: "THB",
       } as CartItem["unitPrice"],
-      quantity: { __brand: "CartItemQuantity" as const, value: 3 } as CartItem["quantity"],
+      quantity: 3 as CartItemQuantity,
     });
     const cart: Cart = { ...emptyCart(), items: [item1, item2] };
     expect(getCartTotal(cart)).toBe(350);
@@ -86,7 +82,7 @@ describe("getCartItemCount", () => {
     const item1 = makeItem({ quantity: QTY_2 });
     const item2 = makeItem({
       productId: PRODUCT_ID_2,
-      quantity: { __brand: "CartItemQuantity" as const, value: 3 } as CartItem["quantity"],
+      quantity: 3 as CartItemQuantity,
     });
     const cart: Cart = { ...emptyCart(), items: [item1, item2] };
     expect(getCartItemCount(cart)).toBe(5);
@@ -128,7 +124,7 @@ describe("findCartItem", () => {
     const result = findCartItem(cart, PRODUCT_ID, "M");
     expect(result._tag).toBe("Some");
     if (result._tag === "Some") {
-      expect(result.value.productId.value).toBe("prod-1");
+      expect(result.value.productId).toBe("prod-1");
     }
   });
 });
@@ -137,16 +133,12 @@ describe("makeEmptyCart", () => {
   test("creates cart with no items", () => {
     const cart = makeEmptyCart(CART_ID, None());
     expect(cart.items).toHaveLength(0);
-    expect(cart.id.value).toBe("cart-test-1");
+    expect(cart.id).toBe("cart-test-1");
     expect(cart.userId._tag).toBe("None");
   });
 
   test("creates cart with userId when provided", () => {
-    const userId = { __brand: "UserId" as const, value: "u-1" } as Cart["userId"] extends import(
-      "@fabric/types"
-    ).Maybe<infer U>
-      ? U
-      : never;
+    const userId = makeUserId("u-1");
     const cart = makeEmptyCart(CART_ID, Some(userId));
     expect(cart.userId._tag).toBe("Some");
   });
@@ -159,7 +151,7 @@ describe("addItemToCart", () => {
     expect(result._tag).toBe("Ok");
     if (result._tag === "Ok") {
       expect(result.value.items).toHaveLength(1);
-      expect(result.value.items[0]?.quantity.value).toBe(1);
+      expect(result.value.items[0]?.quantity).toBe(1);
     }
   });
 
@@ -170,7 +162,7 @@ describe("addItemToCart", () => {
     expect(result._tag).toBe("Ok");
     if (result._tag === "Ok") {
       expect(result.value.items).toHaveLength(1);
-      expect(result.value.items[0]?.quantity.value).toBe(5);
+      expect(result.value.items[0]?.quantity).toBe(5);
     }
   });
 
@@ -198,7 +190,7 @@ describe("addItemToCart", () => {
 
   test("returns Err when merged quantity exceeds max", () => {
     const item = makeItem({
-      quantity: { __brand: "CartItemQuantity" as const, value: 99 } as CartItem["quantity"],
+      quantity: 99 as CartItemQuantity,
     });
     const cart: Cart = { ...emptyCart(), items: [item] };
     const result = addItemToCart(cart, { ...makeItem(), quantity: 10 });
@@ -269,7 +261,7 @@ describe("updateCartItemQuantity", () => {
     const result = updateCartItemQuantity(cart, PRODUCT_ID, "M", 5);
     expect(result._tag).toBe("Ok");
     if (result._tag === "Ok") {
-      expect(result.value.items[0]?.quantity.value).toBe(5);
+      expect(result.value.items[0]?.quantity).toBe(5);
     }
   });
 
@@ -278,14 +270,14 @@ describe("updateCartItemQuantity", () => {
     const item2 = makeItem({
       productId: PRODUCT_ID_2,
       size: "L" as CartItem["size"],
-      quantity: { __brand: "CartItemQuantity" as const, value: 1 } as CartItem["quantity"],
+      quantity: 1 as CartItemQuantity,
     });
     const cart: Cart = { ...emptyCart(), items: [item1, item2] };
     const result = updateCartItemQuantity(cart, PRODUCT_ID, "M", 10);
     expect(result._tag).toBe("Ok");
     if (result._tag === "Ok") {
-      const other = result.value.items.find((i) => i.productId.value === "prod-2");
-      expect(other?.quantity.value).toBe(1);
+      const other = result.value.items.find((i) => i.productId === "prod-2");
+      expect(other?.quantity).toBe(1);
     }
   });
 });
@@ -301,6 +293,6 @@ describe("clearCart", () => {
   test("preserves cart id and userId", () => {
     const cart = emptyCart();
     const cleared = clearCart(cart);
-    expect(cleared.id.value).toBe(cart.id.value);
+    expect(cleared.id).toBe(cart.id);
   });
 });

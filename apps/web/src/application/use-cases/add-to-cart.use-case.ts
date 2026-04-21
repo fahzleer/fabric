@@ -38,7 +38,7 @@ export const addToCartUseCase = (
           productId: input.productId.value,
           size: input.size,
           quantity: input.quantity,
-          unitPriceInCents: Math.round(input.unitPrice.amount * 100),
+          unitPriceInCents: Math.round(input.unitPrice.displayAmount * 100),
           currency: input.unitPrice.currency,
         })
       )

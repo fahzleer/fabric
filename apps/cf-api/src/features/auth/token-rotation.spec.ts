@@ -8,7 +8,7 @@ import type { FirebaseActivityRepository } from "../../infrastructure/firebase/f
 import type { FirebaseLockoutAdapter } from "../../infrastructure/firebase/firebase-lockout.adapter";
 import type { FirebaseTokenRepository } from "../../infrastructure/firebase/firebase-token.repository";
 import type { FirebaseUserAdapter } from "../../infrastructure/firebase/firebase-user.adapter";
-import { registerAuthRoutes } from "./auth.handlers";
+import { type AuthConfig, registerAuthRoutes } from "./auth.handlers";
 
 const TEST_KEY_HEX = "a".repeat(64);
 process.env.PASETO_KEY = TEST_KEY_HEX;
@@ -91,12 +91,20 @@ function makeMemcached(): MemcachedAdapter {
   } as unknown as MemcachedAdapter;
 }
 
+const TEST_AUTH_CONFIG: AuthConfig = {
+  pasetoKey: TEST_KEY_HEX,
+  accessTokenTtlSeconds: 900,
+  refreshTokenTtlSeconds: 604800,
+  bcryptRounds: 4,
+  googleClientId: "",
+};
+
 function makeApp(tokenOverrides: Partial<FirebaseTokenRepository> = {}): {
   app: Hono;
   tokenRepo: FirebaseTokenRepository;
 } {
   const app = new Hono();
-  const verifier = new PasetoVerifierService();
+  const verifier = new PasetoVerifierService(process.env.PASETO_KEY as string);
   const userAdapter = makeUserAdapter();
   const tokenRepo = makeTokenRepo(tokenOverrides);
   const lockoutStore = makeLockoutAdapter();
@@ -109,7 +117,8 @@ function makeApp(tokenOverrides: Partial<FirebaseTokenRepository> = {}): {
     lockoutStore,
     verifier,
     activityRepo,
-    makeMemcached()
+    makeMemcached(),
+    TEST_AUTH_CONFIG
   );
   return { app, tokenRepo };
 }
@@ -140,7 +149,7 @@ describe("POST /auth/refresh — token rotation", () => {
 
   test("2. new tokens are valid PASETO tokens", async () => {
     const { app } = makeApp();
-    const verifier = new PasetoVerifierService();
+    const verifier = new PasetoVerifierService(process.env.PASETO_KEY as string);
     const token = await issueRefreshToken("user-123");
 
     const res = await postRefresh(app, token);

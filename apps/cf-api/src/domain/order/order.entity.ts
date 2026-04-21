@@ -18,7 +18,8 @@ export interface OrderLine {
   readonly quantity: number;
 }
 
-export const getOrderLineTotal = (line: OrderLine): number => line.unitPrice.amount * line.quantity;
+export const getOrderLineTotal = (line: OrderLine): number =>
+  line.unitPrice.displayAmount * line.quantity;
 
 export interface Order {
   readonly id: OrderId;
@@ -54,13 +55,13 @@ export const transitionOrderStatus = (
   if (order.status === "cancelled")
     return {
       _tag: "Err",
-      error: OrderAlreadyCancelledError(order.id.value),
+      error: OrderAlreadyCancelledError(order.id),
     };
 
   if (!canTransitionOrderStatus(order.status, newStatus))
     return {
       _tag: "Err",
-      error: InvalidOrderStateTransitionError(order.id.value, order.status, newStatus),
+      error: InvalidOrderStateTransitionError(order.id, order.status, newStatus),
     };
 
   return {
@@ -76,7 +77,7 @@ export const markOrderAsShipped = (
   if (order.status !== "processing")
     return {
       _tag: "Err",
-      error: InvalidOrderStateTransitionError(order.id.value, order.status, "shipped"),
+      error: InvalidOrderStateTransitionError(order.id, order.status, "shipped"),
     };
   return {
     _tag: "Ok",

@@ -1,4 +1,6 @@
 import { describe, expect, it } from "bun:test";
+import type { ProductName, StockQuantity } from "@fabric/types";
+import { makeProductId } from "@fabric/types";
 import { Temporal } from "@js-temporal/polyfill";
 import type { Product } from "./product.entity";
 import {
@@ -14,19 +16,19 @@ import {
 } from "./product.entity";
 
 const makeStock = (sizes: Partial<Record<"XS" | "S" | "M" | "L" | "XL", number>>) => {
-  const stock: Record<string, { __brand: "StockQuantity"; value: number }> = {};
+  const stock: Record<string, StockQuantity> = {};
   for (const [size, qty] of Object.entries(sizes)) {
-    stock[size] = { __brand: "StockQuantity", value: qty as number };
+    stock[size] = qty as StockQuantity;
   }
   return stock as Product["stock"];
 };
 
 const makeProduct = (overrides: Partial<Product> = {}): Product => ({
-  id: { __brand: "ProductId", value: "prod-1" },
+  id: makeProductId("prod-1"),
   ownerId: "user-1",
-  name: { __brand: "ProductName", value: "Test Shirt" },
+  name: "Test Shirt" as ProductName,
   description: "A test product",
-  price: { __brand: "ProductPrice", amount: 499, currency: "THB" },
+  price: { __brand: "ProductPrice", displayAmount: 499, currency: "THB" },
   category: "basic",
   status: "active",
   stock: makeStock({ S: 5, M: 10, L: 3 }),
@@ -85,7 +87,7 @@ describe("getStockForSize", () => {
     const result = getStockForSize(product, "S");
     expect(result._tag).toBe("Some");
     if (result._tag === "Some") {
-      expect(result.value.value).toBe(5);
+      expect(result.value).toBe(5);
     }
   });
 
@@ -211,7 +213,7 @@ describe("reserveStock", () => {
     expect(result._tag).toBe("Ok");
     if (result._tag === "Ok") {
       const newStock = result.value.stock.M;
-      expect(newStock?.value).toBe(7);
+      expect(newStock).toBe(7);
     }
   });
 
@@ -221,7 +223,7 @@ describe("reserveStock", () => {
     expect(result._tag).toBe("Ok");
     if (result._tag === "Ok") {
       expect(result.value.status).toBe("active");
-      expect(result.value.stock.S?.value).toBe(0);
+      expect(result.value.stock.S).toBe(0);
     }
   });
 
@@ -251,20 +253,20 @@ describe("releaseStock", () => {
   it("increases stock for the given size", () => {
     const product = makeProduct();
     const updated = releaseStock(product, "S", 3);
-    expect(updated.stock.S?.value).toBe(8);
+    expect(updated.stock.S).toBe(8);
   });
 
   it("creates stock entry if size was not in map", () => {
     const product = makeProduct({ stock: makeStock({ S: 5 }) });
     const updated = releaseStock(product, "XL", 2);
-    expect(updated.stock.XL?.value).toBe(2);
+    expect(updated.stock.XL).toBe(2);
   });
 
   it("does not auto-transition status (stock and status are independent)", () => {
     const active = makeProduct({ status: "active", stock: makeStock({ S: 0 }) });
     const updated = releaseStock(active, "S", 5);
     expect(updated.status).toBe("active");
-    expect(updated.stock.S?.value).toBe(5);
+    expect(updated.stock.S).toBe(5);
   });
 
   it("does not change status for draft or archived products", () => {

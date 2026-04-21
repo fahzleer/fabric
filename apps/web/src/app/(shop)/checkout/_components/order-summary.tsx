@@ -25,7 +25,9 @@ function CartLineItems({ items }: { items: ShoppingCart["items"] }) {
   return (
     <div className="space-y-3">
       {items.map((item) => {
-        const lineAmount = new BigNumber(item.productSnapshot.price.amount).times(item.quantity);
+        const lineAmount = new BigNumber(item.productSnapshot.price.displayAmount).times(
+          item.quantity
+        );
         return (
           <div
             key={`${item.productId.value}:${item.size}`}

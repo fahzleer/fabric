@@ -12,7 +12,7 @@ import { log } from "../monitoring/logger";
 export class HttpPricingAdapter implements PricingPort {
   private readonly baseUrl: string;
 
-  constructor(pricingUrl: string = process.env.PRICING_SERVICE_URL ?? "http://localhost:8082") {
+  constructor(pricingUrl: string) {
     this.baseUrl = pricingUrl;
   }
 
@@ -26,9 +26,9 @@ export class HttpPricingAdapter implements PricingPort {
     try {
       const body = {
         items: items.map((item) => ({
-          productId: item.productId.value,
-          quantity: item.quantity.value,
-          unitPriceCents: Math.round(item.unitPrice.amount * 100),
+          productId: item.productId,
+          quantity: item.quantity,
+          unitPriceCents: Math.round(item.unitPrice.displayAmount * 100),
           size: item.size,
         })),
         voucher: voucher ?? null,

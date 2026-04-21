@@ -6,7 +6,12 @@ const mockFetch = mock(
 Object.assign(globalThis, { fetch: mockFetch });
 
 import type { IPaymentGateway } from "../ports/payment-gateway.port";
-import { interpretPaymentCommands } from "./payment.interpreter";
+import { type NotifierConfig, interpretPaymentCommands } from "./payment.interpreter";
+
+const NOTIFIER: NotifierConfig = {
+  cfApiUrl: "http://localhost:3010",
+  internalSecret: "test-secret",
+};
 
 const MOCK_GATEWAY = {
   charge: mock(async (_orderId: string, _cents: number, _currency: string, _token: string) => ({
@@ -51,7 +56,8 @@ describe("interpretPaymentCommands", () => {
           token: "tok_visa",
         },
       ],
-      MOCK_GATEWAY as unknown as IPaymentGateway
+      MOCK_GATEWAY as unknown as IPaymentGateway,
+      NOTIFIER
     );
 
     expect(result.success).toBe(true);
@@ -77,7 +83,8 @@ describe("interpretPaymentCommands", () => {
           token: "tok_decline",
         },
       ],
-      DECLINED_GATEWAY as unknown as IPaymentGateway
+      DECLINED_GATEWAY as unknown as IPaymentGateway,
+      NOTIFIER
     );
 
     expect(result.success).toBe(false);
@@ -91,7 +98,8 @@ describe("interpretPaymentCommands", () => {
   test("3. RecordPayment (crypto) → no gateway.charge, success=true, no fetch call", async () => {
     const result = await interpretPaymentCommands(
       [{ _tag: "RecordPayment", orderId: "order-003", paymentId: "crypto-001", amountCents: 0 }],
-      MOCK_GATEWAY as unknown as IPaymentGateway
+      MOCK_GATEWAY as unknown as IPaymentGateway,
+      NOTIFIER
     );
 
     expect(result.success).toBe(true);
@@ -120,7 +128,8 @@ describe("interpretPaymentCommands", () => {
             token: "tok_visa",
           },
         ],
-        MOCK_GATEWAY as unknown as IPaymentGateway
+        MOCK_GATEWAY as unknown as IPaymentGateway,
+        NOTIFIER
       )
     ).resolves.toBeDefined();
 
@@ -150,7 +159,8 @@ describe("interpretPaymentCommands", () => {
           token: "tok_mc",
         },
       ],
-      MOCK_GATEWAY as unknown as IPaymentGateway
+      MOCK_GATEWAY as unknown as IPaymentGateway,
+      NOTIFIER
     );
 
     expect(result.success).toBe(true);

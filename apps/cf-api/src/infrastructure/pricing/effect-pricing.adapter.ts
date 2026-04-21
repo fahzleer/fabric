@@ -45,13 +45,13 @@ export const calculateCheckoutEffect = (
   voucher: VoucherForRoc | undefined,
   shippingAddress: { country: string; province: string },
   currency: string,
-  baseUrl = process.env.PRICING_SERVICE_URL ?? "http://localhost:8082"
+  baseUrl: string
 ): Effect.Effect<PricingResult, never> => {
   const body = {
     items: items.map((item) => ({
-      productId: item.productId.value,
-      quantity: item.quantity.value,
-      unitPriceCents: Math.round(item.unitPrice.amount * 100),
+      productId: item.productId,
+      quantity: item.quantity,
+      unitPriceCents: Math.round(item.unitPrice.displayAmount * 100),
       size: item.size,
     })),
     voucher: voucher ?? null,

@@ -33,11 +33,11 @@ async function authHeader(
 const MOCK_TIMESTAMP = { toString: () => "2024-01-01T00:00:00Z" };
 
 const MOCK_PRODUCT = {
-  id: { value: "prod-123" },
+  id: "prod-123",
   ownerId: "owner-001",
-  name: { value: "Test T-Shirt" },
+  name: "Test T-Shirt",
   description: "A test shirt",
-  price: { amount: 29.99, currency: "THB" },
+  price: { displayAmount: 29.99, currency: "THB" },
   category: "basic",
   status: "active",
   stock: {},
@@ -72,7 +72,7 @@ function makeProductService(overrides: Partial<ProductService> = {}): ProductSer
   return {
     getActiveProducts: mock(async () => MOCK_PAGINATED),
     getProduct: mock(async () => MOCK_PRODUCT),
-    createProduct: mock(async () => ({ ...MOCK_PRODUCT, id: { value: "new-prod" } })),
+    createProduct: mock(async () => ({ ...MOCK_PRODUCT, id: "new-prod" })),
     updateProduct: mock(async () => MOCK_PRODUCT),
     deleteProduct: mock(async () => ({ deleted: true })),
     ...overrides,
@@ -101,7 +101,7 @@ function makeApp(
   merchantRepo: MerchantRepositoryPort;
 } {
   const app = new Hono();
-  const verifier = new PasetoVerifierService();
+  const verifier = new PasetoVerifierService(process.env.PASETO_KEY as string);
   const service = makeProductService(serviceOverrides);
   const merchantRepo = makeMerchantRepo(merchantOverrides);
 
@@ -168,7 +168,7 @@ describe("GET /api/products/:id — public detail", () => {
     await app.fetch(new Request("http://localhost/api/products/my-product-id"));
 
     const call = (service.getProduct as ReturnType<typeof mock>).mock.calls[0];
-    expect(call?.[0].value).toBe("my-product-id");
+    expect(call?.[0]).toBe("my-product-id");
   });
 });
 
@@ -539,6 +539,6 @@ describe("DELETE /api/products/:id — admin only", () => {
     );
 
     const call = (service.deleteProduct as ReturnType<typeof mock>).mock.calls[0];
-    expect(call?.[0].value).toBe("the-product-id");
+    expect(call?.[0]).toBe("the-product-id");
   });
 });

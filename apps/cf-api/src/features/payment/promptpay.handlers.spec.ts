@@ -7,8 +7,8 @@ import type { PasetoVerifierService } from "../../infrastructure/auth/paseto-ver
 import type { OrderService } from "../order/order.service";
 import { registerPromptPayRoutes } from "./promptpay.handlers";
 
-process.env.COMMERCE_SERVICE_URL = "http://commerce-test:8083";
-process.env.INTERNAL_SECRET = "test-internal-secret";
+const TEST_COMMERCE_URL = "http://commerce-test:8083";
+const TEST_INTERNAL_SECRET = "test-internal-secret";
 
 function makeAuthedVerifier(userId = "user-001"): PasetoVerifierService {
   return {
@@ -47,7 +47,7 @@ function makeApp(
   orderService: OrderService = makeOrderService(PENDING_ORDER)
 ) {
   const app = new Hono();
-  registerPromptPayRoutes(app, orderService, verifier);
+  registerPromptPayRoutes(app, orderService, verifier, TEST_COMMERCE_URL, TEST_INTERNAL_SECRET);
   return app;
 }
 

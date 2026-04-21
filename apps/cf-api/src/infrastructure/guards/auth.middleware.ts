@@ -42,35 +42,7 @@ export function requireRole(...roles: UserRole[]): MiddlewareHandler {
   };
 }
 
-import { CacheKeys, type MemcachedAdapter } from "@fabric/cache";
-
-export function throttle(
-  memcached: MemcachedAdapter,
-  opts: { limit: number; windowMs: number }
-): MiddlewareHandler {
-  return async (c, next) => {
-    const ip =
-      c.req.header("x-real-ip") ??
-      c.req.header("x-forwarded-for")?.split(",")[0]?.trim() ??
-      "unknown";
-    const key = CacheKeys.rateLimitKey(ip, c.req.path);
-    const ttlSeconds = Math.ceil(opts.windowMs / 1000);
-
-    const count = await memcached.increment(key, ttlSeconds);
-    if (count !== null && count > opts.limit) {
-      c.header("X-RateLimit-Limit", String(opts.limit));
-      c.header("X-RateLimit-Remaining", "0");
-      c.header("Retry-After", String(ttlSeconds));
-      return c.json({ error: "Too Many Requests", _tag: "RateLimitExceeded" }, 429);
-    }
-
-    if (count !== null) {
-      c.header("X-RateLimit-Limit", String(opts.limit));
-      c.header("X-RateLimit-Remaining", String(Math.max(0, opts.limit - count)));
-    }
-    await next();
-  };
-}
+export { throttle } from "@fabric/middleware";
 
 export function internalSecret(secret: string): MiddlewareHandler {
   return async (c, next) => {

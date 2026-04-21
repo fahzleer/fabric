@@ -31,7 +31,7 @@ export const readProductState = async (
   ctx: Ctx,
   productId: string
 ): Promise<Option.Option<ProductState>> => {
-  const snap = await ctx.db.ref(`products_current/${productId}`).once("value");
+  const snap = await ctx.db.ref(`product_read_model/${productId}`).once("value");
   if (!snap.exists()) return Option.none();
 
   const row = snap.val() as {
@@ -64,7 +64,7 @@ export const writeProductState = async (
   _productId: string,
   state: ProductState
 ): Promise<void> => {
-  await ctx.db.ref(`products_current/${state.productId}`).set({
+  await ctx.db.ref(`product_read_model/${state.productId}`).set({
     productId: state.productId,
     ownerId: state.ownerId,
     name: state.name,
@@ -78,7 +78,7 @@ export const writeProductState = async (
 };
 
 export const readAllProductStates = async (ctx: Ctx): Promise<ProductState[]> => {
-  const snap = await ctx.db.ref("products_current").once("value");
+  const snap = await ctx.db.ref("product_read_model").once("value");
   if (!snap.exists()) return [];
 
   const results: ProductState[] = [];
