@@ -8,6 +8,7 @@
   },
   "scripts": {
     "test": "bun test ./src",
+    "test:unit": "bun test ./src",
     "typecheck": "tsc --noEmit",
     "lint": "biome lint ./src",
     "format": "biome format ./src --write"

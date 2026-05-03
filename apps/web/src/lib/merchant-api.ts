@@ -4,6 +4,7 @@ import { None, Some, isSome } from "@fabric/types";
 import { headers } from "next/headers";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3010";
+const PRODUCT_BASE = process.env.PRODUCT_API_URL ?? API_BASE;
 const INTERNAL_SECRET = process.env.INTERNAL_SECRET ?? "";
 
 async function issueToken(userId: string, email: string, role: string): Promise<Maybe<string>> {
@@ -158,7 +159,7 @@ function _buildMerchantApi(user: { id: string; email: string; role?: string }, t
 
     async getProductById(id: string): Promise<ApiResult<MerchantProduct>> {
       try {
-        const res = await fetch(`${API_BASE}/api/products/${id}`, {
+        const res = await fetch(`${PRODUCT_BASE}/products/${id}`, {
           headers: authHeaders,
           cache: "no-store",
         });
@@ -180,7 +181,7 @@ function _buildMerchantApi(user: { id: string; email: string; role?: string }, t
       perPage = 20
     ): Promise<ApiResult<{ items: MerchantProduct[]; total: number }>> {
       try {
-        const url = new URL(`${API_BASE}/api/products`);
+        const url = new URL(`${PRODUCT_BASE}/products`);
         url.searchParams.set("page", String(page));
         url.searchParams.set("perPage", String(perPage));
         const res = await fetch(url.toString(), { cache: "no-store" });
@@ -207,10 +208,10 @@ function _buildMerchantApi(user: { id: string; email: string; role?: string }, t
       images: { url: string; alt: string; isPrimary: boolean; order: number }[];
     }): Promise<ApiResult<MerchantProduct>> {
       try {
-        const res = await fetch(`${API_BASE}/api/products`, {
+        const res = await fetch(`${PRODUCT_BASE}/products`, {
           method: "POST",
           headers: authHeaders,
-          body: JSON.stringify(body),
+          body: JSON.stringify({ ...body, merchantId: user.id }),
           cache: "no-store",
         });
         const data = (await res.json()) as MerchantProduct & { error?: string; _tag?: string };
@@ -240,7 +241,7 @@ function _buildMerchantApi(user: { id: string; email: string; role?: string }, t
       }>
     ): Promise<ApiResult<MerchantProduct>> {
       try {
-        const res = await fetch(`${API_BASE}/api/products/${id}`, {
+        const res = await fetch(`${PRODUCT_BASE}/products/${id}`, {
           method: "PUT",
           headers: authHeaders,
           body: JSON.stringify(body),
@@ -474,6 +475,48 @@ function _buildMerchantApi(user: { id: string; email: string; role?: string }, t
         return { ok: true, value: undefined };
       } catch {
         return { ok: false, error: "Network error rejecting payout" };
+      }
+    },
+
+    async listMerchants(): Promise<ApiResult<unknown[]>> {
+      try {
+        const res = await fetch(`${API_BASE}/admin/merchants`, {
+          headers: authHeaders,
+          cache: "no-store",
+        });
+        const data = (await res.json()) as { merchants?: unknown[]; error?: string; _tag?: string };
+        if (!res.ok)
+          return {
+            ok: false,
+            error: data.error ?? "Failed to load merchants",
+            ...(data._tag ? { _tag: data._tag } : {}),
+          };
+        return { ok: true, value: data.merchants ?? [] };
+      } catch {
+        return { ok: false, error: "Network error loading merchants" };
+      }
+    },
+
+    async listKycSubmissions(): Promise<ApiResult<unknown[]>> {
+      try {
+        const res = await fetch(`${API_BASE}/admin/kyc`, {
+          headers: authHeaders,
+          cache: "no-store",
+        });
+        const data = (await res.json()) as {
+          submissions?: unknown[];
+          error?: string;
+          _tag?: string;
+        };
+        if (!res.ok)
+          return {
+            ok: false,
+            error: data.error ?? "Failed to load KYC submissions",
+            ...(data._tag ? { _tag: data._tag } : {}),
+          };
+        return { ok: true, value: data.submissions ?? [] };
+      } catch {
+        return { ok: false, error: "Network error loading KYC submissions" };
       }
     },
   };

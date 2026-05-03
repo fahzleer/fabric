@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { makeProductId, makeProductPriceFromCents } from "@fabric/types";
+import { ProductPrice, makeProductId } from "@fabric/types";
 import type { CartItem, ShoppingCart } from "./types";
 import {
   formatCartTotal,
@@ -9,8 +9,8 @@ import {
   isCartEmpty,
 } from "./types";
 
-const PRICE = makeProductPriceFromCents(10_000, "THB");
-const PRICE_THB_WHOLE = makeProductPriceFromCents(99_900, "THB");
+const PRICE = ProductPrice.fromCents(10_000, "THB");
+const PRICE_THB_WHOLE = ProductPrice.fromCents(99_900, "THB");
 
 const makeName = (v: string) => ({ __brand: "ProductName" as const, value: v });
 const makeImage = () => ({
@@ -62,7 +62,7 @@ describe("getCartTotal", () => {
   test("sums all line totals", () => {
     const items = [
       makeItem("prod-1", 2, PRICE),
-      makeItem("prod-2", 1, makeProductPriceFromCents(5_000, "THB")),
+      makeItem("prod-2", 1, ProductPrice.fromCents(5_000, "THB")),
     ];
     expect(getCartTotal(makeCart(items))).toBe(250);
   });

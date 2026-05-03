@@ -2,7 +2,7 @@
   "name": "fabric",
   "private": true,
   "version": "0.0.1",
-  "description": "Fabric — monorepo (web + cf-api + cf-commerce + worker / Firebase stack)",
+  "description": "Fabric — microservices e-commerce platform (Next.js + Bun + Effect-TS + Kafka + PostgreSQL)",
   "homepage": "https://github.com/fahzleer/fabric#readme",
   "bugs": {
     "url": "https://github.com/fahzleer/fabric/issues"
@@ -34,7 +34,9 @@
     "format": "biome format --write .",
     "check": "biome check --write .",
     "typecheck": "turbo typecheck",
+    "type-check": "turbo typecheck",
     "test": "turbo test",
+    "test:unit": "turbo test:unit",
     "prepare": "husky"
   },
   "devDependencies": {

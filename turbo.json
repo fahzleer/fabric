@@ -47,6 +47,9 @@
     "test": {
       "cache": false
     },
+    "test:unit": {
+      "cache": false
+    },
     "lint": {
       "dependsOn": ["^topo"]
     },

@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { makeProductId, makeProductPriceFromCents } from "@fabric/types";
+import { ProductPrice, makeProductId } from "@fabric/types";
 import type { Product } from "./types";
 import {
   getProductAvailableSizes,
@@ -28,7 +28,7 @@ function makeProduct(overrides: Partial<Product> = {}): Product {
     slug: "test-shirt",
     description: "A test shirt",
     tagline: "Great shirt",
-    price: makeProductPriceFromCents(10_000, "THB"),
+    price: ProductPrice.fromCents(10_000, "THB"),
     category: "basic",
     status: "active",
     images: [makeImage(true, 0)] as unknown as Product["images"],

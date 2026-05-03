@@ -3,7 +3,7 @@
 import { validateCsrfOrigin } from "@/lib/csrf";
 import { createMerchantApi } from "@/lib/merchant-api";
 import { isSome } from "@fabric/types";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 
 function parseStock(formData: FormData): Record<string, number> {
@@ -113,6 +113,8 @@ export async function createProductAction(formData: FormData) {
   }
 
   revalidatePath("/merchant/products");
+  revalidateTag("products", {}); // bust public product list cache
+  revalidateTag(`product:${result.value.id}`, {}); // bust individual product detail cache
   redirect("/merchant/products?success=Product+created");
 }
 
@@ -149,5 +151,6 @@ export async function updateProductAction(productId: string, formData: FormData)
   }
 
   revalidatePath("/merchant/products");
+  revalidateTag("products", {}); // bust public product list cache
   redirect("/merchant/products?success=Changes+saved");
 }

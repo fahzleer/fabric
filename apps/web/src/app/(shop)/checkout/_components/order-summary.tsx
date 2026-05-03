@@ -29,12 +29,9 @@ function CartLineItems({ items }: { items: ShoppingCart["items"] }) {
           item.quantity
         );
         return (
-          <div
-            key={`${item.productId.value}:${item.size}`}
-            className="flex justify-between items-start"
-          >
+          <div key={`${item.productId}:${item.size}`} className="flex justify-between items-start">
             <div>
-              <p className="text-sm font-medium text-gray-900">{item.productSnapshot.name.value}</p>
+              <p className="text-sm font-medium text-gray-900">{item.productSnapshot.name}</p>
               <p className="text-xs text-gray-500">
                 Size: {item.size} · Qty: {item.quantity}
               </p>

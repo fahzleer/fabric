@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fabric-env
+  namespace: fabric
+data:
+  # Inter-service URLs (cluster-internal DNS)
+  ORDER_URL:     "http://order-svc:4001"
+  CUSTOMER_URL:  "http://customer-svc:4002"
+  PAYMENT_URL:   "http://payment-svc:4003"
+  SHIPPING_URL:  "http://shipping-svc:4004"
+  PRODUCT_URL:   "http://product-svc:4006"
+  SEARCH_URL:    "http://search-svc:4007"
+  PROMOTION_URL: "http://promotion-svc:4008"
+  IMPORTER_URL:  "http://importer-svc:4009"
+
+  # Infrastructure
+  REDIS_URL:    "redis://redis-svc:6379"
+  KAFKA_BROKERS: "kafka-svc:9092"
+
+  # Observability
+  LOG_LEVEL: "info"
+  NODE_ENV:  "production"

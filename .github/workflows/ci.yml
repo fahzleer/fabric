@@ -45,5 +45,8 @@ jobs:
       - name: Typecheck
         run: bunx turbo typecheck
 
+      - name: Import Graph (dependency-cruiser)
+        run: npx depcruise --config .dependency-cruiser.js apps/cf-api/src apps/cf-commerce/src
+
       - name: Test
         run: bunx turbo test

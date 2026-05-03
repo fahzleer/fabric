@@ -26,6 +26,7 @@ export interface ProductPriceError extends TaggedError<"ProductPriceError"> {}
 export type ProductPrice = {
   readonly __brand: "ProductPrice";
   readonly displayAmount: number;
+  readonly cents: number;
   readonly currency: CurrencyCode;
 };
 
@@ -39,14 +40,24 @@ export const makeProductPrice = (
       message: `Price must be a non-negative number, got: ${displayAmount}`,
     };
   }
-  return { __brand: "ProductPrice", displayAmount, currency };
+  return {
+    __brand: "ProductPrice",
+    displayAmount,
+    cents: Math.round(displayAmount * 100),
+    currency,
+  };
 };
 
-export const makeProductPriceFromCents = (cents: number, currency: CurrencyCode): ProductPrice => ({
-  __brand: "ProductPrice",
-  displayAmount: cents / 100,
-  currency,
-});
+export namespace ProductPrice {
+  export const fromCents = (cents: number, currency: CurrencyCode): ProductPrice => ({
+    __brand: "ProductPrice",
+    displayAmount: cents / 100,
+    cents,
+    currency,
+  });
+
+  export const toCents = (p: ProductPrice): number => p.cents;
+}
 
 export const formatProductPrice = (price: ProductPrice): string => {
   return new Intl.NumberFormat("th-TH", {
@@ -56,7 +67,11 @@ export const formatProductPrice = (price: ProductPrice): string => {
   }).format(price.displayAmount);
 };
 
-export const ProductPriceSchema = type({ displayAmount: "number >= 0", currency: "string" });
+export const ProductPriceSchema = type({
+  displayAmount: "number >= 0",
+  cents: "number >= 0",
+  currency: "string",
+});
 
 export type ProductSize = "XS" | "S" | "M" | "L" | "XL" | "XXL" | "XXXL";
 

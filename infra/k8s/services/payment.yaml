@@ -1,0 +1,93 @@
+# ── Payment service ────────────────────────────────────────────────────────────
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment
+  namespace: fabric
+  labels:
+    app: payment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: payment
+  template:
+    metadata:
+      labels:
+        app: payment
+    spec:
+      containers:
+        - name: payment
+          image: ghcr.io/fabric/payment:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 4003
+          envFrom:
+            - configMapRef:
+                name: fabric-env
+          env:
+            - name: PORT
+              value: "4003"
+            - name: OMISE_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: fabric-secrets
+                  key: OMISE_SECRET_KEY
+            - name: OMISE_PUBLIC_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: fabric-secrets
+                  key: OMISE_PUBLIC_KEY
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 4003
+            initialDelaySeconds: 10
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 4003
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "256Mi"
+            limits:
+              cpu: "1000m"
+              memory: "512Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: payment-svc
+  namespace: fabric
+spec:
+  selector:
+    app: payment
+  ports:
+    - protocol: TCP
+      port: 4003
+      targetPort: 4003
+  type: ClusterIP
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: payment-hpa
+  namespace: fabric
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: payment
+  minReplicas: 2
+  maxReplicas: 6
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70

@@ -12,7 +12,7 @@ export function ProductCard({ product }: ProductCardProps) {
 
   return (
     <Link
-      href={`/product/${product.id.value}`}
+      href={`/product/${product.id}`}
       className="group block overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md"
     >
       <div className="aspect-square overflow-hidden bg-gray-100 relative">
@@ -27,7 +27,7 @@ export function ProductCard({ product }: ProductCardProps) {
       </div>
 
       <div className="p-4">
-        <h3 className="text-lg font-semibold text-gray-900">{product.name.value}</h3>
+        <h3 className="text-lg font-semibold text-gray-900">{product.name}</h3>
         <p className="mt-1 text-sm text-gray-600">{product.tagline}</p>
         <div className="mt-2 flex items-center justify-between">
           <p className="text-xl font-bold text-gray-900">{formattedPrice}</p>

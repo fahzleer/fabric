@@ -10,8 +10,8 @@
       ".read": "auth != null && auth.token.role === 'admin'",
       ".write": "auth != null && auth.token.role === 'admin'"
     },
-    "product_current": {
-      ".read": true,
+    "product_write": {
+      ".read": "auth != null && (auth.token.role === 'admin' || auth.token.role === 'store_owner')",
       ".write": "auth != null && (auth.token.role === 'admin' || auth.token.role === 'store_owner')",
       ".indexOn": ["status", "ownerId", "category", "createdAt"]
     },
@@ -63,10 +63,25 @@
       ".read": false,
       ".write": false
     },
-    "products_current": {
+    "product_read_model": {
       ".read": true,
       ".write": false,
-      ".indexOn": ["status", "lastEventAt"]
+      ".indexOn": ["status", "lastEventAt", "ownerId", "category"]
+    },
+    "event_outbox": {
+      ".read": false,
+      ".write": "auth != null && auth.token.role === 'admin'",
+      "$eventId": {
+        ".read": "auth != null && (auth.token.role === 'admin' || auth.token.role === 'store_owner')",
+        ".write": "auth != null && (auth.token.role === 'admin' || auth.token.role === 'store_owner')"
+      }
+    },
+    "event_dlq": {
+      ".read": "auth != null && auth.token.role === 'admin'",
+      ".write": false,
+      "$eventId": {
+        ".write": "auth != null && auth.token.role === 'admin'"
+      }
     },
     "activity_log": {
       ".read": "auth != null && auth.token.role === 'admin'",

@@ -14,7 +14,8 @@
   },
   "dependencies": {
     "@fabric/cache": "*",
-    "hono": "^4.7.10"
+    "elysia": "^1.2.25",
+    "ioredis": "^5.6.1"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",

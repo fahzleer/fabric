@@ -20,7 +20,6 @@ export {
   makeProductName,
   ProductPriceSchema,
   makeProductPrice,
-  makeProductPriceFromCents,
   ProductSizeSchema,
   ALL_SIZES,
   isValidSize,

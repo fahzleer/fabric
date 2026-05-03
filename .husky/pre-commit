@@ -1,2 +1,3 @@
 bunx lint-staged
-bun test
+bun run type-check
+bun run test:unit

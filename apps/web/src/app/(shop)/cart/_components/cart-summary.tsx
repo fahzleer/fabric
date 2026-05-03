@@ -23,11 +23,11 @@ export function CartSummary({ cart }: CartSummaryProps) {
           );
           return (
             <div
-              key={`${item.productId.value}:${item.size}`}
+              key={`${item.productId}:${item.size}`}
               className="flex justify-between text-sm text-gray-600"
             >
               <span>
-                {item.productSnapshot.name.value} × {item.quantity}
+                {item.productSnapshot.name} × {item.quantity}
               </span>
               <span>
                 {formatPrice({

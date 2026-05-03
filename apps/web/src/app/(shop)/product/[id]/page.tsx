@@ -34,10 +34,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const primaryImage = product.images.find((img) => img.isPrimary) ?? product.images[0];
 
   return {
-    title: product.name.value,
+    title: product.name,
     description: product.tagline || product.description.slice(0, 160),
     openGraph: {
-      title: product.name.value,
+      title: product.name,
       description: product.tagline || product.description.slice(0, 160),
       images: primaryImage
         ? [
@@ -54,7 +54,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     },
     twitter: {
       card: "summary_large_image",
-      title: product.name.value,
+      title: product.name,
       description: product.tagline || product.description.slice(0, 160),
       images: primaryImage ? [primaryImage.url] : undefined,
     },
@@ -144,7 +144,7 @@ export default async function ProductPage({ params: paramsPromise }: PageProps) 
 
           <div className="flex flex-col">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">{product.name.value}</h1>
+              <h1 className="text-3xl font-bold text-gray-900">{product.name}</h1>
               {isSome(storeInfo) && (
                 <Link
                   href={`/store/${storeInfo.value.slug}`}
@@ -169,7 +169,7 @@ export default async function ProductPage({ params: paramsPromise }: PageProps) 
                 productId={productId}
                 availableSizes={availableSizes}
                 price={product.price}
-                productName={product.name.value}
+                productName={product.name}
                 productImageUrl={primaryImage.url}
               />
             </div>

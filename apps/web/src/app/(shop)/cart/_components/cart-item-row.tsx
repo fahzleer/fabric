@@ -43,7 +43,7 @@ export function CartItemRow({ item }: CartItemRowProps) {
       <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-md bg-gray-100">
         <Image
           src={item.productSnapshot.image.url}
-          alt={item.productSnapshot.name.value}
+          alt={item.productSnapshot.name}
           fill
           className="object-cover"
           sizes="96px"
@@ -54,7 +54,7 @@ export function CartItemRow({ item }: CartItemRowProps) {
       <div className="flex flex-1 flex-col">
         <div className="flex justify-between">
           <div>
-            <h3 className="text-sm font-medium text-gray-900">{item.productSnapshot.name.value}</h3>
+            <h3 className="text-sm font-medium text-gray-900">{item.productSnapshot.name}</h3>
             <p className="mt-1 text-xs text-gray-500">Size: {item.size}</p>
           </div>
           <p className="text-sm font-medium text-gray-900">{formattedLineTotal}</p>

@@ -1,6 +1,6 @@
 import type { CartItem } from "@/domain/cart/types";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3010";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
 export async function syncCartToServer(
   items: readonly CartItem[],
@@ -20,7 +20,7 @@ export async function syncCartToServer(
           Authorization: `Bearer ${authToken}`,
         },
         body: JSON.stringify({
-          productId: item.productId.value,
+          productId: item.productId,
           size: item.size,
           quantity: item.quantity,
         }),

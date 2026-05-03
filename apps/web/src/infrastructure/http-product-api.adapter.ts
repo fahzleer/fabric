@@ -3,8 +3,8 @@ import { unstable_cache } from "next/cache";
 import type { NetworkError, ProductApiPort } from "../application/ports/product-api.port";
 import { NetworkError as makeNetworkError } from "../application/ports/product-api.port";
 import type { Product, ProductImage, ProductSummary, StockInfo } from "../domain/product/types";
-import type { ProductId, ProductNotFoundError } from "../domain/product/types";
-import { ProductNotFoundError as makeNotFoundError } from "../domain/product/types";
+import type { ProductId, ProductName, ProductNotFoundError } from "../domain/product/types";
+import { ProductNotFoundError as makeNotFoundError, makeProductId } from "../domain/product/types";
 
 const API_BASE_URL =
   process.env.API_CORE_URL ?? process.env.NEXT_PUBLIC_API_CORE_URL ?? "http://localhost:3010";
@@ -62,13 +62,14 @@ type RawProduct = {
 
 function mapSummary(raw: RawProductSummary): ProductSummary {
   return {
-    id: { __brand: "ProductId" as const, value: raw.id },
-    name: { __brand: "ProductName" as const, value: raw.name },
+    id: makeProductId(raw.id),
+    name: raw.name as unknown as ProductName,
     slug: raw.name.toLowerCase().replace(/\s+/g, "-"),
     tagline: "",
     price: {
       __brand: "ProductPrice" as const,
       displayAmount: raw.price,
+      cents: Math.round(raw.price * 100),
       currency: raw.priceCurrency as "THB" | "USD" | "EUR" | "GBP" | "JPY" | "SGD",
     },
     primaryImage: raw.primaryImage
@@ -102,14 +103,15 @@ function mapProduct(raw: RawProduct): Product {
   })) as unknown as Product["images"];
 
   return {
-    id: { __brand: "ProductId" as const, value: raw.id },
-    name: { __brand: "ProductName" as const, value: raw.name },
+    id: makeProductId(raw.id),
+    name: raw.name as unknown as ProductName,
     slug: raw.name.toLowerCase().replace(/\s+/g, "-"),
     description: raw.description,
     tagline: "",
     price: {
       __brand: "ProductPrice" as const,
       displayAmount: raw.price,
+      cents: Math.round(raw.price * 100),
       currency: raw.priceCurrency as "THB" | "USD" | "EUR" | "GBP" | "JPY" | "SGD",
     },
     category: raw.category as Product["category"],
@@ -150,31 +152,28 @@ const fetchProductsCached = unstable_cache(
   }
 );
 
-const fetchProductCached = unstable_cache(
-  async (id: string): Promise<Product | null> => {
-    let res: Response;
-    try {
-      res = await fetch(`${API_BASE_URL}/api/products/${id}`);
-    } catch {
-      return null;
-    }
-
-    if (res.status === 404) {
-      return null;
-    }
-
-    if (!res.ok) {
-      throw new Error(`api-core /products/${id} returned ${res.status}`);
-    }
-
-    const json = (await res.json()) as RawProduct;
-    return mapProduct(json);
-  },
-  ["product-detail"],
-  {
-    revalidate: REVALIDATE_SECONDS,
-  }
-);
+/**
+ * Per-product cached fetcher — each unique ID gets its own cache entry
+ * tagged with `product:<id>` so `revalidateTag` works after create/update.
+ */
+async function fetchProductCached(id: string): Promise<Product | null> {
+  return unstable_cache(
+    async () => {
+      let res: Response;
+      try {
+        res = await fetch(`${API_BASE_URL}/api/products/${id}`);
+      } catch {
+        return null;
+      }
+      if (res.status === 404) return null;
+      if (!res.ok) throw new Error(`api-core /products/${id} returned ${res.status}`);
+      const json = (await res.json()) as RawProduct;
+      return mapProduct(json);
+    },
+    ["product-detail", id],
+    { revalidate: REVALIDATE_SECONDS, tags: [CACHE_TAGS.product(id)] }
+  )();
+}
 
 const fetchFeaturedProductsCached = unstable_cache(
   async (limit: number): Promise<readonly ProductSummary[]> => {
@@ -213,9 +212,12 @@ export class HttpProductApiAdapter implements ProductApiPort {
   getProduct(id: ProductId): Effect.Effect<Product, ProductNotFoundError | NetworkError> {
     return Effect.tryPromise({
       try: async () => {
-        const product = await fetchProductCached(id.value);
+        // ProductId = Brand<string, "ProductId"> — it IS the string at runtime.
+        // Never use .value; cast directly to string.
+        const rawId = id as unknown as string;
+        const product = await fetchProductCached(rawId);
         if (product === null) {
-          throw makeNotFoundError(`Product ${id.value} not found`);
+          throw makeNotFoundError(`Product ${id as unknown as string} not found`);
         }
         return product;
       },

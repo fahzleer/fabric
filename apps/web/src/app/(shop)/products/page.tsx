@@ -1,4 +1,5 @@
 import { productApiAdapter } from "@/infrastructure/http-product-api.adapter";
+import { getVariant } from "@/lib/ab-testing";
 import { preloadProducts } from "@/lib/data";
 import { Effect } from "effect";
 import { connection } from "next/server";
@@ -9,7 +10,10 @@ export default async function ProductsPage() {
 
   await connection();
 
-  const result = await Effect.runPromise(Effect.either(productApiAdapter.getProducts()));
+  const [result, heroCta] = await Promise.all([
+    Effect.runPromise(Effect.either(productApiAdapter.getProducts())),
+    getVariant("hero-cta-text").then((v) => (v === "treatment" ? "Explore Products" : "Shop Now")),
+  ]);
 
   if (result._tag === "Left") {
     return (
@@ -34,12 +38,12 @@ export default async function ProductsPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 space-y-8">
-      <FeaturedProductsGrid products={featured} />
+      <FeaturedProductsGrid products={featured} heroCta={heroCta ?? "Shop Now"} />
 
       {rest.length > 0 && (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
           {rest.map((p) => (
-            <ProductCard key={p.id.value} product={p} />
+            <ProductCard key={p.id} product={p} />
           ))}
         </div>
       )}

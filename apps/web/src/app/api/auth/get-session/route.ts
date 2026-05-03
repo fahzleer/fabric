@@ -3,7 +3,7 @@ import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3010";
-const INTERNAL_SECRET = process.env.INTERNAL_SECRET ?? "";
+const TOKEN_ISSUE_SECRET = process.env.TOKEN_ISSUE_SECRET ?? "";
 
 export async function GET() {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -26,7 +26,7 @@ export async function GET() {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-internal-secret": INTERNAL_SECRET,
+        "x-internal-secret": TOKEN_ISSUE_SECRET,
       },
       body: JSON.stringify({
         userId: user.id,

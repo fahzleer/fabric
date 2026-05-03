@@ -1,10 +1,13 @@
 import type { TaggedError } from "./kernel";
 import type { UserRole } from "./user.types";
 
+export type TokenScope = "standard" | "privileged";
+
 export interface AccessTokenPayload {
   readonly sub: string;
   readonly role: UserRole;
   readonly email: string;
+  readonly scope: TokenScope;
   readonly iat: string;
   readonly exp: string;
 }

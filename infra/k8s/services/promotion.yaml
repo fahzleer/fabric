@@ -1,0 +1,83 @@
+# ── Promotion service ──────────────────────────────────────────────────────────
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: promotion
+  namespace: fabric
+  labels:
+    app: promotion
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: promotion
+  template:
+    metadata:
+      labels:
+        app: promotion
+    spec:
+      containers:
+        - name: promotion
+          image: ghcr.io/fabric/promotion:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 4008
+          envFrom:
+            - configMapRef:
+                name: fabric-env
+          env:
+            - name: PORT
+              value: "4008"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 4008
+            initialDelaySeconds: 10
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 4008
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: promotion-svc
+  namespace: fabric
+spec:
+  selector:
+    app: promotion
+  ports:
+    - protocol: TCP
+      port: 4008
+      targetPort: 4008
+  type: ClusterIP
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: promotion-hpa
+  namespace: fabric
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: promotion
+  minReplicas: 1
+  maxReplicas: 4
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70

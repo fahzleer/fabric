@@ -5,10 +5,13 @@ import { usePathname } from "next/navigation";
 
 const navItems = [
   { href: "/admin/dashboard", label: "Dashboard" },
+  { href: "/admin/merchants", label: "Merchants" },
+  { href: "/admin/kyc", label: "KYC Review" },
+  { href: "/admin/payouts", label: "Payouts" },
   { href: "/admin/invoices", label: "Invoices" },
   { href: "/admin/inventory", label: "Inventory" },
   { href: "/admin/affiliates", label: "Affiliates" },
-  { href: "/admin/payouts", label: "Payouts" },
+  { href: "/admin/experiments", label: "A/B Tests" },
 ] as const;
 
 export function AdminSidebar() {

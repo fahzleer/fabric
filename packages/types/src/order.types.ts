@@ -18,7 +18,7 @@ export const makeOrderId = (value: string): OrderId => value as OrderId;
 export type OrderStatus =
   | "pending"
   | "confirmed"
-  | "processing"
+  | "paid"
   | "shipped"
   | "delivered"
   | "cancelled"
@@ -27,8 +27,8 @@ export type OrderStatus =
 export const VALID_ORDER_STATUS_TRANSITIONS: Readonly<Record<OrderStatus, readonly OrderStatus[]>> =
   {
     pending: ["confirmed", "cancelled"],
-    confirmed: ["processing", "cancelled"],
-    processing: ["shipped", "cancelled"],
+    confirmed: ["paid", "cancelled"],
+    paid: ["shipped", "cancelled"],
     shipped: ["delivered"],
     delivered: [],
     cancelled: [],
@@ -43,12 +43,15 @@ export interface ShippingAddressError extends TaggedError<"ShippingAddressError"
 export type ShippingAddress = {
   readonly recipientName: string;
   readonly street: string;
-  readonly district: string;
+  readonly district?: string;
   readonly city: string;
   readonly province: string;
   readonly postalCode: string;
   readonly country: string;
-  readonly phoneNumber: string;
+  /** Preferred field — matches microservice API. */
+  readonly phone?: string;
+  /** Legacy alias for phone — kept for backwards compat with existing forms. */
+  readonly phoneNumber?: string;
 };
 
 export const makeShippingAddress = (
@@ -58,6 +61,12 @@ export const makeShippingAddress = (
     return {
       _tag: "ShippingAddressError",
       message: "Recipient name, street, and postal code are required",
+    };
+  }
+  if (!(raw.phone || raw.phoneNumber)) {
+    return {
+      _tag: "ShippingAddressError",
+      message: "Phone number is required",
     };
   }
   return raw;

@@ -2,7 +2,7 @@ import { getSessionCookie } from 'better-auth/cookies'
 import type { NextRequest } from 'next/server'
 import { NextResponse, userAgent } from 'next/server'
 
-const PROTECTED_PREFIXES = ['/products', '/product']
+const PROTECTED_PREFIXES = ['/products', '/product', '/admin', '/merchant']
 const AUTH_ONLY_PREFIXES = ['/auth/login', '/auth/register']
 
 export function middleware(request: NextRequest): NextResponse {

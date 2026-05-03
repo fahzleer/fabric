@@ -10,6 +10,7 @@
     "format": "biome format --write ./src",
     "typecheck": "tsc --noEmit",
     "test": "bun test",
+    "test:unit": "bun test src/domain src/application src/infrastructure",
     "coverage": "bun test --coverage",
     "cypress:open": "cypress open",
     "cypress:run": "cypress run --browser chrome"

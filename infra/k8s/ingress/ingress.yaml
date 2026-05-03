@@ -1,0 +1,32 @@
+# ── Ingress — routes external traffic to the gateway ─────────────────────────
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: fabric-ingress
+  namespace: fabric
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size:       "50m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout:    "60"
+    nginx.ingress.kubernetes.io/proxy-send-timeout:    "60"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "10"
+    nginx.ingress.kubernetes.io/enable-cors:           "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin:     "*"
+    nginx.ingress.kubernetes.io/cors-allow-methods:    "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-headers:    "Authorization, Content-Type, X-Request-ID"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: api.fabric.io
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: gateway-svc
+                port:
+                  number: 4000
+  tls:
+    - hosts:
+        - api.fabric.io
+      secretName: fabric-tls-cert

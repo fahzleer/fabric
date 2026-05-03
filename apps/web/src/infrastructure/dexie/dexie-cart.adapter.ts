@@ -37,7 +37,7 @@ export const dexieCartAdapter = {
   ): Effect.Effect<ShoppingCart, ProductOutOfStockError | CartInvalidQuantityError | NetworkError> {
     return Effect.tryPromise({
       try: async () => {
-        const key = makeItemKey(productId.value, size);
+        const key = makeItemKey(productId as unknown as string, size);
         const existing = await cartDb.cartItems.get(key);
 
         const newQty = existing
@@ -46,7 +46,7 @@ export const dexieCartAdapter = {
 
         const itemData: DexieCartItem = {
           id: key,
-          productId: productId.value,
+          productId: productId as unknown as string,
           size,
           quantity: newQty,
           unitPriceCents:
@@ -73,7 +73,7 @@ export const dexieCartAdapter = {
   ): Effect.Effect<ShoppingCart, CartItemNotFoundError | NetworkError> {
     return Effect.tryPromise({
       try: async () => {
-        const key = makeItemKey(productId.value, size);
+        const key = makeItemKey(productId as unknown as string, size);
         await cartDb.cartItems.delete(key);
         const items = await cartDb.cartItems.toArray();
         return dexieItemsToCart(items);
@@ -89,7 +89,7 @@ export const dexieCartAdapter = {
   ): Effect.Effect<ShoppingCart, CartItemNotFoundError | CartInvalidQuantityError | NetworkError> {
     return Effect.tryPromise({
       try: async () => {
-        const key = makeItemKey(productId.value, size);
+        const key = makeItemKey(productId as unknown as string, size);
         const qty = new BigNumber(newQuantity).toNumber();
         await cartDb.cartItems.update(key, { quantity: qty });
         const items = await cartDb.cartItems.toArray();

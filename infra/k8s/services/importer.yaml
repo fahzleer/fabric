@@ -1,0 +1,70 @@
+# ── Importer service ───────────────────────────────────────────────────────────
+# Runs as a single replica (sequential CSV/XLSX import jobs)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: importer
+  namespace: fabric
+  labels:
+    app: importer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: importer
+  template:
+    metadata:
+      labels:
+        app: importer
+    spec:
+      containers:
+        - name: importer
+          image: ghcr.io/fabric/importer:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 4009
+          envFrom:
+            - configMapRef:
+                name: fabric-env
+          env:
+            - name: PORT
+              value: "4009"
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: fabric-secrets
+                  key: IMPORTER_DATABASE_URL
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 4009
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 4009
+            initialDelaySeconds: 10
+            periodSeconds: 15
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "512Mi"
+            limits:
+              cpu: "2000m"
+              memory: "2Gi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: importer-svc
+  namespace: fabric
+spec:
+  selector:
+    app: importer
+  ports:
+    - protocol: TCP
+      port: 4009
+      targetPort: 4009
+  type: ClusterIP
+# No HPA for importer — single replica, CPU-bound import jobs

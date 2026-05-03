@@ -38,7 +38,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   if (productsResult._tag === "Right") {
     productPages = productsResult.right.map((product) => ({
-      url: `${baseUrl}/product/${product.id.value}`,
+      url: `${baseUrl}/product/${product.id}`,
       lastModified: new Date(),
       changeFrequency: "weekly" as const,
       priority: 0.8,

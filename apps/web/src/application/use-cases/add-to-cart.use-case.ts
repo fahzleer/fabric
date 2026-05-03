@@ -35,10 +35,10 @@ export const addToCartUseCase = (
       deps.eventBus.publish(
         makeItemAddedToCart({
           cartId: updatedCart.id,
-          productId: input.productId.value,
+          productId: input.productId,
           size: input.size,
           quantity: input.quantity,
-          unitPriceInCents: Math.round(input.unitPrice.displayAmount * 100),
+          unitPriceInCents: input.unitPrice.cents,
           currency: input.unitPrice.currency,
         })
       )
@@ -72,7 +72,7 @@ export const removeFromCartUseCase = (
       deps.eventBus.publish(
         makeItemRemovedFromCart({
           cartId: updatedCart.id,
-          productId: input.productId.value,
+          productId: input.productId,
           size: input.size,
         })
       )

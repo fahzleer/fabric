@@ -28,7 +28,7 @@ export const getProductDetailUseCase = (
     yield* Effect.forkDaemon(
       deps.eventBus.publish(
         makeProductViewed({
-          productId: input.productId.value,
+          productId: input.productId,
           sessionId: input.sessionId,
         })
       )

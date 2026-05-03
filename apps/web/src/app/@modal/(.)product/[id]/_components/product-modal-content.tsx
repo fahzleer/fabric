@@ -31,7 +31,7 @@ export function ProductModalContent({ product }: ProductModalContentProps) {
 
       <div className="p-6 flex flex-col">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">{product.name.value}</h2>
+          <h2 className="text-2xl font-bold text-gray-900">{product.name}</h2>
           {product.tagline.length > 0 && (
             <p className="mt-1 text-sm text-gray-500">{product.tagline}</p>
           )}
@@ -48,14 +48,14 @@ export function ProductModalContent({ product }: ProductModalContentProps) {
             productId={product.id}
             availableSizes={availableSizes}
             price={product.price}
-            productName={product.name.value}
+            productName={product.name}
             productImageUrl={primaryImage.url}
           />
         </div>
 
         <div className="mt-3">
           <Link
-            href={`/product/${product.id.value}`}
+            href={`/product/${product.id}`}
             className="block w-full text-center rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-700 font-medium hover:bg-gray-50 transition-colors"
           >
             View Full Details

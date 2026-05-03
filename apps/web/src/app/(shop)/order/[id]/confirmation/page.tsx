@@ -5,19 +5,19 @@ import { headers } from "next/headers";
 import Link from "next/link";
 import { ClearCartOnMount } from "./_components/clear-cart-on-mount";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3010";
-const INTERNAL_SECRET = process.env.INTERNAL_SECRET ?? "";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+const TOKEN_ISSUE_SECRET = process.env.TOKEN_ISSUE_SECRET ?? "";
 
 type OrderLine = {
-  productId: { value: string };
+  productId: string;
   productName: string;
-  unitPrice: { amount: number; currency: string };
+  unitPriceCents: number;
   size: string;
   quantity: number;
 };
 
 type OrderDetail = {
-  id: { value: string };
+  id: string;
   status: string;
   totalAmountInCents: number;
   shippingCents: number;
@@ -46,7 +46,7 @@ type PriceBreakdown = {
 const STATUS_LABELS: Record<string, { label: string; colour: string }> = {
   pending: { label: "Payment Pending", colour: "text-yellow-700 bg-yellow-50 border-yellow-200" },
   confirmed: { label: "Confirmed", colour: "text-green-700  bg-green-50  border-green-200" },
-  processing: { label: "Processing", colour: "text-blue-700   bg-blue-50   border-blue-200" },
+  paid: { label: "Paid", colour: "text-purple-700 bg-purple-50 border-purple-200" },
   shipped: { label: "Shipped", colour: "text-blue-700   bg-blue-50   border-blue-200" },
   delivered: { label: "Delivered", colour: "text-green-700  bg-green-50  border-green-200" },
   cancelled: { label: "Cancelled", colour: "text-red-700    bg-red-50    border-red-200" },
@@ -63,7 +63,7 @@ async function getAuthToken(): Promise<Maybe<string>> {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-internal-secret": INTERNAL_SECRET,
+        "x-internal-secret": TOKEN_ISSUE_SECRET,
       },
       body: JSON.stringify({
         userId: user.id,
@@ -110,10 +110,7 @@ function computePriceBreakdown(order: Maybe<OrderDetail>): PriceBreakdown {
     };
   }
   const o = order.value;
-  const subtotalCents = o.lines.reduce(
-    (acc, l) => acc + Math.round(l.unitPrice.amount * 100) * l.quantity,
-    0
-  );
+  const subtotalCents = o.lines.reduce((acc, l) => acc + l.unitPriceCents * l.quantity, 0);
   const taxCents = Math.max(
     0,
     o.totalAmountInCents - (subtotalCents - o.discountCents + o.shippingCents)
@@ -143,10 +140,7 @@ function OrderLineItems({ lines, currency }: { lines: OrderLine[]; currency: str
       <h2 className="text-sm font-semibold text-gray-900 mb-3">Items Ordered</h2>
       <div className="space-y-3">
         {lines.map((line) => (
-          <div
-            key={`${line.productId.value}:${line.size}`}
-            className="flex justify-between items-start"
-          >
+          <div key={`${line.productId}:${line.size}`} className="flex justify-between items-start">
             <div>
               <p className="text-sm font-medium text-gray-900">{line.productName}</p>
               <p className="text-xs text-gray-500">
@@ -154,7 +148,7 @@ function OrderLineItems({ lines, currency }: { lines: OrderLine[]; currency: str
               </p>
             </div>
             <p className="text-sm font-medium text-gray-900">
-              {formatPrice({ amount: line.unitPrice.amount * line.quantity, currency })}
+              {formatPrice({ amount: (line.unitPriceCents / 100) * line.quantity, currency })}
             </p>
           </div>
         ))}

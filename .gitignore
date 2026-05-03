@@ -21,8 +21,7 @@ test-results/
 # Turbo cache
 .turbo/
 
-# Bun lockfile artifacts
-bun.lockb
+# bun.lock (text format) is committed for reproducible installs
 
 # Environment files
 .env

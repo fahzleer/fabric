@@ -58,7 +58,7 @@ export const updateCartItemQuantity = (
   return Ok({
     ...cart,
     items: cart.items.map((item) =>
-      item.productId.value === productId.value && item.size === size ? { ...item, quantity } : item
+      item.productId === productId && item.size === size ? { ...item, quantity } : item
     ),
     updatedAt: Temporal.Now.instant().toString(),
   });
