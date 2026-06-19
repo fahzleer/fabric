@@ -1,5 +1,5 @@
 import { createMerchantApi } from "@/lib/merchant-api";
-import { isSome } from "@fabric/types";
+import { isOk, isSome } from "@fabric/types";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { connection } from "next/server";
@@ -102,7 +102,7 @@ export default async function MerchantOnboardingPage({
   const billingResult = await api.getBillingStatus();
 
   const isOnboarded =
-    billingResult.ok &&
+    isOk(billingResult) &&
     isSome(billingResult.value.onboarded) &&
     billingResult.value.onboarded.value;
 

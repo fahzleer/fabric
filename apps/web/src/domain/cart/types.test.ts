@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { makeProductId, makeProductPriceFromCents } from "@fabric/types";
+import type { ProductName } from "@/domain/product/types";
+import { makeProductId, makeProductName, makeProductPriceFromCents } from "@fabric/types";
 import type { CartItem, ShoppingCart } from "./types";
 import {
   formatCartTotal,
@@ -12,7 +13,7 @@ import {
 const PRICE = makeProductPriceFromCents(10_000, "THB");
 const PRICE_THB_WHOLE = makeProductPriceFromCents(99_900, "THB");
 
-const makeName = (v: string) => ({ __brand: "ProductName" as const, value: v });
+const makeName = (v: string): ProductName => makeProductName(v) as ProductName;
 const makeImage = () => ({
   url: "/img.jpg",
   altText: "alt",

@@ -16,6 +16,7 @@ function productToJson(p: Product) {
     id: p.id.value,
     name: p.name.value,
     description: p.description,
+    tagline: p.tagline,
     price: p.price.amount,
     priceCurrency: p.price.currency,
     category: p.category,
@@ -37,6 +38,7 @@ function productSummaryToJson(s: ProductSummary) {
   return {
     id: s.id.value,
     name: s.name.value,
+    tagline: s.tagline,
     price: s.price.amount,
     priceCurrency: s.price.currency,
     category: s.category,
@@ -64,6 +66,7 @@ const ImageSchema = type({
 const CreateProductBody = type({
   name: "string >= 1",
   "description?": "string",
+  "tagline?": "string <= 80",
   price: "number > 0",
   "priceCurrency?": "string == 3",
   category: '"basic" | "premium" | "limited_edition" | "custom"',
@@ -74,6 +77,7 @@ const CreateProductBody = type({
 const UpdateProductBody = type({
   "name?": "string >= 1",
   "description?": "string",
+  "tagline?": "string <= 80",
   "price?": "number > 0",
   "priceCurrency?": "string == 3",
   "category?": '"basic" | "premium" | "limited_edition" | "custom"',
@@ -147,6 +151,7 @@ function buildUpdatePayload(validated: typeof UpdateProductBody.infer) {
   return {
     ...(validated.name ? { name: validated.name } : {}),
     ...(validated.description !== undefined ? { description: validated.description } : {}),
+    ...(validated.tagline !== undefined ? { tagline: validated.tagline } : {}),
     ...(validated.price !== undefined ? { price: validated.price } : {}),
     ...(validated.priceCurrency ? { priceCurrency: validated.priceCurrency } : {}),
     ...(validated.category ? { category: validated.category } : {}),
@@ -223,6 +228,7 @@ export function registerProductRoutes(
         ownerId: userId,
         name: validated.name,
         description: validated.description ?? "",
+        tagline: validated.tagline ?? "",
         price: validated.price,
         priceCurrency: validated.priceCurrency ?? "THB",
         category: validated.category,
@@ -262,6 +268,36 @@ export function registerProductRoutes(
       return c.json(result);
     }
   );
+
+  app.get("/admin/products", requireAuth(verifier), requireRole("admin"), async (c) => {
+    const result = await service.getAllProducts();
+    return c.json({ products: result });
+  });
+
+  app.get("/merchant/inventory", requireAuth(verifier), async (c) => {
+    const ownerId = c.get("userId") as string;
+    const result = await service.getMerchantInventory(ownerId);
+    return c.json({ products: result });
+  });
+
+  app.get("/merchant/products", requireAuth(verifier), async (c) => {
+    const ownerId = c.get("userId") as string;
+    const page = Math.max(1, Number(c.req.query("page") ?? "1"));
+    const perPage = Math.min(100, Math.max(1, Number(c.req.query("perPage") ?? "50")));
+    const status = c.req.query("status") ?? undefined;
+    const category = c.req.query("category") ?? undefined;
+    const sort = c.req.query("sort") ?? undefined;
+    const { items, total } = await service.getMyProducts(
+      ownerId,
+      { page, perPage },
+      {
+        ...(status ? { status } : {}),
+        ...(category ? { category } : {}),
+        ...(sort ? { sort: sort as never } : {}),
+      }
+    );
+    return c.json({ items, page, perPage, total });
+  });
 
   app.delete("/api/products/:id", requireAuth(verifier), requireRole("admin"), async (c) => {
     const userId = c.get("userId") as string;

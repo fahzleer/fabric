@@ -1,7 +1,8 @@
+import type { CurrencyCode } from "@fabric/types";
 import { Either } from "effect";
 import { PricingError } from "../Error/PricingError.ts";
 
-export type CurrencyCode = "THB" | "USD" | "EUR" | "SGD";
+export type { CurrencyCode };
 
 export interface ProductPrice {
   readonly cents: number;
@@ -28,13 +29,10 @@ export const makeProductPrice =
 export const parseCurrency = (code: string): Either.Either<CurrencyCode, PricingError> => {
   switch (code) {
     case "THB":
-      return Either.right("THB");
     case "USD":
-      return Either.right("USD");
     case "EUR":
-      return Either.right("EUR");
     case "SGD":
-      return Either.right("SGD");
+      return Either.right(code);
     default:
       return Either.left(PricingError.invalidCurrency(code));
   }

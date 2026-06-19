@@ -94,7 +94,7 @@ export const decodeVoucherApplyRequest = (
 };
 
 const rawToCheckout = (raw: CheckoutRequestRaw): Either.Either<CheckoutRequest, PricingError> => {
-  if (!raw.voucher.code) {
+  if (!raw.voucher?.code) {
     return Either.right({
       items: raw.items,
       voucher: Either.left("NoVoucher" as const),

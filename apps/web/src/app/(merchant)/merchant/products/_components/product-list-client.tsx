@@ -1,16 +1,18 @@
 "use client";
 
 import {
-  type ProductFilterArg,
   merchantAllProductsAtom,
-  merchantManualResultsAtom,
-  merchantSearchAtom,
+  merchantCategoryAtom,
+  merchantQueryAtom,
+  merchantRawQueryAtom,
+  merchantResultsAtom,
+  merchantStatusAtom,
 } from "@/application/atoms/merchant-products.atoms";
 import type { MerchantProduct } from "@/lib/merchant-api";
 import { formatPrice } from "@/lib/price";
-import { Atom, useAtom, useAtomValue } from "@effect-atom/atom-react";
+import { useAtom, useAtomValue } from "@effect-atom/atom-react";
 import Link from "next/link";
-import { useLayoutEffect } from "react";
+import { useLayoutEffect, useMemo } from "react";
 
 const STATUS_BADGE: Record<string, string> = {
   active: "bg-emerald-500/20 text-emerald-300 border-emerald-500/40",
@@ -18,36 +20,36 @@ const STATUS_BADGE: Record<string, string> = {
   archived: "bg-red-500/20 text-red-400 border-red-500/40",
 };
 
-const filterQueryAtom = Atom.make("");
-const filterCategoryAtom = Atom.make("all");
-const filterStatusAtom = Atom.make("all");
-
 export function ProductListClient({ initialProducts }: { initialProducts: MerchantProduct[] }) {
   const [, setAllProducts] = useAtom(merchantAllProductsAtom);
-  const [, runSearch] = useAtom(merchantSearchAtom);
 
   useLayoutEffect(() => {
     setAllProducts(initialProducts);
-    runSearch({ query: "", category: "all", status: "all" });
-  }, [initialProducts, setAllProducts, runSearch]);
+  }, [initialProducts, setAllProducts]);
 
   return <FilterView />;
 }
 
 function FilterView() {
-  const results = useAtomValue(merchantManualResultsAtom);
-  const [actionResult, runSearch] = useAtom(merchantSearchAtom);
+  const results = useAtomValue(merchantResultsAtom);
   const allProducts = useAtomValue(merchantAllProductsAtom);
 
-  const [query, setQuery] = useAtom(filterQueryAtom);
-  const [category, setCategory] = useAtom(filterCategoryAtom);
-  const [status, setStatus] = useAtom(filterStatusAtom);
+  // The search input writes to the raw atom; the debounced derivation
+  // (merchantQueryAtom) is what the filter actually reads. 150ms is
+  // short enough to feel instant, long enough to skip 5-6 keystrokes
+  // for a fast typist.
+  const [rawQuery, setRawQuery] = useAtom(merchantRawQueryAtom);
+  const [category, setCategory] = useAtom(merchantCategoryAtom);
+  const [status, setStatus] = useAtom(merchantStatusAtom);
+  const debouncedQuery = useAtomValue(merchantQueryAtom);
 
-  const search = (overrides?: Partial<ProductFilterArg>) =>
-    runSearch({ query, category, status, ...overrides } satisfies ProductFilterArg);
-
-  const categories = ["all", ...Array.from(new Set(allProducts.map((p) => p.category))).sort()];
-  const isRunning = actionResult.waiting;
+  // Categories list is derived from the (stable) all-products list. Memoize
+  // so it doesn't recompute on every keystroke. Recomputes only when the
+  // product set changes (e.g. on a fresh page load).
+  const categories = useMemo(
+    () => ["all", ...Array.from(new Set(allProducts.map((p) => p.category))).sort()],
+    [allProducts]
+  );
 
   const inputCls =
     "rounded-lg border border-white/10 bg-gray-800 px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500";
@@ -59,57 +61,35 @@ function FilterView() {
         <input
           type="text"
           placeholder="Search name…"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && search()}
+          value={rawQuery}
+          onChange={(e) => setRawQuery(e.target.value)}
           className={`${inputCls} min-w-40 flex-1`}
         />
-        <select
-          value={category}
-          onChange={(e) => {
-            setCategory(e.target.value);
-            search({ category: e.target.value });
-          }}
-          className={inputCls}
-        >
+        <select value={category} onChange={(e) => setCategory(e.target.value)} className={inputCls}>
           {categories.map((c) => (
             <option key={c} value={c}>
               {c === "all" ? "All categories" : c.replace(/_/g, " ")}
             </option>
           ))}
         </select>
-        <select
-          value={status}
-          onChange={(e) => {
-            setStatus(e.target.value);
-            search({ status: e.target.value });
-          }}
-          className={inputCls}
-        >
+        <select value={status} onChange={(e) => setStatus(e.target.value)} className={inputCls}>
           <option value="all">All statuses</option>
           <option value="active">Active</option>
           <option value="draft">Draft</option>
           <option value="archived">Archived</option>
         </select>
-        <button
-          type="button"
-          onClick={() => search()}
-          className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-500"
-        >
-          Search
-        </button>
       </div>
 
       <div className="space-y-3">
         <div className="flex items-center gap-2">
           <span className="text-xs text-gray-500">
             {results.length} result{results.length !== 1 ? "s" : ""}
+            {debouncedQuery !== rawQuery && (
+              <span className="ml-2 italic text-gray-600">…typing</span>
+            )}
           </span>
-          {isRunning && (
-            <span className="inline-block h-2 w-2 animate-pulse rounded-full bg-emerald-400" />
-          )}
         </div>
-        {results.length === 0 && !isRunning ? (
+        {results.length === 0 ? (
           <p className="py-10 text-center text-sm text-gray-500">No products match</p>
         ) : (
           <ProductTable products={results} />

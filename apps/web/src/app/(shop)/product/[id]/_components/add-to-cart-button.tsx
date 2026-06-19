@@ -3,8 +3,8 @@
 import { cartAtom } from "@/application/atoms/cart.atoms";
 import type { ProductId, ProductPrice, ProductSize } from "@/domain/product/types";
 import { dexieCartAdapter } from "@/infrastructure/dexie/dexie-cart.adapter";
-import { type Maybe, None, Some, isNone, isSome } from "@/lib/maybe";
 import { Atom, useAtom, useAtomSet } from "@effect-atom/atom-react";
+import { type Maybe, None, Some, isNone, isSome } from "@fabric/types";
 import { Effect, Option } from "effect";
 
 const selectedSizeAtom = Atom.make<Maybe<ProductSize>>(None());

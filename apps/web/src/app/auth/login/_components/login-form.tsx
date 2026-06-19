@@ -1,8 +1,8 @@
 "use client";
 
 import { authClient } from "@/lib/auth-client";
-import { type Maybe, None, Some, isSome } from "@/lib/maybe";
 import { Atom, useAtom } from "@effect-atom/atom-react";
+import { type Maybe, None, Some, isSome } from "@fabric/types";
 import { useQueryState } from "nuqs";
 import { loginAction } from "../_lib/actions";
 

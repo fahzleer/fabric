@@ -29,6 +29,8 @@ const makeMerchant = (overrides: Partial<Merchant> = {}): Merchant => ({
   stripeCustomerId: None(),
   stripeSubscriptionId: None(),
   productCount: 0,
+  completedOrderCount: 0,
+  totalRevenueCents: 0,
   createdAt: "2024-01-01T00:00:00Z",
   updatedAt: "2024-01-01T00:00:00Z",
   planExpiresAt: None(),

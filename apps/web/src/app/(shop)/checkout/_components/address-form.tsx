@@ -1,6 +1,6 @@
 "use client";
 
-import { shippingAddressAtom } from "@/application/atoms/checkout.atoms";
+import { saveShippingAddress, shippingAddressAtom } from "@/application/atoms/checkout.atoms";
 import type { ShippingAddressFormData } from "@/application/atoms/checkout.atoms";
 import { Atom, useAtom, useAtomSet } from "@effect-atom/atom-react";
 import { Option } from "effect";
@@ -40,6 +40,7 @@ export function AddressForm({ onNext }: AddressFormProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
+    saveShippingAddress(form);
     setShippingAddress(Option.some(form));
     onNext();
   };
@@ -64,7 +65,7 @@ export function AddressForm({ onNext }: AddressFormProps) {
           id="recipientName"
           type="text"
           value={form.recipientName}
-          onChange={(e) => setForm((f) => ({ ...f, recipientName: e.target.value }))}
+          onChange={(e) => setForm({ ...form, recipientName: e.target.value })}
           className={fieldClass(errors.recipientName)}
           placeholder="Full name"
         />
@@ -81,7 +82,7 @@ export function AddressForm({ onNext }: AddressFormProps) {
           id="street"
           type="text"
           value={form.street}
-          onChange={(e) => setForm((f) => ({ ...f, street: e.target.value }))}
+          onChange={(e) => setForm({ ...form, street: e.target.value })}
           className={fieldClass(errors.street)}
           placeholder="123 Main St"
         />
@@ -97,7 +98,7 @@ export function AddressForm({ onNext }: AddressFormProps) {
             id="city"
             type="text"
             value={form.city}
-            onChange={(e) => setForm((f) => ({ ...f, city: e.target.value }))}
+            onChange={(e) => setForm({ ...form, city: e.target.value })}
             className={fieldClass(errors.city)}
             placeholder="Bangkok"
           />
@@ -111,7 +112,7 @@ export function AddressForm({ onNext }: AddressFormProps) {
             id="postalCode"
             type="text"
             value={form.postalCode}
-            onChange={(e) => setForm((f) => ({ ...f, postalCode: e.target.value }))}
+            onChange={(e) => setForm({ ...form, postalCode: e.target.value })}
             className={fieldClass(errors.postalCode)}
             placeholder="10100"
           />
@@ -126,7 +127,7 @@ export function AddressForm({ onNext }: AddressFormProps) {
         <select
           id="country"
           value={form.country}
-          onChange={(e) => setForm((f) => ({ ...f, country: e.target.value }))}
+          onChange={(e) => setForm({ ...form, country: e.target.value })}
           className={fieldClass()}
         >
           <option value="TH">Thailand</option>
@@ -144,7 +145,7 @@ export function AddressForm({ onNext }: AddressFormProps) {
           id="phone"
           type="tel"
           value={form.phone}
-          onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
+          onChange={(e) => setForm({ ...form, phone: e.target.value })}
           className={fieldClass(errors.phone)}
           placeholder="+66812345678"
         />

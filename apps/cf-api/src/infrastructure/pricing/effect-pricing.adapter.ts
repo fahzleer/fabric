@@ -50,8 +50,9 @@ export const calculateCheckoutEffect = (
   const body = {
     items: items.map((item) => ({
       productId: item.productId.value,
+      productName: item.productName,
+      priceCents: Math.round(item.unitPrice.amount * 100),
       quantity: item.quantity.value,
-      unitPriceCents: Math.round(item.unitPrice.amount * 100),
       size: item.size,
     })),
     voucher: voucher ?? null,

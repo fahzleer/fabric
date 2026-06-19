@@ -21,6 +21,7 @@ function makeProductRepo(overrides: Partial<ProductRepositoryPort> = {}): Produc
     reserveStockAtomicUpdate: mock(async () => Ok(MOCK_PRODUCT)),
     reserveStockBatch: mock(async () => Ok([MOCK_PRODUCT])),
     findByOwner: mock(async () => Ok({ items: [], total: 0, page: 1, perPage: 20 })),
+    findAll: mock(async () => Ok([])),
     ...overrides,
   };
 }
@@ -61,6 +62,7 @@ const MOCK_PRODUCT: Product = {
   ownerId: "owner-001",
   name: { __brand: "ProductName" as const, value: "Test T-Shirt" },
   description: "A great t-shirt",
+  tagline: "Soft everyday tee",
   price: { amount: 29.99, currency: "THB" as const, __brand: "ProductPrice" as const },
   category: "basic",
   status: "draft",
@@ -82,6 +84,7 @@ const VALID_CREATE_INPUT = {
   ownerId: "owner-001",
   name: "Cool T-Shirt",
   description: "A stylish t-shirt",
+  tagline: "Everyday essential",
   price: 29.99,
   priceCurrency: "THB",
   category: "basic" as const,

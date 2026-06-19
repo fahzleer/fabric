@@ -2,7 +2,7 @@
 
 import { validateCsrfOrigin } from "@/lib/csrf";
 import { createMerchantApi } from "@/lib/merchant-api";
-import { isSome } from "@fabric/types";
+import { isErr, isSome } from "@fabric/types";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
@@ -18,7 +18,7 @@ export async function openBillingPortalAction() {
   const api = maybeApi.value;
 
   const result = await api.getBillingPortalUrl();
-  if (!result.ok) {
+  if (isErr(result)) {
     redirect(`/merchant/billing?error=${encodeURIComponent(result.error)}`);
   }
 
@@ -46,7 +46,7 @@ export async function subscribePlanAction(formData: FormData) {
   const api = maybeApi.value;
 
   const result = await api.subscribeToPlan(planId);
-  if (!result.ok) {
+  if (isErr(result)) {
     redirect(`/merchant/billing?error=${encodeURIComponent(result.error)}`);
   }
 
@@ -67,7 +67,7 @@ export async function cancelSubscriptionAction() {
   const api = maybeApi.value;
 
   const result = await api.cancelSubscription();
-  if (!result.ok) {
+  if (isErr(result)) {
     redirect(`/merchant/billing?error=${encodeURIComponent(result.error)}`);
   }
 

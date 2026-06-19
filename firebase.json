@@ -63,7 +63,8 @@
     }
   ],
   "database": {
-    "rules": "database.rules.json"
+    "rules": "database.rules.json",
+    "indexes": "database.indexes.json"
   },
   "storage": {
     "rules": "storage.rules"

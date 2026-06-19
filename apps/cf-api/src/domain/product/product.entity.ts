@@ -1,5 +1,5 @@
-import type { Maybe, NonEmptyArray } from "@fabric/types";
-import { None, Some, isSome } from "@fabric/types";
+import type { Maybe, NonEmptyArray, Result } from "@fabric/types";
+import { Err, None, Ok, Some, isSome } from "@fabric/types";
 import { InvalidStatusTransitionError, ProductOutOfStockError } from "@fabric/types";
 import { Temporal } from "@js-temporal/polyfill";
 import type {
@@ -25,6 +25,7 @@ export interface Product {
   readonly ownerId: string;
   readonly name: ProductName;
   readonly description: string;
+  readonly tagline: string;
   readonly price: ProductPrice;
   readonly category: ProductCategory;
   readonly status: ProductStatus;
@@ -60,46 +61,30 @@ export const isSizeAvailable = (product: Product, size: ProductSize, quantity: n
 export const transitionProductStatus = (
   product: Product,
   newStatus: ProductStatus
-): { _tag: "Ok"; value: Product } | { _tag: "Err"; error: InvalidStatusTransitionErrorType } => {
+): Result<Product, InvalidStatusTransitionErrorType> => {
   if (!canTransitionStatus(product.status, newStatus))
-    return {
-      _tag: "Err",
-      error: InvalidStatusTransitionError(product.status, newStatus),
-    };
-  return {
-    _tag: "Ok",
-    value: { ...product, status: newStatus, updatedAt: Temporal.Now.instant() },
-  };
+    return Err(InvalidStatusTransitionError(product.status, newStatus));
+  return Ok({ ...product, status: newStatus, updatedAt: Temporal.Now.instant() });
 };
 
 export const reserveStock = (
   product: Product,
   size: ProductSize,
   quantity: number
-): { _tag: "Ok"; value: Product } | { _tag: "Err"; error: ProductOutOfStockErrorType } => {
+): Result<Product, ProductOutOfStockErrorType> => {
   const stockMaybe = getStockForSize(product, size);
-  if (!isSome(stockMaybe))
-    return {
-      _tag: "Err",
-      error: ProductOutOfStockError(product.id.value, size, quantity, 0),
-    };
+  if (!isSome(stockMaybe)) return Err(ProductOutOfStockError(product.id.value, size, quantity, 0));
 
   const available = stockMaybe.value.value;
   if (available < quantity)
-    return {
-      _tag: "Err",
-      error: ProductOutOfStockError(product.id.value, size, quantity, available),
-    };
+    return Err(ProductOutOfStockError(product.id.value, size, quantity, available));
 
   const newStock: StockMap = {
     ...product.stock,
     [size]: { __brand: "StockQuantity" as const, value: available - quantity },
   };
 
-  return {
-    _tag: "Ok",
-    value: { ...product, stock: newStock, updatedAt: Temporal.Now.instant() },
-  };
+  return Ok({ ...product, stock: newStock, updatedAt: Temporal.Now.instant() });
 };
 
 export const releaseStock = (product: Product, size: ProductSize, quantity: number): Product => {
@@ -115,6 +100,7 @@ export const releaseStock = (product: Product, size: ProductSize, quantity: numb
 export interface ProductSummary {
   readonly id: ProductId;
   readonly name: ProductName;
+  readonly tagline: string;
   readonly price: ProductPrice;
   readonly category: ProductCategory;
   readonly status: ProductStatus;
@@ -127,6 +113,7 @@ export interface ProductSummary {
 export const toProductSummary = (product: Product): ProductSummary => ({
   id: product.id,
   name: product.name,
+  tagline: product.tagline,
   price: product.price,
   category: product.category,
   status: product.status,

@@ -1,5 +1,5 @@
 import { createMerchantApi } from "@/lib/merchant-api";
-import { type Maybe, isSome } from "@fabric/types";
+import { type Maybe, isOk, isSome } from "@fabric/types";
 import type { Metadata } from "next";
 import { connection } from "next/server";
 import {
@@ -201,10 +201,10 @@ export default async function MerchantBillingPage({
 
   const billingResult = await api.getBillingStatus();
   const notOnboarded =
-    billingResult.ok &&
+    isOk(billingResult) &&
     isSome(billingResult.value.onboarded) &&
     !billingResult.value.onboarded.value;
-  const billing = billingResult.ok ? billingResult.value : undefined;
+  const billing = isOk(billingResult) ? billingResult.value : undefined;
   const currentPlan = (billing?.plan ?? "free") as PlanId;
   const isActive = billing?.planStatus === "active" || billing?.planStatus === "trialing";
 

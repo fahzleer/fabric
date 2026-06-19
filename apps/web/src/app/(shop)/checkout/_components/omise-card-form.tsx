@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  loadShippingAddress,
   placedOrderIdAtom,
   pricingPreviewAtom,
   shippingAddressAtom,
@@ -8,10 +9,10 @@ import {
 } from "@/application/atoms/checkout.atoms";
 import { getCartTotal } from "@/domain/cart/types";
 import type { ShoppingCart } from "@/domain/cart/types";
-import { type Maybe, None, Some, isNone, isSome } from "@/lib/maybe";
 import { formatPrice } from "@/lib/price";
 import { syncCartToServer } from "@/lib/sync-cart";
 import { Atom, useAtom, useAtomSet, useAtomValue } from "@effect-atom/atom-react";
+import { Err, type Maybe, None, Ok, type Result, Some, isErr, isNone, isSome } from "@fabric/types";
 import { Option } from "effect";
 import { useRouter } from "next/navigation";
 import Script from "next/script";
@@ -64,7 +65,7 @@ type OmiseShippingAddress = {
   province: string;
 };
 
-type OmiseOrderResult = { ok: true; orderId: string } | { ok: false; message: string };
+type OmiseOrderResult = Result<string, string>;
 
 type RawShippingAddress = Omit<OmiseShippingAddress, "province"> & { province?: string };
 
@@ -126,18 +127,15 @@ async function submitOmiseOrder(
   });
 
   if (!res.ok) {
-    return {
-      ok: false,
-      message: statusMessages[res.status] ?? "Order could not be placed. Please try again.",
-    };
+    return Err(statusMessages[res.status] ?? "Order could not be placed. Please try again.");
   }
 
   const order = (await res.json()) as { id?: { value?: string } | string };
   const orderId = typeof order.id === "string" ? order.id : order.id?.value;
   if (!orderId) {
-    return { ok: false, message: "Order placed but no order ID returned. Please contact support." };
+    return Err("Order placed but no order ID returned. Please contact support.");
   }
-  return { ok: true, orderId };
+  return Ok(orderId);
 }
 
 async function executeOmisePayment(
@@ -158,19 +156,24 @@ async function executeOmisePayment(
     { ...rawShipping, province: rawShipping.province ?? "Bangkok" },
     authToken
   );
-  if (!result.ok) {
-    deps.setError(Some(result.message));
+  if (isErr(result)) {
+    deps.setError(Some(result.error));
     deps.setStatus("error");
     return;
   }
-  deps.setPlacedOrderId(Option.some(result.orderId));
+  deps.setPlacedOrderId(Option.some(result.value));
   deps.setStatus("done");
-  deps.push(`/order/${result.orderId}/confirmation`);
+  deps.push(`/order/${result.value}/confirmation`);
 }
+
+const MOCK_MODE = !OMISE_PUBLIC_KEY;
 
 export function OmiseCardForm({ cart, onBack }: OmiseCardFormProps) {
   const router = useRouter();
-  const shippingAddressOption = useAtomValue(shippingAddressAtom);
+  const shippingAddressFromAtom = useAtomValue(shippingAddressAtom);
+  const shippingAddress = Option.isSome(shippingAddressFromAtom)
+    ? shippingAddressFromAtom
+    : loadShippingAddress();
   const setPlacedOrderId = useAtomSet(placedOrderIdAtom);
   const voucherCode = useAtomValue(voucherCodeAtom);
   const pricingPreviewOption = useAtomValue(pricingPreviewAtom);
@@ -202,9 +205,32 @@ export function OmiseCardForm({ cart, onBack }: OmiseCardFormProps) {
     }
   };
 
+  const handleMockPay = async () => {
+    if (isNone(cart) || cart.value.items.length === 0) return;
+    if (Option.isNone(shippingAddress)) {
+      onBack();
+      return;
+    }
+    setError(None());
+    setStatus("submitting");
+    const deps: PaymentDeps = { setError, setStatus, setPlacedOrderId, push: router.push };
+    try {
+      await executeOmisePayment(
+        `tok_mock_${crypto.randomUUID()}`,
+        cart.value,
+        voucherCode,
+        shippingAddress.value,
+        deps
+      );
+    } catch (e) {
+      setError(Some(e instanceof Error ? e.message : "Unknown error"));
+      setStatus("error");
+    }
+  };
+
   const handlePay = async () => {
     if (isNone(cart) || cart.value.items.length === 0) return;
-    if (Option.isNone(shippingAddressOption)) {
+    if (Option.isNone(shippingAddress)) {
       onBack();
       return;
     }
@@ -220,7 +246,6 @@ export function OmiseCardForm({ cart, onBack }: OmiseCardFormProps) {
     setError(None());
     setStatus("tokenizing");
 
-    const shippingAddress = shippingAddressOption.value;
     const deps: PaymentDeps = {
       setError,
       setStatus,
@@ -247,7 +272,13 @@ export function OmiseCardForm({ cart, onBack }: OmiseCardFormProps) {
         }
         setStatus("submitting");
         try {
-          await executeOmisePayment(response.id, cart.value, voucherCode, shippingAddress, deps);
+          await executeOmisePayment(
+            response.id,
+            cart.value,
+            voucherCode,
+            shippingAddress.value,
+            deps
+          );
         } catch (e) {
           setError(Some(e instanceof Error ? e.message : "Unknown error"));
           setStatus("error");
@@ -262,6 +293,54 @@ export function OmiseCardForm({ cart, onBack }: OmiseCardFormProps) {
     tokenizing: "Securing card details…",
     submitting: "Placing order…",
   };
+
+  if (MOCK_MODE) {
+    return (
+      <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-5">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-gray-900">Pay by Card</h2>
+          <span className="rounded-full bg-yellow-100 px-2.5 py-0.5 text-xs font-medium text-yellow-800">
+            Test mode
+          </span>
+        </div>
+        <p className="text-sm text-gray-500">
+          No Omise key configured — using mock payment gateway. Click the button to simulate a
+          successful payment.
+        </p>
+        {status === "error" && isSome(error) && (
+          <div className="rounded-lg bg-red-50 border border-red-200 p-3 text-sm text-red-700">
+            {error.value}
+          </div>
+        )}
+        <div className="border-t border-gray-200 pt-4">
+          <div className="flex justify-between font-semibold text-gray-900">
+            <span>Total</span>
+            <span>{formatPrice({ amount: totalAmount, currency })}</span>
+          </div>
+        </div>
+        <div className="flex gap-3">
+          <button
+            type="button"
+            onClick={onBack}
+            disabled={status === "submitting"}
+            className="flex-1 rounded-lg border border-gray-300 px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+          >
+            ← Back
+          </button>
+          <button
+            type="button"
+            onClick={handleMockPay}
+            disabled={status === "submitting"}
+            className="flex-1 rounded-lg bg-blue-600 px-4 py-3 text-white font-medium hover:bg-blue-700 disabled:opacity-50"
+          >
+            {status === "submitting"
+              ? "Placing order…"
+              : `Pay ${formatPrice({ amount: totalAmount, currency })}`}
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>

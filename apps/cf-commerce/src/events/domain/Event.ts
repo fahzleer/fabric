@@ -9,6 +9,7 @@ export interface ProductCreatedPayload {
   readonly productId: string;
   readonly ownerId: string;
   readonly name: string;
+  readonly tagline: string;
   readonly price: number;
   readonly currency: string;
   readonly category: string;
@@ -20,6 +21,7 @@ export interface ProductUpdatedPayload {
   readonly productId: string;
   readonly ownerId: string;
   readonly name: string;
+  readonly tagline: string;
   readonly price: number;
   readonly currency: string;
   readonly category: string;
@@ -128,6 +130,7 @@ export const toJson = (event: DomainEvent): string => {
         product_id: p.productId,
         owner_id: p.ownerId,
         name: p.name,
+        tagline: p.tagline,
         price: p.price,
         currency: p.currency,
         category: p.category,
@@ -207,6 +210,7 @@ export const fromJson = (
               productId: obj.product_id as string,
               ownerId: obj.owner_id as string,
               name: obj.name as string,
+              tagline: (obj.tagline as string) ?? "",
               price: obj.price as number,
               currency: obj.currency as string,
               category: obj.category as string,
@@ -225,6 +229,7 @@ export const fromJson = (
               productId: obj.product_id as string,
               ownerId: obj.owner_id as string,
               name: obj.name as string,
+              tagline: (obj.tagline as string) ?? "",
               price: obj.price as number,
               currency: obj.currency as string,
               category: obj.category as string,

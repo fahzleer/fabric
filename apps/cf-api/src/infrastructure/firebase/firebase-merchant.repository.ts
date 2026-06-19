@@ -24,6 +24,8 @@ function fromRecord(record: FirebaseMerchantRecord): Merchant {
     stripeSubscriptionId:
       record.stripeSubscriptionId != null ? Some(record.stripeSubscriptionId) : None<string>(),
     productCount: record.productCount,
+    completedOrderCount: record.completedOrderCount ?? 0,
+    totalRevenueCents: record.totalRevenueCents ?? 0,
     createdAt: record.createdAt,
     updatedAt: record.updatedAt,
     planExpiresAt: record.planExpiresAt != null ? Some(record.planExpiresAt) : None<string>(),
@@ -43,6 +45,8 @@ function toRecord(merchant: Merchant): FirebaseMerchantRecord {
       ? merchant.stripeSubscriptionId.value
       : null,
     productCount: merchant.productCount,
+    completedOrderCount: merchant.completedOrderCount,
+    totalRevenueCents: merchant.totalRevenueCents,
     createdAt: merchant.createdAt,
     updatedAt: merchant.updatedAt,
     planExpiresAt: isSome(merchant.planExpiresAt) ? merchant.planExpiresAt.value : null,
@@ -223,6 +227,55 @@ export class FirebaseMerchantRepository implements MerchantRepositoryPort {
       return Ok(fromRecord(snap.val() as FirebaseMerchantRecord));
     } catch (cause) {
       return Err(BillingRepositoryError("Failed to find merchant by slug", Some(cause)));
+    }
+  }
+
+  async findAll(): Promise<Result<Merchant[], BillingRepositoryErrorType>> {
+    try {
+      const snap = await firebaseQuery(this.db.ref("merchants").once("value"));
+      const merchants: Merchant[] = [];
+      snap.forEach((child) => {
+        merchants.push(fromRecord(child.val() as FirebaseMerchantRecord));
+      });
+      return Ok(merchants);
+    } catch (cause) {
+      return Err(BillingRepositoryError("Failed to list merchants", Some(cause)));
+    }
+  }
+
+  async findAllForAdmin(): Promise<
+    Result<
+      import("../../application/ports/merchant.repository.port").AdminMerchantSummary[],
+      BillingRepositoryErrorType
+    >
+  > {
+    try {
+      const snap = await firebaseQuery(this.db.ref("merchants").once("value"));
+      const result: import(
+        "../../application/ports/merchant.repository.port"
+      ).AdminMerchantSummary[] = [];
+      snap.forEach((child) => {
+        const raw = child.val() as FirebaseMerchantRecord & {
+          totalRevenueCents?: number;
+          completedOrderCount?: number;
+          paidOutCents?: number;
+        };
+        result.push({
+          userId: raw.userId,
+          storeName: raw.storeName,
+          storeSlug: raw.storeSlug ?? null,
+          plan: raw.plan,
+          planStatus: raw.planStatus,
+          productCount: raw.productCount ?? 0,
+          totalRevenueCents: raw.totalRevenueCents ?? 0,
+          completedOrderCount: raw.completedOrderCount ?? 0,
+          paidOutCents: raw.paidOutCents ?? 0,
+          createdAt: raw.createdAt,
+        });
+      });
+      return Ok(result);
+    } catch (cause) {
+      return Err(BillingRepositoryError("Failed to list merchants for admin", Some(cause)));
     }
   }
 }

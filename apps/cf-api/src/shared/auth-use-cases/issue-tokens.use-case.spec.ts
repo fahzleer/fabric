@@ -7,8 +7,7 @@ const mockEncryptToken = mock(
     _payload: unknown,
     _key: string,
     _ttl: number
-  ): Promise<{ _tag: "Ok"; value: string } | { _tag: "Err"; error: TokenIssuanceError }> =>
-    Ok("mock-token")
+  ): Promise<Result<string, TokenIssuanceError>> => Ok("mock-token")
 );
 
 import type { StoredRefreshToken } from "../../infrastructure/firebase/firebase-token.repository";

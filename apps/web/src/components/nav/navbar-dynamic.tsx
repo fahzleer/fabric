@@ -1,7 +1,7 @@
 "use client";
 
 import type { Session } from "@/lib/auth";
-import type { Maybe } from "@/lib/maybe";
+import type { Maybe } from "@fabric/types";
 import dynamic from "next/dynamic";
 
 const CartBadgeDynamic = dynamic(() => import("./cart-badge").then((m) => m.CartBadge), {

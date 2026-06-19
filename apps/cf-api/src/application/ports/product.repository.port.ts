@@ -26,6 +26,13 @@ export type ProductFilterInput = {
   readonly category?: string;
   readonly minPrice?: number;
   readonly maxPrice?: number;
+  readonly status?: string;
+  readonly sort?: ProductSortField;
+};
+
+export type OwnerProductFilterInput = {
+  readonly category?: string;
+  readonly status?: string;
   readonly sort?: ProductSortField;
 };
 
@@ -47,6 +54,8 @@ export type StockReservationItem = {
 
 export interface ProductRepositoryPort {
   findById(id: ProductId): Promise<Result<Product, ProductNotFoundError | RepositoryError>>;
+
+  findAll(): Promise<Result<readonly Product[], RepositoryError>>;
 
   findActive(
     pagination: PaginationInput
@@ -77,8 +86,9 @@ export interface ProductRepositoryPort {
 
   findByOwner(
     ownerId: string,
-    pagination: PaginationInput
-  ): Promise<Result<PaginatedResult<ProductSummary>, RepositoryError>>;
+    pagination: PaginationInput,
+    filter?: OwnerProductFilterInput
+  ): Promise<Result<PaginatedResult<Product>, RepositoryError>>;
 }
 
 export const PRODUCT_REPOSITORY = Symbol("PRODUCT_REPOSITORY");

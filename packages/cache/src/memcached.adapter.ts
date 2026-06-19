@@ -1,9 +1,20 @@
-import { Result, TaggedError } from "better-result";
+import { Err, Ok, type Result, type TaggedError, isErr, isOk, tryCatchAsync } from "@fabric/types";
 import Memcached from "memcached";
 
-export class MemcachedGetError extends TaggedError("MemcachedGetError")<{ message: string }>() {}
-export class MemcachedSetError extends TaggedError("MemcachedSetError")<{ message: string }>() {}
-export class MemcachedDelError extends TaggedError("MemcachedDelError")<{ message: string }>() {}
+export class MemcachedGetError implements TaggedError<"MemcachedGetError"> {
+  readonly _tag = "MemcachedGetError";
+  constructor(readonly message: string) {}
+}
+
+export class MemcachedSetError implements TaggedError<"MemcachedSetError"> {
+  readonly _tag = "MemcachedSetError";
+  constructor(readonly message: string) {}
+}
+
+export class MemcachedDelError implements TaggedError<"MemcachedDelError"> {
+  readonly _tag = "MemcachedDelError";
+  constructor(readonly message: string) {}
+}
 
 export type MemcachedServers = string | string[];
 
@@ -28,16 +39,17 @@ export class MemcachedAdapter {
   }
 
   get<T>(key: string): Promise<Result<T | undefined, MemcachedGetError>> {
-    return Result.tryPromise({
-      try: () =>
-        new Promise<T | undefined>((resolve, reject) => {
-          this.client.get(key, (err, data) => {
-            if (err) reject(err);
-            else resolve(data as T | undefined);
-          });
-        }),
-      catch: (e) => new MemcachedGetError({ message: String(e) }),
-    });
+    return tryCatchAsync<T | undefined, MemcachedGetError>(async () => {
+      const data = await new Promise<T | undefined>((resolve, reject) => {
+        this.client.get(key, (err, result) => {
+          if (err) reject(err);
+          else resolve(result as T | undefined);
+        });
+      });
+      return data;
+    }).then((result) =>
+      isErr(result) ? Err(new MemcachedGetError(String(result.error))) : result
+    );
   }
 
   set(
@@ -45,29 +57,30 @@ export class MemcachedAdapter {
     value: unknown,
     ttlSeconds: number
   ): Promise<Result<boolean, MemcachedSetError>> {
-    return Result.tryPromise({
-      try: () =>
-        new Promise<boolean>((resolve, reject) => {
-          this.client.set(key, value, ttlSeconds, (err, result) => {
-            if (err) reject(err);
-            else resolve(result);
-          });
-        }),
-      catch: (e) => new MemcachedSetError({ message: String(e) }),
-    });
+    return tryCatchAsync<boolean, MemcachedSetError>(async () => {
+      const result = await new Promise<boolean>((resolve, reject) => {
+        this.client.set(key, value, ttlSeconds, (err, ok) => {
+          if (err) reject(err);
+          else resolve(ok);
+        });
+      });
+      return result;
+    }).then((result) =>
+      isErr(result) ? Err(new MemcachedSetError(String(result.error))) : result
+    );
   }
 
   del(key: string): Promise<Result<void, MemcachedDelError>> {
-    return Result.tryPromise({
-      try: () =>
-        new Promise<void>((resolve, reject) => {
-          this.client.del(key, (err) => {
-            if (err) reject(err);
-            else resolve();
-          });
-        }),
-      catch: (e) => new MemcachedDelError({ message: String(e) }),
-    });
+    return tryCatchAsync<void, MemcachedDelError>(async () => {
+      await new Promise<void>((resolve, reject) => {
+        this.client.del(key, (err) => {
+          if (err) reject(err);
+          else resolve();
+        });
+      });
+    }).then((result) =>
+      isErr(result) ? Err(new MemcachedDelError(String(result.error))) : result
+    );
   }
 
   async getOrSet<T>(
@@ -77,18 +90,18 @@ export class MemcachedAdapter {
   ): Promise<Result<T, MemcachedGetError | MemcachedSetError>> {
     const cached = await this.get<T>(key);
 
-    if (Result.isOk(cached) && cached.value !== undefined) {
-      return Result.ok(cached.value);
+    if (isOk(cached) && cached.value !== undefined) {
+      return Ok(cached.value);
     }
 
     const value = await factory();
     const setResult = await this.set(key, value, ttlSeconds);
 
-    if (Result.isError(setResult)) {
-      return Result.err(setResult.error);
+    if (isErr(setResult)) {
+      return Err(setResult.error);
     }
 
-    return Result.ok(value);
+    return Ok(value);
   }
 
   async increment(key: string, ttlSeconds: number): Promise<number | null> {

@@ -1,5 +1,7 @@
 import type { CartItem, ShoppingCart } from "@/domain/cart/types";
-import type { ProductId, ProductSize } from "@/domain/product/types";
+import type { ProductSize } from "@/domain/product/types";
+import type { CurrencyCode } from "@fabric/types";
+import { makeBrandedId } from "@fabric/types";
 import Dexie, { type Table } from "dexie";
 
 export interface DexieCartItem {
@@ -31,18 +33,15 @@ export function dexieItemsToCart(items: DexieCartItem[]): ShoppingCart {
   const cartItems = items.map(
     (item) =>
       ({
-        productId: { __brand: "ProductId", value: item.productId } as ProductId,
+        productId: makeBrandedId("ProductId", item.productId),
         size: item.size as ProductSize,
         quantity: item.quantity,
         productSnapshot: {
-          name: {
-            __brand: "ProductName",
-            value: item.productName,
-          } as CartItem["productSnapshot"]["name"],
+          name: makeBrandedId("ProductName", item.productName),
           price: {
             __brand: "ProductPrice",
             amount: item.unitPriceCents / 100,
-            currency: item.currency,
+            currency: item.currency as CurrencyCode,
           } as CartItem["productSnapshot"]["price"],
           image: {
             url: item.productImageUrl,

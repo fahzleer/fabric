@@ -1,5 +1,5 @@
 import { createMerchantApi } from "@/lib/merchant-api";
-import { isSome } from "@fabric/types";
+import { isErr, isSome } from "@fabric/types";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
@@ -18,7 +18,7 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
   const api = maybeApi.value;
 
   const productResult = await api.getProductById(id);
-  if (!productResult.ok) notFound();
+  if (isErr(productResult)) notFound();
 
   const product = productResult.value;
 

@@ -1,7 +1,7 @@
 "use client";
 
-import { type Maybe, None, Some, isSome } from "@/lib/maybe";
 import { Atom, useAtom } from "@effect-atom/atom-react";
+import { type Maybe, None, Some, isSome } from "@fabric/types";
 import { useTransition } from "react";
 import { approvePayoutAction, rejectPayoutAction } from "./actions";
 

@@ -33,12 +33,23 @@ export async function registerAction(formData: FormData) {
       headers: await headers(),
     });
   } catch (error) {
-    const raw = error instanceof Error ? error.message : "";
-    const msg =
-      raw.toLowerCase().includes("already") || raw.includes("422")
-        ? "An account with this email already exists."
-        : raw || "Registration failed. Please try again.";
-    maybeError = Some(msg);
+    const raw = error instanceof Error ? error.message : String(error);
+
+    console.error("[registerAction] signUpEmail failed", {
+      email,
+      error: raw,
+      cause: error instanceof Error ? error.cause : undefined,
+    });
+
+    if (raw.toLowerCase().includes("already") || raw.includes("422")) {
+      maybeError = Some("An account with this email already exists.");
+    } else if (process.env.NODE_ENV !== "production" && raw) {
+      // In dev, surface the actual error so DB/config issues are visible
+      // in the URL bar instead of being swallowed by a generic message.
+      maybeError = Some(`Registration failed: ${raw}`);
+    } else {
+      maybeError = Some("Registration failed. Please try again.");
+    }
   }
 
   if (isSome(maybeError)) {

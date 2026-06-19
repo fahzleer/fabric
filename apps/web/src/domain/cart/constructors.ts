@@ -1,4 +1,4 @@
-import type { ProductId, ProductSize, Result } from "@fabric/types";
+import type { ProductId, ProductSize, Result, TaggedError } from "@fabric/types";
 import { Err, Ok } from "@fabric/types";
 import { Temporal } from "@js-temporal/polyfill";
 import type { CartItem, ShoppingCart } from "./types";
@@ -38,10 +38,7 @@ export const removeItemFromCart = (
   updatedAt: Temporal.Now.instant().toString(),
 });
 
-export type CartQuantityError = {
-  readonly _tag: "CartQuantityError";
-  readonly message: string;
-};
+export type CartQuantityError = TaggedError<"CartQuantityError">;
 
 export const updateCartItemQuantity = (
   cart: ShoppingCart,

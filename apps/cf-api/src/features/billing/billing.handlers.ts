@@ -1,4 +1,4 @@
-import { None, Some, isSome } from "@fabric/types";
+import { None, Some, isErr, isSome } from "@fabric/types";
 import { type } from "arktype";
 import type { Hono } from "hono";
 import { PLANS } from "../../domain/billing/billing.value-objects";
@@ -147,8 +147,8 @@ export function registerBillingRoutes(
     const userId = c.get("userId");
     const result = await billingService.getAnalytics(userId);
 
-    if (!result.ok) {
-      if (result._tag === "MerchantNotFoundError") {
+    if (isErr(result)) {
+      if (result.error._tag === "MerchantNotFoundError") {
         return c.json({
           completedOrderCount: 0,
           totalRevenueCents: 0,
@@ -158,7 +158,7 @@ export function registerBillingRoutes(
           onboarded: Some(false),
         });
       }
-      return c.json({ error: result.error, _tag: result._tag }, 500);
+      return c.json({ error: result.error.message, _tag: result.error._tag }, 500);
     }
 
     return c.json(result.value);

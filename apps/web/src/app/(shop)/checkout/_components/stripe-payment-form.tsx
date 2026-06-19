@@ -8,9 +8,9 @@ import {
 } from "@/application/atoms/checkout.atoms";
 import { getCartTotal } from "@/domain/cart/types";
 import type { ShoppingCart } from "@/domain/cart/types";
-import { type Maybe, None, Some, isNone, isSome } from "@/lib/maybe";
 import { formatPrice } from "@/lib/price";
 import { Atom, useAtom, useAtomSet, useAtomValue } from "@effect-atom/atom-react";
+import { type Maybe, None, Some, isNone, isSome } from "@fabric/types";
 import { Option } from "effect";
 import { useRouter } from "next/navigation";
 import Script from "next/script";

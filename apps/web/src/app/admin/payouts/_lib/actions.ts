@@ -1,7 +1,7 @@
 "use server";
 
 import { createMerchantApi } from "@/lib/merchant-api";
-import { isSome } from "@fabric/types";
+import { isErr, isSome } from "@fabric/types";
 import { revalidatePath } from "next/cache";
 
 export type PayoutActionState = {
@@ -19,7 +19,7 @@ export async function approvePayoutAction(
   if (api.role !== "admin") return { error: "Forbidden: admin only" };
 
   const result = await api.approvePayout(requestId, ownerUserId);
-  if (!result.ok) return { error: result.error };
+  if (isErr(result)) return { error: result.error };
 
   revalidatePath("/admin/payouts");
   return { success: true };
@@ -39,7 +39,7 @@ export async function rejectPayoutAction(
   if (!trimmedReason) return { error: "Rejection reason is required" };
 
   const result = await api.rejectPayout(requestId, ownerUserId, trimmedReason);
-  if (!result.ok) return { error: result.error };
+  if (isErr(result)) return { error: result.error };
 
   revalidatePath("/admin/payouts");
   return { success: true };

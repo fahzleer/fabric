@@ -2,8 +2,8 @@
 
 import type { Session } from "@/lib/auth";
 import { signOut } from "@/lib/auth-client";
-import { type Maybe, None, Some, getOrElse, isSome } from "@/lib/maybe";
 import { Atom, useAtom } from "@effect-atom/atom-react";
+import { type Maybe, None, Some, getOrElse, isSome } from "@fabric/types";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 

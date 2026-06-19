@@ -2,7 +2,6 @@ import { AddToCartButton } from "@/app/(shop)/product/[id]/_components/add-to-ca
 import type { Product } from "@/domain/product/types";
 import { formatPrice } from "@/lib/price";
 import Image from "next/image";
-import Link from "next/link";
 
 interface ProductModalContentProps {
   product: Product;
@@ -54,12 +53,12 @@ export function ProductModalContent({ product }: ProductModalContentProps) {
         </div>
 
         <div className="mt-3">
-          <Link
+          <a
             href={`/product/${product.id.value}`}
             className="block w-full text-center rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-700 font-medium hover:bg-gray-50 transition-colors"
           >
             View Full Details
-          </Link>
+          </a>
         </div>
       </div>
     </div>

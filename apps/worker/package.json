@@ -34,7 +34,6 @@
     "@sinclair/typebox": "^0.34.15",
     "arkregex": "^0.0.5",
     "arktype": "^2.1.23",
-    "better-result": "^2.7.0",
     "elysia": "^1.4.25",
     "nuqs": "^2.7.2",
     "react": "^19.2.0",

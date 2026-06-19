@@ -1,7 +1,7 @@
 import * as crypto from "node:crypto";
 import * as path from "node:path";
+import { type Result, type TaggedError, tryCatchAsync } from "@fabric/types";
 import { Storage } from "@google-cloud/storage";
-import { Result, TaggedError } from "better-result";
 
 export interface GcsAdapterOptions {
   bucketName: string;
@@ -14,9 +14,20 @@ export interface UploadResult {
   filename: string;
 }
 
-export class GcsUploadError extends TaggedError("GcsUploadError")<{ message: string }>() {}
-export class GcsDeleteError extends TaggedError("GcsDeleteError")<{ message: string }>() {}
-export class GcsSignedUrlError extends TaggedError("GcsSignedUrlError")<{ message: string }>() {}
+export class GcsUploadError implements TaggedError<"GcsUploadError"> {
+  readonly _tag = "GcsUploadError";
+  constructor(readonly message: string) {}
+}
+
+export class GcsDeleteError implements TaggedError<"GcsDeleteError"> {
+  readonly _tag = "GcsDeleteError";
+  constructor(readonly message: string) {}
+}
+
+export class GcsSignedUrlError implements TaggedError<"GcsSignedUrlError"> {
+  readonly _tag = "GcsSignedUrlError";
+  constructor(readonly message: string) {}
+}
 
 export class GcsStorageAdapter {
   private readonly storage: Storage;
@@ -40,21 +51,22 @@ export class GcsStorageAdapter {
     const gcsPath = `products/${productId}/images/${uniqueName}`;
     const file = this.storage.bucket(this.bucketName).file(gcsPath);
 
-    return Result.tryPromise({
-      try: () =>
-        file
-          .save(buffer, {
-            contentType,
-            metadata: { productId, originalFilename },
-            predefinedAcl: "publicRead",
-          })
-          .then(() => ({
-            publicUrl: this.buildPublicUrl(gcsPath),
-            gcsPath,
-            filename: uniqueName,
-          })),
-      catch: (e) => new GcsUploadError({ message: String(e) }),
-    });
+    return tryCatchAsync<UploadResult, GcsUploadError>(async () => {
+      await file.save(buffer, {
+        contentType,
+        metadata: { productId, originalFilename },
+        predefinedAcl: "publicRead",
+      });
+      return {
+        publicUrl: this.buildPublicUrl(gcsPath),
+        gcsPath,
+        filename: uniqueName,
+      };
+    }).then((result) =>
+      result._tag === "Err"
+        ? { _tag: "Err" as const, error: new GcsUploadError(String(result.error)) }
+        : result
+    );
   }
 
   deleteProductImage(urlOrPath: string): Promise<Result<void, GcsDeleteError>> {
@@ -62,27 +74,26 @@ export class GcsStorageAdapter {
       ? urlOrPath.replace(`https://storage.googleapis.com/${this.bucketName}/`, "")
       : urlOrPath;
 
-    return Result.tryPromise({
-      try: () =>
-        this.storage
-          .bucket(this.bucketName)
-          .file(gcsPath)
-          .delete({ ignoreNotFound: true })
-          .then(() => undefined),
-      catch: (e) => new GcsDeleteError({ message: String(e) }),
-    });
+    return tryCatchAsync<void, GcsDeleteError>(async () => {
+      await this.storage.bucket(this.bucketName).file(gcsPath).delete({ ignoreNotFound: true });
+    }).then((result) =>
+      result._tag === "Err"
+        ? { _tag: "Err" as const, error: new GcsDeleteError(String(result.error)) }
+        : result
+    );
   }
 
   deleteAllProductImages(productId: string): Promise<Result<void, GcsDeleteError>> {
     const prefix = `products/${productId}/images/`;
 
-    return Result.tryPromise({
-      try: async () => {
-        const [files] = await this.storage.bucket(this.bucketName).getFiles({ prefix });
-        await Promise.allSettled(files.map((f) => f.delete()));
-      },
-      catch: (e) => new GcsDeleteError({ message: String(e) }),
-    });
+    return tryCatchAsync<void, GcsDeleteError>(async () => {
+      const [files] = await this.storage.bucket(this.bucketName).getFiles({ prefix });
+      await Promise.allSettled(files.map((f) => f.delete()));
+    }).then((result) =>
+      result._tag === "Err"
+        ? { _tag: "Err" as const, error: new GcsDeleteError(String(result.error)) }
+        : result
+    );
   }
 
   buildPublicUrl(gcsPath: string): string {
@@ -90,14 +101,16 @@ export class GcsStorageAdapter {
   }
 
   getSignedUrl(gcsPath: string, expiresInMs: number): Promise<Result<string, GcsSignedUrlError>> {
-    return Result.tryPromise({
-      try: () =>
-        this.storage
-          .bucket(this.bucketName)
-          .file(gcsPath)
-          .getSignedUrl({ action: "read", expires: Date.now() + expiresInMs })
-          .then(([url]) => url),
-      catch: (e) => new GcsSignedUrlError({ message: String(e) }),
-    });
+    return tryCatchAsync<string, GcsSignedUrlError>(async () => {
+      const [url] = await this.storage
+        .bucket(this.bucketName)
+        .file(gcsPath)
+        .getSignedUrl({ action: "read", expires: Date.now() + expiresInMs });
+      return url;
+    }).then((result) =>
+      result._tag === "Err"
+        ? { _tag: "Err" as const, error: new GcsSignedUrlError(String(result.error)) }
+        : result
+    );
   }
 }

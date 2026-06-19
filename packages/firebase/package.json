@@ -15,7 +15,7 @@
     "format": "biome format --write ./src"
   },
   "dependencies": {
-    "better-result": "^2.7.0",
+    "@fabric/types": "workspace:*",
     "firebase-admin": "^13.0.0"
   },
   "devDependencies": {

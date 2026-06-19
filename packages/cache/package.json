@@ -16,8 +16,8 @@
     "format": "biome format --write ./src"
   },
   "dependencies": {
+    "@fabric/types": "*",
     "@google-cloud/storage": "^7.16.0",
-    "better-result": "^2.7.0",
     "memcached": "^2.2.2"
   },
   "devDependencies": {

@@ -37,7 +37,7 @@ function StoreProductCard({
     price: { amount: number; currency: string };
     primaryImage: { url: string; altText: string };
     tagline: string;
-    inStock: boolean;
+    isInStock: boolean;
   };
 }) {
   const price = formatPrice(product.price);
@@ -55,7 +55,7 @@ function StoreProductCard({
           sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 25vw"
           className="object-cover transition-transform group-hover:scale-105"
         />
-        {!product.inStock && (
+        {!product.isInStock && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/50">
             <span className="rounded-full bg-black/70 px-3 py-1 text-xs font-medium text-gray-300">
               Out of stock
@@ -125,7 +125,7 @@ export default async function StorefrontPage({
                 </span>
               </div>
               <p className="mt-1 text-sm text-gray-400">
-                {store.productCount} {store.productCount === 1 ? "product" : "products"} available
+                {products.total} {products.total === 1 ? "product" : "products"} available
               </p>
             </div>
           </div>

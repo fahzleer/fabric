@@ -1,6 +1,6 @@
 import type { FirebaseOrderRecord, FirebaseProductRecord } from "@fabric/firebase";
 import { OrderNotFoundError, ProductNotFoundError, ProductOutOfStockError } from "@fabric/types";
-import { None, Some } from "@fabric/types";
+import { None, Some, isSome } from "@fabric/types";
 import type { RepositoryError } from "@fabric/types";
 import type { NonEmptyArray } from "@fabric/types";
 import { isNonEmpty } from "@fabric/types";
@@ -129,8 +129,8 @@ function toRecord(order: Order): FirebaseOrderRecord {
     placedAt: order.placedAt.toString(),
     updatedAt: Temporal.Now.instant().toString(),
     confirmedAt: order.status === "confirmed" ? Temporal.Now.instant().toString() : null,
-    shippedAt: order.shippedAt._tag === "Some" ? order.shippedAt.value.toString() : null,
-    trackingNumber: order.trackingNumber._tag === "Some" ? order.trackingNumber.value : null,
+    shippedAt: isSome(order.shippedAt) ? order.shippedAt.value.toString() : null,
+    trackingNumber: isSome(order.trackingNumber) ? order.trackingNumber.value : null,
     cancelledAt: order.status === "cancelled" ? Temporal.Now.instant().toString() : null,
     paymentId: null,
   };
@@ -181,6 +181,71 @@ export class FirebaseOrderRepository implements OrderRepositoryPort {
         _tag: "Err",
         error: makeRepositoryError(`Failed to find orders for user ${userId.value}`, cause),
       };
+    }
+  }
+
+  async findForMerchant(
+    productIds: readonly string[],
+    pagination: PaginationInput
+  ): Promise<
+    Result<
+      PaginatedResult<import("../../application/ports/order.repository.port").MerchantOrderSummary>,
+      RepositoryError
+    >
+  > {
+    try {
+      const snap = await firebaseQuery(this.db.ref("orders").once("value"));
+      const productIdSet = new Set(productIds);
+      const matched: { rec: FirebaseOrderRecord; itemCount: number }[] = [];
+      snap.forEach((child) => {
+        const rec = child.val() as FirebaseOrderRecord;
+        const itemCount = Object.values(rec.items).reduce((sum, item) => {
+          return productIdSet.has(item.productId) ? sum + item.quantity : sum;
+        }, 0);
+        if (itemCount > 0) matched.push({ rec, itemCount });
+      });
+      matched.sort((a, b) => (a.rec.placedAt < b.rec.placedAt ? 1 : -1));
+      const total = matched.length;
+      const offset = (pagination.page - 1) * pagination.perPage;
+      const items = matched
+        .slice(offset, offset + pagination.perPage)
+        .map(({ rec, itemCount }) => ({
+          id: rec.id,
+          status: rec.status,
+          itemCount,
+          totalAmountInCents: rec.totalCents,
+          currency: rec.currency,
+          placedAt: rec.placedAt,
+          customerId: rec.userId,
+        }));
+      return {
+        _tag: "Ok",
+        value: { items, total, page: pagination.page, perPage: pagination.perPage },
+      };
+    } catch (cause) {
+      return { _tag: "Err", error: makeRepositoryError("Failed to find merchant orders", cause) };
+    }
+  }
+
+  async findAll(
+    pagination: PaginationInput
+  ): Promise<Result<PaginatedResult<Order>, RepositoryError>> {
+    try {
+      const snap = await firebaseQuery(this.db.ref("orders").once("value"));
+      const orders: Order[] = [];
+      snap.forEach((child) => {
+        orders.push(fromRecord(child.val() as FirebaseOrderRecord));
+      });
+      orders.sort((a, b) => Temporal.Instant.compare(b.placedAt, a.placedAt));
+      const total = orders.length;
+      const offset = (pagination.page - 1) * pagination.perPage;
+      const items = orders.slice(offset, offset + pagination.perPage);
+      return {
+        _tag: "Ok",
+        value: { items, total, page: pagination.page, perPage: pagination.perPage },
+      };
+    } catch (cause) {
+      return { _tag: "Err", error: makeRepositoryError("Failed to find all orders", cause) };
     }
   }
 

@@ -1,6 +1,6 @@
 import { createMerchantApi } from "@/lib/merchant-api";
 import type { PayoutRequest } from "@/lib/merchant-api";
-import { isSome } from "@fabric/types";
+import { isErr, isOk, isSome } from "@fabric/types";
 import type { Metadata } from "next";
 import { connection } from "next/server";
 import { PayoutActionButtons } from "./_lib/payout-action-buttons";
@@ -52,7 +52,7 @@ export default async function AdminPayoutsPage() {
   const api = maybeApi.value;
 
   const result = await api.listAllPendingPayouts();
-  const payouts = result.ok ? result.value : [];
+  const payouts = isOk(result) ? result.value : [];
 
   return (
     <div className="space-y-6 max-w-5xl">
@@ -73,14 +73,14 @@ export default async function AdminPayoutsPage() {
       </div>
 
       {/* Error */}
-      {!result.ok && (
+      {isErr(result) && (
         <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400">
           Failed to load payout requests: {result.error}
         </div>
       )}
 
       {/* Empty state */}
-      {result.ok && payouts.length === 0 && (
+      {isOk(result) && payouts.length === 0 && (
         <div className="rounded-xl border border-white/10 bg-gray-800/30 px-5 py-12 text-center">
           <p className="text-2xl mb-2">💸</p>
           <p className="text-sm font-medium text-gray-300">No pending payout requests</p>

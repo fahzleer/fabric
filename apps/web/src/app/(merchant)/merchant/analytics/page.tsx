@@ -1,8 +1,9 @@
 import { createMerchantApi } from "@/lib/merchant-api";
-import { isSome } from "@fabric/types";
+import { isErr, isSome } from "@fabric/types";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
+import { SalesInsightCard } from "./_components/sales-insight-card";
 
 export const metadata: Metadata = {
   title: "Analytics — Merchant Portal",
@@ -76,8 +77,8 @@ export default async function MerchantAnalyticsPage() {
 
   const result = await api.getAnalytics();
 
-  if (!result.ok) {
-    if (result._tag === "MerchantNotFoundError") redirect("/merchant/onboarding");
+  if (isErr(result)) {
+    if (result.error.startsWith("[MerchantNotFoundError]")) redirect("/merchant/onboarding");
     return (
       <div className="space-y-8">
         <div>
@@ -140,6 +141,9 @@ export default async function MerchantAnalyticsPage() {
           </p>
         </div>
       </div>
+
+      {/* AI sales insight (Typhoon) */}
+      <SalesInsightCard hasData={completedOrderCount > 0} />
 
       {/* Empty state hint */}
       {completedOrderCount === 0 && (

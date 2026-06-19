@@ -14,6 +14,16 @@ import type {
   StockReservationItem,
 } from "./product.repository.port";
 
+export interface MerchantOrderSummary {
+  readonly id: string;
+  readonly status: string;
+  readonly itemCount: number;
+  readonly totalAmountInCents: number;
+  readonly currency: string;
+  readonly placedAt: string;
+  readonly customerId: string;
+}
+
 export interface OrderRepositoryPort {
   findById(id: OrderId): Promise<Result<Order, OrderNotFoundError | RepositoryError>>;
 
@@ -21,6 +31,13 @@ export interface OrderRepositoryPort {
     userId: UserId,
     pagination: PaginationInput
   ): Promise<Result<PaginatedResult<OrderSummary>, RepositoryError>>;
+
+  findForMerchant(
+    productIds: readonly string[],
+    pagination: PaginationInput
+  ): Promise<Result<PaginatedResult<MerchantOrderSummary>, RepositoryError>>;
+
+  findAll(pagination: PaginationInput): Promise<Result<PaginatedResult<Order>, RepositoryError>>;
 
   save(order: Order): Promise<Result<Order, RepositoryError>>;
 
