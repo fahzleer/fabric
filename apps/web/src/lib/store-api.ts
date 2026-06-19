@@ -17,7 +17,7 @@ export type StorefrontProduct = {
   price: { amount: number; currency: string };
   primaryImage: { url: string; altText: string };
   tagline: string;
-  inStock: boolean;
+  isInStock: boolean;
   category: string;
 };
 

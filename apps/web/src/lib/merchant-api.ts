@@ -1,6 +1,16 @@
 import { auth } from "@/lib/auth";
-import type { Maybe } from "@fabric/types";
-import { None, Some, isSome } from "@fabric/types";
+import type {
+  Affiliate,
+  AffiliateContact,
+  AffiliateEarning,
+  AffiliateEarningRow,
+  AffiliateLink,
+  AffiliatePayoutRow,
+  AffiliateSummaryStats,
+  ContentPipelineItem,
+  Maybe,
+} from "@fabric/types";
+import { Err, None, Ok, type Result, Some, isSome } from "@fabric/types";
 import { headers } from "next/headers";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3010";
@@ -77,7 +87,73 @@ export type PayoutRequest = {
   adminNote?: string;
 };
 
-export type ApiResult<T> = { ok: true; value: T } | { ok: false; error: string; _tag?: string };
+export type MerchantInventoryProduct = {
+  id: string;
+  name: string;
+  category: string;
+  status: string;
+  priceCents: number;
+  currency: string;
+  stock: Record<string, number>;
+  totalStock: number;
+  createdAt: string;
+};
+
+export type MerchantOrderSummary = {
+  id: string;
+  status: string;
+  itemCount: number;
+  totalAmountInCents: number;
+  currency: string;
+  placedAt: string;
+  customerId: string;
+};
+
+export type MerchantOrderLine = {
+  productId: { value: string };
+  productName: string;
+  size: string;
+  quantity: number;
+  unitPrice: { amount: number; currency: string };
+};
+
+export type MerchantOrderDetail = {
+  id: { value: string };
+  status: string;
+  totalAmountInCents: number;
+  shippingCents: number;
+  discountCents: number;
+  currency: string;
+  placedAt: string;
+  userId: { value: string };
+  lines: MerchantOrderLine[];
+  shippingAddress: {
+    recipientName: string;
+    street: string;
+    city: string;
+    province: string;
+    country: string;
+    postalCode: string;
+    phone: string;
+  };
+};
+
+export type MerchantAffiliatesData = {
+  affiliates: Affiliate[];
+  links: AffiliateLink[];
+  earnings: AffiliateEarning[];
+  payouts: AffiliatePayoutRow[];
+  pipeline: ContentPipelineItem[];
+  contacts: AffiliateContact[];
+  earningsByAffiliate: AffiliateEarningRow[];
+  summary: AffiliateSummaryStats;
+};
+
+function formatApiError(tag: string | undefined, message: string): string {
+  return tag ? `[${tag}] ${message}` : message;
+}
+
+export type ApiResult<T> = Result<T, string>;
 
 export async function createMerchantApi(): Promise<
   Maybe<Awaited<ReturnType<typeof _buildMerchantApi>>>
@@ -109,14 +185,10 @@ function _buildMerchantApi(user: { id: string; email: string; role?: string }, t
         });
         const data = (await res.json()) as MerchantStatus & { error?: string; _tag?: string };
         if (!res.ok)
-          return {
-            ok: false,
-            error: data.error ?? "Failed to load billing status",
-            ...(data._tag ? { _tag: data._tag } : {}),
-          };
-        return { ok: true, value: data };
+          return Err(formatApiError(data._tag, data.error ?? "Failed to load billing status"));
+        return Ok(data);
       } catch {
-        return { ok: false, error: "Network error loading billing status" };
+        return Err("Network error loading billing status");
       }
     },
 
@@ -137,22 +209,14 @@ function _buildMerchantApi(user: { id: string; email: string; role?: string }, t
           error?: string;
           _tag?: string;
         };
-        if (!res.ok)
-          return {
-            ok: false,
-            error: data.error ?? "Onboarding failed",
-            ...(data._tag ? { _tag: data._tag } : {}),
-          };
-        return {
-          ok: true,
-          value: {
-            userId: data.userId ?? "",
-            storeName: data.storeName ?? "",
-            plan: data.plan ?? "free",
-          },
-        };
+        if (!res.ok) return Err(formatApiError(data._tag, data.error ?? "Onboarding failed"));
+        return Ok({
+          userId: data.userId ?? "",
+          storeName: data.storeName ?? "",
+          plan: data.plan ?? "free",
+        });
       } catch {
-        return { ok: false, error: "Network error during onboarding" };
+        return Err("Network error during onboarding");
       }
     },
 
@@ -163,15 +227,10 @@ function _buildMerchantApi(user: { id: string; email: string; role?: string }, t
           cache: "no-store",
         });
         const data = (await res.json()) as MerchantProduct & { error?: string; _tag?: string };
-        if (!res.ok)
-          return {
-            ok: false,
-            error: data.error ?? "Product not found",
-            ...(data._tag ? { _tag: data._tag } : {}),
-          };
-        return { ok: true, value: data };
+        if (!res.ok) return Err(formatApiError(data._tag, data.error ?? "Product not found"));
+        return Ok(data);
       } catch {
-        return { ok: false, error: "Network error loading product" };
+        return Err("Network error loading product");
       }
     },
 
@@ -180,20 +239,19 @@ function _buildMerchantApi(user: { id: string; email: string; role?: string }, t
       perPage = 20
     ): Promise<ApiResult<{ items: MerchantProduct[]; total: number }>> {
       try {
-        const url = new URL(`${API_BASE}/api/products`);
+        const url = new URL(`${API_BASE}/merchant/products`);
         url.searchParams.set("page", String(page));
         url.searchParams.set("perPage", String(perPage));
-        const res = await fetch(url.toString(), { cache: "no-store" });
+        const res = await fetch(url.toString(), { headers: authHeaders, cache: "no-store" });
         const data = (await res.json()) as {
           items?: MerchantProduct[];
           total?: number;
           error?: string;
         };
-        if (!res.ok) return { ok: false, error: data.error ?? "Failed to load products" };
-        const items = (data.items ?? []).filter((p) => p.ownerId === user.id);
-        return { ok: true, value: { items, total: items.length } };
+        if (!res.ok) return Err(data.error ?? "Failed to load products");
+        return Ok({ items: data.items ?? [], total: data.total ?? 0 });
       } catch {
-        return { ok: false, error: "Network error loading products" };
+        return Err("Network error loading products");
       }
     },
 
@@ -215,14 +273,10 @@ function _buildMerchantApi(user: { id: string; email: string; role?: string }, t
         });
         const data = (await res.json()) as MerchantProduct & { error?: string; _tag?: string };
         if (!res.ok)
-          return {
-            ok: false,
-            error: data.error ?? "Failed to create product",
-            ...(data._tag ? { _tag: data._tag } : {}),
-          };
-        return { ok: true, value: data };
+          return Err(formatApiError(data._tag, data.error ?? "Failed to create product"));
+        return Ok(data);
       } catch {
-        return { ok: false, error: "Network error creating product" };
+        return Err("Network error creating product");
       }
     },
 
@@ -248,14 +302,10 @@ function _buildMerchantApi(user: { id: string; email: string; role?: string }, t
         });
         const data = (await res.json()) as MerchantProduct & { error?: string; _tag?: string };
         if (!res.ok)
-          return {
-            ok: false,
-            error: data.error ?? "Failed to update product",
-            ...(data._tag ? { _tag: data._tag } : {}),
-          };
-        return { ok: true, value: data };
+          return Err(formatApiError(data._tag, data.error ?? "Failed to update product"));
+        return Ok(data);
       } catch {
-        return { ok: false, error: "Network error updating product" };
+        return Err("Network error updating product");
       }
     },
 
@@ -267,14 +317,10 @@ function _buildMerchantApi(user: { id: string; email: string; role?: string }, t
         });
         const data = (await res.json()) as { url?: string; error?: string; _tag?: string };
         if (!res.ok)
-          return {
-            ok: false,
-            error: data.error ?? "Failed to get portal URL",
-            ...(data._tag ? { _tag: data._tag } : {}),
-          };
-        return { ok: true, value: data.url ?? "" };
+          return Err(formatApiError(data._tag, data.error ?? "Failed to get portal URL"));
+        return Ok(data.url ?? "");
       } catch {
-        return { ok: false, error: "Network error getting portal URL" };
+        return Err("Network error getting portal URL");
       }
     },
 
@@ -294,15 +340,10 @@ function _buildMerchantApi(user: { id: string; email: string; role?: string }, t
           error?: string;
           _tag?: string;
         };
-        if (!res.ok)
-          return {
-            ok: false,
-            error: data.error ?? "Failed to subscribe",
-            ...(data._tag ? { _tag: data._tag } : {}),
-          };
-        return { ok: true, value: { plan: data.plan ?? "", planStatus: data.planStatus ?? "" } };
+        if (!res.ok) return Err(formatApiError(data._tag, data.error ?? "Failed to subscribe"));
+        return Ok({ plan: data.plan ?? "", planStatus: data.planStatus ?? "" });
       } catch {
-        return { ok: false, error: "Network error subscribing to plan" };
+        return Err("Network error subscribing to plan");
       }
     },
 
@@ -314,14 +355,45 @@ function _buildMerchantApi(user: { id: string; email: string; role?: string }, t
         });
         const data = (await res.json()) as MerchantAnalytics & { error?: string; _tag?: string };
         if (!res.ok)
-          return {
-            ok: false,
-            error: data.error ?? "Failed to load analytics",
-            ...(data._tag ? { _tag: data._tag } : {}),
-          };
-        return { ok: true, value: data };
+          return Err(formatApiError(data._tag, data.error ?? "Failed to load analytics"));
+        return Ok(data);
       } catch {
-        return { ok: false, error: "Network error loading analytics" };
+        return Err("Network error loading analytics");
+      }
+    },
+
+    async getMerchantInventory(): Promise<ApiResult<MerchantInventoryProduct[]>> {
+      try {
+        const res = await fetch(`${API_BASE}/merchant/inventory`, {
+          headers: authHeaders,
+          cache: "no-store",
+        });
+        const data = (await res.json()) as {
+          products?: MerchantInventoryProduct[];
+          error?: string;
+        };
+        if (!res.ok) return Err(data.error ?? "Failed to load inventory");
+        return Ok(data.products ?? []);
+      } catch {
+        return Err("Network error loading inventory");
+      }
+    },
+
+    async getMerchantAffiliates(): Promise<ApiResult<MerchantAffiliatesData>> {
+      try {
+        const res = await fetch(`${API_BASE}/merchant/affiliate/data`, {
+          headers: authHeaders,
+          cache: "no-store",
+        });
+        const data = (await res.json()) as MerchantAffiliatesData & {
+          error?: string;
+          _tag?: string;
+        };
+        if (!res.ok)
+          return Err(formatApiError(data._tag, data.error ?? "Failed to load affiliates"));
+        return Ok(data);
+      } catch {
+        return Err("Network error loading affiliates");
       }
     },
 
@@ -334,14 +406,10 @@ function _buildMerchantApi(user: { id: string; email: string; role?: string }, t
         });
         const data = (await res.json()) as { error?: string; _tag?: string };
         if (!res.ok)
-          return {
-            ok: false,
-            error: data.error ?? "Failed to cancel subscription",
-            ...(data._tag ? { _tag: data._tag } : {}),
-          };
-        return { ok: true, value: undefined };
+          return Err(formatApiError(data._tag, data.error ?? "Failed to cancel subscription"));
+        return Ok(undefined);
       } catch {
-        return { ok: false, error: "Network error cancelling subscription" };
+        return Err("Network error cancelling subscription");
       }
     },
 
@@ -353,14 +421,10 @@ function _buildMerchantApi(user: { id: string; email: string; role?: string }, t
         });
         const data = (await res.json()) as PayoutBalance & { error?: string; _tag?: string };
         if (!res.ok)
-          return {
-            ok: false,
-            error: data.error ?? "Failed to load payout balance",
-            ...(data._tag ? { _tag: data._tag } : {}),
-          };
-        return { ok: true, value: data };
+          return Err(formatApiError(data._tag, data.error ?? "Failed to load payout balance"));
+        return Ok(data);
       } catch {
-        return { ok: false, error: "Network error loading payout balance" };
+        return Err("Network error loading payout balance");
       }
     },
 
@@ -375,15 +439,10 @@ function _buildMerchantApi(user: { id: string; email: string; role?: string }, t
           error?: string;
           _tag?: string;
         };
-        if (!res.ok)
-          return {
-            ok: false,
-            error: data.error ?? "Failed to load payouts",
-            ...(data._tag ? { _tag: data._tag } : {}),
-          };
-        return { ok: true, value: data.payouts ?? [] };
+        if (!res.ok) return Err(formatApiError(data._tag, data.error ?? "Failed to load payouts"));
+        return Ok(data.payouts ?? []);
       } catch {
-        return { ok: false, error: "Network error loading payouts" };
+        return Err("Network error loading payouts");
       }
     },
 
@@ -397,14 +456,10 @@ function _buildMerchantApi(user: { id: string; email: string; role?: string }, t
         });
         const data = (await res.json()) as PayoutRequest & { error?: string; _tag?: string };
         if (!res.ok)
-          return {
-            ok: false,
-            error: data.error ?? "Failed to request payout",
-            ...(data._tag ? { _tag: data._tag } : {}),
-          };
-        return { ok: true, value: data };
+          return Err(formatApiError(data._tag, data.error ?? "Failed to request payout"));
+        return Ok(data);
       } catch {
-        return { ok: false, error: "Network error requesting payout" };
+        return Err("Network error requesting payout");
       }
     },
 
@@ -420,14 +475,10 @@ function _buildMerchantApi(user: { id: string; email: string; role?: string }, t
           _tag?: string;
         };
         if (!res.ok)
-          return {
-            ok: false,
-            error: data.error ?? "Failed to load pending payouts",
-            ...(data._tag ? { _tag: data._tag } : {}),
-          };
-        return { ok: true, value: data.payouts ?? [] };
+          return Err(formatApiError(data._tag, data.error ?? "Failed to load pending payouts"));
+        return Ok(data.payouts ?? []);
       } catch {
-        return { ok: false, error: "Network error loading pending payouts" };
+        return Err("Network error loading pending payouts");
       }
     },
 
@@ -441,14 +492,10 @@ function _buildMerchantApi(user: { id: string; email: string; role?: string }, t
         });
         const data = (await res.json()) as { error?: string; _tag?: string };
         if (!res.ok)
-          return {
-            ok: false,
-            error: data.error ?? "Failed to approve payout",
-            ...(data._tag ? { _tag: data._tag } : {}),
-          };
-        return { ok: true, value: undefined };
+          return Err(formatApiError(data._tag, data.error ?? "Failed to approve payout"));
+        return Ok(undefined);
       } catch {
-        return { ok: false, error: "Network error approving payout" };
+        return Err("Network error approving payout");
       }
     },
 
@@ -465,15 +512,47 @@ function _buildMerchantApi(user: { id: string; email: string; role?: string }, t
           cache: "no-store",
         });
         const data = (await res.json()) as { error?: string; _tag?: string };
-        if (!res.ok)
-          return {
-            ok: false,
-            error: data.error ?? "Failed to reject payout",
-            ...(data._tag ? { _tag: data._tag } : {}),
-          };
-        return { ok: true, value: undefined };
+        if (!res.ok) return Err(formatApiError(data._tag, data.error ?? "Failed to reject payout"));
+        return Ok(undefined);
       } catch {
-        return { ok: false, error: "Network error rejecting payout" };
+        return Err("Network error rejecting payout");
+      }
+    },
+
+    async getMerchantOrders(
+      page = 1,
+      perPage = 20
+    ): Promise<
+      ApiResult<{ items: MerchantOrderSummary[]; total: number; page: number; perPage: number }>
+    > {
+      try {
+        const url = new URL(`${API_BASE}/merchant/orders`);
+        url.searchParams.set("page", String(page));
+        url.searchParams.set("perPage", String(perPage));
+        const res = await fetch(url.toString(), { headers: authHeaders, cache: "no-store" });
+        const data = (await res.json()) as {
+          items?: MerchantOrderSummary[];
+          total?: number;
+          error?: string;
+        };
+        if (!res.ok) return Err(data.error ?? "Failed to load orders");
+        return Ok({ items: data.items ?? [], total: data.total ?? 0, page, perPage });
+      } catch {
+        return Err("Network error loading orders");
+      }
+    },
+
+    async getMerchantOrderById(id: string): Promise<ApiResult<MerchantOrderDetail>> {
+      try {
+        const res = await fetch(`${API_BASE}/merchant/orders/${id}`, {
+          headers: authHeaders,
+          cache: "no-store",
+        });
+        const data = (await res.json()) as MerchantOrderDetail & { error?: string };
+        if (!res.ok) return Err(data.error ?? "Order not found");
+        return Ok(data);
+      } catch {
+        return Err("Network error loading order");
       }
     },
   };

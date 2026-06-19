@@ -1,4 +1,4 @@
-import { Result } from "better-result";
+import { type Result, isOk, tryCatchAsync } from "@fabric/types";
 
 export interface Env {
   CF_API_URL: string;
@@ -35,30 +35,28 @@ export default {
       redirect: "follow",
     });
 
-    const result = await Result.tryPromise(() => fetch(upstreamRequest));
+    const result: Result<Response, unknown> = await tryCatchAsync(() => fetch(upstreamRequest));
 
-    return result.match({
-      ok: (response) => {
-        const responseHeaders = new Headers(response.headers);
-        responseHeaders.set("X-Frame-Options", "SAMEORIGIN");
-        responseHeaders.set("X-Content-Type-Options", "nosniff");
-        responseHeaders.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
-        responseHeaders.set("Referrer-Policy", "strict-origin-when-cross-origin");
-        responseHeaders.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+    if (isOk(result)) {
+      const response = result.value;
+      const responseHeaders = new Headers(response.headers);
+      responseHeaders.set("X-Frame-Options", "SAMEORIGIN");
+      responseHeaders.set("X-Content-Type-Options", "nosniff");
+      responseHeaders.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
+      responseHeaders.set("Referrer-Policy", "strict-origin-when-cross-origin");
+      responseHeaders.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
 
-        return new Response(response.body, {
-          status: response.status,
-          statusText: response.statusText,
-          headers: responseHeaders,
-        });
-      },
-      err: (error) => {
-        console.error(`[worker] upstream error: ${String(error)}`);
-        return new Response(JSON.stringify({ error: "Service temporarily unavailable" }), {
-          status: 503,
-          headers: { "Content-Type": "application/json" },
-        });
-      },
+      return new Response(response.body, {
+        status: response.status,
+        statusText: response.statusText,
+        headers: responseHeaders,
+      });
+    }
+
+    console.error(`[worker] upstream error: ${String(result.error)}`);
+    return new Response(JSON.stringify({ error: "Service temporarily unavailable" }), {
+      status: 503,
+      headers: { "Content-Type": "application/json" },
     });
   },
 };

@@ -40,4 +40,21 @@ export interface MerchantRepositoryPort {
   findBySlug(
     slug: string
   ): Promise<Result<Merchant, MerchantNotFoundError | BillingRepositoryError>>;
+
+  findAll(): Promise<Result<Merchant[], BillingRepositoryError>>;
+
+  findAllForAdmin(): Promise<Result<AdminMerchantSummary[], BillingRepositoryError>>;
+}
+
+export interface AdminMerchantSummary {
+  userId: string;
+  storeName: string;
+  storeSlug: string | null;
+  plan: string;
+  planStatus: string;
+  productCount: number;
+  totalRevenueCents: number;
+  completedOrderCount: number;
+  paidOutCents: number;
+  createdAt: string;
 }

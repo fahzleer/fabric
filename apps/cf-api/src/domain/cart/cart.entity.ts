@@ -1,5 +1,5 @@
-import type { Maybe } from "@fabric/types";
-import { None, Some, isSome } from "@fabric/types";
+import type { Maybe, Result } from "@fabric/types";
+import { Err, None, Ok, Some, isSome } from "@fabric/types";
 import { InvalidQuantityError, InvalidSizeError, ItemNotInCartError } from "@fabric/types";
 import { Temporal } from "@js-temporal/polyfill";
 import type { ProductId, ProductPrice, ProductSize } from "../product/product.value-objects";
@@ -62,13 +62,11 @@ export const makeEmptyCart = (id: CartId, userId: Maybe<UserId>): Cart => ({
 export const addItemToCart = (
   cart: Cart,
   item: Omit<CartItem, "quantity"> & { quantity: number }
-):
-  | { _tag: "Ok"; value: Cart }
-  | { _tag: "Err"; error: InvalidQuantityErrorType | InvalidSizeErrorType } => {
-  if (!isValidSize(item.size)) return { _tag: "Err", error: InvalidSizeError(item.size) };
+): Result<Cart, InvalidQuantityErrorType | InvalidSizeErrorType> => {
+  if (!isValidSize(item.size)) return Err(InvalidSizeError(item.size));
 
   const qtyResult = makeCartItemQuantity(item.quantity);
-  if ("_tag" in qtyResult) return { _tag: "Err", error: InvalidQuantityError(qtyResult.message) };
+  if ("_tag" in qtyResult) return Err(InvalidQuantityError(qtyResult.message));
 
   const existingIndex = cart.items.findIndex(
     (i) => i.productId.value === item.productId.value && i.size === item.size
@@ -77,54 +75,40 @@ export const addItemToCart = (
   if (existingIndex !== -1) {
     const existing = cart.items[existingIndex];
     if (existing === undefined)
-      return { _tag: "Err", error: InvalidQuantityError("Cart item not found at expected index") };
+      return Err(InvalidQuantityError("Cart item not found at expected index"));
     const newQty = existing.quantity.value + item.quantity;
     const newQtyResult = makeCartItemQuantity(newQty);
-    if ("_tag" in newQtyResult)
-      return { _tag: "Err", error: InvalidQuantityError(newQtyResult.message) };
+    if ("_tag" in newQtyResult) return Err(InvalidQuantityError(newQtyResult.message));
 
     const updatedItems = cart.items.map((cartItem, idx) =>
       idx === existingIndex ? { ...cartItem, quantity: newQtyResult } : cartItem
     );
-    return {
-      _tag: "Ok",
-      value: { ...cart, items: updatedItems, updatedAt: Temporal.Now.instant() },
-    };
+    return Ok({ ...cart, items: updatedItems, updatedAt: Temporal.Now.instant() });
   }
 
   const newItem: CartItem = { ...item, quantity: qtyResult };
-  return {
-    _tag: "Ok",
-    value: {
-      ...cart,
-      items: [...cart.items, newItem],
-      updatedAt: Temporal.Now.instant(),
-    },
-  };
+  return Ok({
+    ...cart,
+    items: [...cart.items, newItem],
+    updatedAt: Temporal.Now.instant(),
+  });
 };
 
 export const removeItemFromCart = (
   cart: Cart,
   productId: ProductId,
   size: ProductSize
-): { _tag: "Ok"; value: Cart } | { _tag: "Err"; error: ItemNotInCartErrorType } => {
+): Result<Cart, ItemNotInCartErrorType> => {
   const exists = isSome(findCartItem(cart, productId, size));
-  if (!exists)
-    return {
-      _tag: "Err",
-      error: ItemNotInCartError(productId.value, size),
-    };
+  if (!exists) return Err(ItemNotInCartError(productId.value, size));
 
-  return {
-    _tag: "Ok",
-    value: {
-      ...cart,
-      items: cart.items.filter(
-        (item) => !(item.productId.value === productId.value && item.size === size)
-      ),
-      updatedAt: Temporal.Now.instant(),
-    },
-  };
+  return Ok({
+    ...cart,
+    items: cart.items.filter(
+      (item) => !(item.productId.value === productId.value && item.size === size)
+    ),
+    updatedAt: Temporal.Now.instant(),
+  });
 };
 
 export const updateCartItemQuantity = (
@@ -132,31 +116,22 @@ export const updateCartItemQuantity = (
   productId: ProductId,
   size: ProductSize,
   newQuantity: number
-):
-  | { _tag: "Ok"; value: Cart }
-  | { _tag: "Err"; error: ItemNotInCartErrorType | InvalidQuantityErrorType } => {
+): Result<Cart, ItemNotInCartErrorType | InvalidQuantityErrorType> => {
   const existingMaybe = findCartItem(cart, productId, size);
-  if (!isSome(existingMaybe))
-    return {
-      _tag: "Err",
-      error: ItemNotInCartError(productId.value, size),
-    };
+  if (!isSome(existingMaybe)) return Err(ItemNotInCartError(productId.value, size));
 
   const qtyResult = makeCartItemQuantity(newQuantity);
-  if ("_tag" in qtyResult) return { _tag: "Err", error: InvalidQuantityError(qtyResult.message) };
+  if ("_tag" in qtyResult) return Err(InvalidQuantityError(qtyResult.message));
 
-  return {
-    _tag: "Ok",
-    value: {
-      ...cart,
-      items: cart.items.map((item) =>
-        item.productId.value === productId.value && item.size === size
-          ? { ...item, quantity: qtyResult }
-          : item
-      ),
-      updatedAt: Temporal.Now.instant(),
-    },
-  };
+  return Ok({
+    ...cart,
+    items: cart.items.map((item) =>
+      item.productId.value === productId.value && item.size === size
+        ? { ...item, quantity: qtyResult }
+        : item
+    ),
+    updatedAt: Temporal.Now.instant(),
+  });
 };
 
 export const clearCart = (cart: Cart): Cart => ({

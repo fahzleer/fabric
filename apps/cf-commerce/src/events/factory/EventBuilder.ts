@@ -27,6 +27,7 @@ export interface ProductCreatedBuilder {
   readonly productId: Option.Option<string>;
   readonly ownerId: Option.Option<string>;
   readonly name: Option.Option<string>;
+  readonly tagline: Option.Option<string>;
   readonly price: Option.Option<number>;
   readonly currency: Option.Option<string>;
   readonly category: Option.Option<string>;
@@ -41,6 +42,7 @@ export const productCreatedBuilder = (): ProductCreatedBuilder => ({
   productId: Option.none(),
   ownerId: Option.none(),
   name: Option.none(),
+  tagline: Option.none(),
   price: Option.none(),
   currency: Option.none(),
   category: Option.none(),
@@ -65,6 +67,10 @@ export const withOwnerId = (b: ProductCreatedBuilder, v: string): ProductCreated
 export const withName = (b: ProductCreatedBuilder, v: string): ProductCreatedBuilder => ({
   ...b,
   name: Option.some(v),
+});
+export const withTagline = (b: ProductCreatedBuilder, v: string): ProductCreatedBuilder => ({
+  ...b,
+  tagline: Option.some(v),
 });
 export const withPrice = (b: ProductCreatedBuilder, cents: number): ProductCreatedBuilder => ({
   ...b,
@@ -150,6 +156,7 @@ export const buildProductCreated = (
         productId: pid.value,
         ownerId: oid.value,
         name: n.value,
+        tagline: Option.getOrElse(b.tagline, () => ""),
         price: p.value,
         currency: c.value,
         category: cat.value,

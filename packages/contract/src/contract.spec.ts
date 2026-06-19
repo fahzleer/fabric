@@ -92,6 +92,7 @@ describe("ProductSummaryDto has all required fields", () => {
   const makeSummaryDto = (overrides: Partial<ProductSummaryDto> = {}): ProductSummaryDto => ({
     id: "prod-1",
     name: "Test Shirt",
+    tagline: "A great test shirt",
     price: 499,
     priceCurrency: "THB",
     category: "basic",
@@ -168,6 +169,7 @@ describe("ProductSummaryDto has all required fields", () => {
     const detail: ProductDetailDto = {
       id: "prod-1",
       name: "Test Shirt",
+      tagline: "A great test shirt",
       price: 499,
       priceCurrency: "THB",
       category: "basic",

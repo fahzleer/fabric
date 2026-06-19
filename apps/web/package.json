@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "ulimit -n 65536 && next dev",
+    "dev": "ulimit -n 65536 && next dev --port 3002",
     "build": "next build --webpack",
     "start": "next start",
     "lint": "biome lint ./src",
@@ -11,6 +11,10 @@
     "typecheck": "tsc --noEmit",
     "test": "bun test",
     "coverage": "bun test --coverage",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio",
     "cypress:open": "cypress open",
     "cypress:run": "cypress run --browser chrome"
   },
@@ -24,7 +28,6 @@
     "@tanstack/react-query": "^5.90.21",
     "arkregex": "^0.0.5",
     "better-auth": "^1.2.7",
-    "better-result": "^2.7.0",
     "bignumber.js": "^9.3.1",
     "dexie": "^4.3.0",
     "dexie-react-hooks": "^4.2.0",

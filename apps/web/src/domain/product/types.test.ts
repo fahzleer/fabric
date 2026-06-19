@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { makeProductId, makeProductPriceFromCents } from "@fabric/types";
-import type { Product } from "./types";
+import { makeProductId, makeProductName, makeProductPriceFromCents } from "@fabric/types";
+import type { Product, ProductName } from "./types";
 import {
   getProductAvailableSizes,
   getProductPrimaryImage,
@@ -13,7 +13,7 @@ import {
   toProductSummary,
 } from "./types";
 
-const makeName = (v: string) => ({ __brand: "ProductName" as const, value: v });
+const makeName = (v: string): ProductName => makeProductName(v) as ProductName;
 const makeImage = (isPrimary: boolean, order = 0) => ({
   url: `/img-${order}.jpg`,
   altText: "alt",

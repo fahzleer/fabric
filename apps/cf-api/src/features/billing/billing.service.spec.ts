@@ -31,6 +31,8 @@ const MERCHANT_FREE: Merchant = {
   stripeCustomerId: None<string>(),
   stripeSubscriptionId: None<string>(),
   productCount: 0,
+  completedOrderCount: 0,
+  totalRevenueCents: 0,
   createdAt: "2025-01-01T00:00:00Z",
   updatedAt: "2025-01-01T00:00:00Z",
   planExpiresAt: None<string>(),
@@ -82,6 +84,8 @@ function makeMerchantRepo(overrides: Partial<MerchantRepositoryPort> = {}): Merc
     updatePlan: mock(async () => Ok(undefined)),
     recordCompletedOrder: mock(async () => Ok(undefined)),
     findBySlug: mock(async () => Err(MerchantNotFoundError("unknown"))),
+    findAll: mock(async () => Ok([])),
+    findAllForAdmin: mock(async () => Ok([])),
     ...overrides,
   };
 }

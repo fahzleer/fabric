@@ -8,9 +8,13 @@ type NavItem = { href: string; label: string; icon: string; aliases: string[] };
 const navItems: NavItem[] = [
   { href: "/merchant/dashboard", label: "Dashboard", icon: "▤", aliases: ["/merchant/onboarding"] },
   { href: "/merchant/products", label: "Products", icon: "🏷", aliases: [] },
+  { href: "/merchant/orders", label: "Orders", icon: "📦", aliases: [] },
   { href: "/merchant/analytics", label: "Analytics", icon: "📊", aliases: [] },
   { href: "/merchant/payouts", label: "Payouts", icon: "💸", aliases: [] },
   { href: "/merchant/billing", label: "Billing", icon: "💳", aliases: [] },
+  { href: "/merchant/invoices", label: "Invoices", icon: "🧾", aliases: [] },
+  { href: "/merchant/inventory", label: "Inventory", icon: "📦", aliases: [] },
+  { href: "/merchant/affiliates", label: "Affiliates", icon: "🔗", aliases: [] },
 ];
 
 function matchesPath(pathname: string, item: NavItem): boolean {

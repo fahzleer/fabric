@@ -27,7 +27,8 @@
   ],
   "scripts": {
     "emulator": "firebase emulators:start --only database,storage",
-    "dev": "turbo dev --filter='!worker'",
+    "dev": "bun run scripts/dev-with-emulator.ts",
+    "emulator:bg": "firebase emulators:start --only database,storage",
     "build": "turbo build",
     "lint": "biome lint .",
     "lint:all": "turbo lint",

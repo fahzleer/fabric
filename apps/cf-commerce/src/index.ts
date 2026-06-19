@@ -1,5 +1,9 @@
-import { createFirebaseFromEnv } from "@fabric/firebase";
-import { Result } from "better-result";
+import {
+  type FirebaseClients,
+  type FirebaseInitError,
+  createFirebaseFromEnv,
+} from "@fabric/firebase";
+import { Err, Ok, type Result, isErr } from "@fabric/types";
 import { deleteApp } from "firebase-admin/app";
 import { onRequest } from "firebase-functions/v2/https";
 import { Hono } from "hono";
@@ -21,13 +25,42 @@ import { OmisePaymentGateway } from "./payment/adapters/omise-payment-gateway.ad
 import { PromptPayAdapter } from "./payment/adapters/promptpay.adapter.ts";
 import { registerPricingRoutes } from "./pricing/Http/Router.ts";
 
+/**
+ * Adapter that converts the external `better-result` shape returned by
+ * `@fabric/firebase` into the kernel `Result` type from `@fabric/types`.
+ * It recognizes the `.ok`, `._tag`, and `.status` discriminants so it stays
+ * robust if the upstream Result representation changes.
+ */
+type ExternalResult<T, E> =
+  | { readonly ok: false; readonly error: E }
+  | { readonly ok: true; readonly value: T }
+  | { readonly _tag: "Err"; readonly error: E }
+  | { readonly _tag: "Ok"; readonly value: T }
+  | { readonly status: "error"; readonly error: E }
+  | { readonly status: "ok"; readonly value: T };
+
+const toKernelResult = <T, E>(result: ExternalResult<T, E>): Result<T, E> => {
+  if ("ok" in result) {
+    return result.ok === false ? Err(result.error) : Ok(result.value);
+  }
+  if ("_tag" in result) {
+    return result._tag === "Err" ? Err(result.error) : Ok(result.value);
+  }
+  if ("status" in result) {
+    return result.status === "error" ? Err(result.error) : Ok(result.value);
+  }
+  return Err(new Error("Invalid Result shape") as E);
+};
+
 let bootPromise: ReturnType<typeof startBoot> | null = null;
 
 async function startBoot() {
   const config = loadConfig();
 
-  const firebaseResult = createFirebaseFromEnv();
-  if (Result.isError(firebaseResult)) {
+  const firebaseResult = toKernelResult<FirebaseClients, FirebaseInitError>(
+    createFirebaseFromEnv()
+  );
+  if (isErr(firebaseResult)) {
     throw new Error(`Firebase init failed: ${firebaseResult.error.message}`);
   }
   const firebase = firebaseResult.value;

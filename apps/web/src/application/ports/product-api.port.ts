@@ -1,10 +1,9 @@
+import type { TaggedError } from "@fabric/types";
 import type { Effect } from "effect";
 import type { Product, ProductId, ProductSummary } from "../../domain/product/types";
 import type { ProductNotFoundError } from "../../domain/product/types";
 
-export type NetworkError = {
-  readonly _tag: "NetworkError";
-  readonly message: string;
+export type NetworkError = TaggedError<"NetworkError"> & {
   readonly statusCode: number;
   readonly cause: unknown;
 };

@@ -1,0 +1,19 @@
+{
+  "indexes": {
+    ".read": false,
+    ".write": false,
+    "product_current": {
+      ".indexOn": [
+        ["status", "price"],
+        ["ownerId", "status"],
+        ["ownerId", "createdAt"],
+        ["status", "category", "price"]
+      ]
+    },
+    "products_current": {
+      ".indexOn": [
+        ["ownerId", "status"]
+      ]
+    }
+  }
+}

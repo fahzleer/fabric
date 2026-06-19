@@ -1,5 +1,12 @@
-import type { Maybe, NonEmptyArray } from "@fabric/types";
-import { InvalidOrderStateTransitionError, OrderAlreadyCancelledError, Some } from "@fabric/types";
+import type { Maybe, NonEmptyArray, Result } from "@fabric/types";
+import {
+  Err,
+  InvalidOrderStateTransitionError,
+  Ok,
+  OrderAlreadyCancelledError,
+  Some,
+  isSome,
+} from "@fabric/types";
 import { Temporal } from "@js-temporal/polyfill";
 import type { ProductId, ProductPrice, ProductSize } from "../product/product.value-objects";
 import type { UserId } from "../user/user.value-objects";
@@ -40,54 +47,33 @@ export interface Order {
 export const calculateOrderTotal = (lines: readonly OrderLine[]): number =>
   lines.reduce((sum, line) => sum + getOrderLineTotal(line), 0);
 
-export const isOrderShipped = (order: Order): boolean => order.shippedAt._tag === "Some";
+export const isOrderShipped = (order: Order): boolean => isSome(order.shippedAt);
 
 export const transitionOrderStatus = (
   order: Order,
   newStatus: OrderStatus
-):
-  | { _tag: "Ok"; value: Order }
-  | {
-      _tag: "Err";
-      error: InvalidOrderStateTransitionErrorType | OrderAlreadyCancelledErrorType;
-    } => {
-  if (order.status === "cancelled")
-    return {
-      _tag: "Err",
-      error: OrderAlreadyCancelledError(order.id.value),
-    };
+): Result<Order, InvalidOrderStateTransitionErrorType | OrderAlreadyCancelledErrorType> => {
+  if (order.status === "cancelled") return Err(OrderAlreadyCancelledError(order.id.value));
 
   if (!canTransitionOrderStatus(order.status, newStatus))
-    return {
-      _tag: "Err",
-      error: InvalidOrderStateTransitionError(order.id.value, order.status, newStatus),
-    };
+    return Err(InvalidOrderStateTransitionError(order.id.value, order.status, newStatus));
 
-  return {
-    _tag: "Ok",
-    value: { ...order, status: newStatus, updatedAt: Temporal.Now.instant() },
-  };
+  return Ok({ ...order, status: newStatus, updatedAt: Temporal.Now.instant() });
 };
 
 export const markOrderAsShipped = (
   order: Order,
   trackingNumber: string
-): { _tag: "Ok"; value: Order } | { _tag: "Err"; error: InvalidOrderStateTransitionErrorType } => {
+): Result<Order, InvalidOrderStateTransitionErrorType> => {
   if (order.status !== "processing")
-    return {
-      _tag: "Err",
-      error: InvalidOrderStateTransitionError(order.id.value, order.status, "shipped"),
-    };
-  return {
-    _tag: "Ok",
-    value: {
-      ...order,
-      status: "shipped",
-      shippedAt: Some(Temporal.Now.instant()),
-      trackingNumber: Some(trackingNumber),
-      updatedAt: Temporal.Now.instant(),
-    },
-  };
+    return Err(InvalidOrderStateTransitionError(order.id.value, order.status, "shipped"));
+  return Ok({
+    ...order,
+    status: "shipped",
+    shippedAt: Some(Temporal.Now.instant()),
+    trackingNumber: Some(trackingNumber),
+    updatedAt: Temporal.Now.instant(),
+  });
 };
 
 export interface OrderSummary {

@@ -21,6 +21,7 @@ const makeProduct = (overrides: Partial<Product> = {}): Product => ({
   ownerId: "user-1",
   name: { __brand: "ProductName", value: "Test Shirt" },
   description: "A test product",
+  tagline: "",
   price: { __brand: "ProductPrice", amount: 499, currency: "THB" },
   category: "basic",
   status: "active",

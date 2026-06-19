@@ -1,5 +1,4 @@
-import { Some } from "@fabric/types";
-import { Temporal } from "@js-temporal/polyfill";
+import { Some, isSome } from "@fabric/types";
 import type { ActivityRepositoryPort } from "../../application/ports/activity.repository.port";
 import type { CartRepositoryPort } from "../../application/ports/cart.repository.port";
 import type { ProductRepositoryPort } from "../../application/ports/product.repository.port";
@@ -26,7 +25,7 @@ export class CartService {
     const result = await this.carts.findByUserId(userId);
     if (result._tag === "Err") return presentDomainError(result.error);
 
-    if (result.value._tag === "Some") {
+    if (isSome(result.value)) {
       return result.value.value;
     }
 
@@ -112,13 +111,11 @@ export class CartService {
   }
 
   async clearCart(userId: UserId) {
-    const result = await this.carts.findByUserId(userId);
-    if (result._tag === "Err") return presentDomainError(result.error);
-    if (result.value._tag === "None") return { cleared: true };
-
-    const cart = result.value.value;
-    const cleared = { ...cart, items: [], updatedAt: Temporal.Now.instant() };
-    await this.carts.save(cleared);
+    const freshCart = makeEmptyCart(
+      { __brand: "CartId" as const, value: crypto.randomUUID() } as CartId,
+      Some(userId)
+    );
+    await this.carts.save(freshCart);
     return { cleared: true };
   }
 }

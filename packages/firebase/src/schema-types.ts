@@ -15,6 +15,7 @@ export interface FirebaseProductRecord {
   ownerId: string;
   name: string;
   description: string;
+  tagline: string;
   price: number;
   currency: string;
   category: string;
@@ -162,6 +163,8 @@ export interface FirebaseMerchantRecord {
   stripeCustomerId: string | null;
   stripeSubscriptionId: string | null;
   productCount: number;
+  completedOrderCount: number;
+  totalRevenueCents: number;
   createdAt: string;
   updatedAt: string;
   planExpiresAt: string | null;

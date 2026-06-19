@@ -4,6 +4,7 @@ import { Temporal } from "@js-temporal/polyfill";
 import type { ActivityRepositoryPort } from "../../application/ports/activity.repository.port";
 import type { EventPublisherPort } from "../../application/ports/event-publisher.port";
 import type {
+  OwnerProductFilterInput,
   PaginationInput,
   ProductFilterInput,
   ProductRepositoryPort,
@@ -22,6 +23,7 @@ export type CreateProductInput = {
   readonly ownerId: string;
   readonly name: string;
   readonly description: string;
+  readonly tagline: string;
   readonly price: number;
   readonly priceCurrency: string;
   readonly category: ProductCategory;
@@ -40,6 +42,41 @@ function buildStock(raw: Record<string, number>): Product["stock"] {
       { __brand: "StockQuantity" as const, value: qty },
     ])
   ) as Product["stock"];
+}
+
+type MerchantProductJson = {
+  id: string;
+  name: string;
+  description: string;
+  tagline: string;
+  price: number;
+  priceCurrency: string;
+  category: ProductCategory;
+  status: ProductStatus;
+  stock: Record<string, number>;
+  images: Array<{ url: string; alt: string; isPrimary: boolean; order: number }>;
+  ownerId: string;
+};
+
+function toMerchantProductJson(p: Product, ownerId: string): MerchantProductJson {
+  return {
+    id: p.id.value,
+    name: p.name.value,
+    description: p.description,
+    tagline: p.tagline,
+    price: p.price.amount,
+    priceCurrency: p.price.currency,
+    category: p.category,
+    status: p.status,
+    stock: Object.fromEntries(Object.entries(p.stock).map(([size, qty]) => [size, qty.value])),
+    images: p.images.map((img) => ({
+      url: img.url,
+      alt: img.altText,
+      isPrimary: img.isPrimary,
+      order: img.order,
+    })),
+    ownerId,
+  };
 }
 
 function buildImages(
@@ -116,6 +153,7 @@ export class ProductService {
       ownerId: input.ownerId,
       name: nameResult,
       description: input.description,
+      tagline: input.tagline,
       price,
       category: input.category,
       status: "active",
@@ -138,6 +176,7 @@ export class ProductService {
         product_id: product.id.value,
         owner_id: product.ownerId,
         name: product.name.value,
+        tagline: product.tagline,
         price: product.price.amount,
         currency: product.price.currency,
         category: product.category,
@@ -188,6 +227,7 @@ export class ProductService {
       name,
       price,
       description: input.description ?? existing.description,
+      tagline: input.tagline ?? existing.tagline,
       category: input.category ?? existing.category,
       status: input.status ?? existing.status,
       stock,
@@ -208,6 +248,7 @@ export class ProductService {
         product_id: updated.id.value,
         owner_id: updated.ownerId,
         name: updated.name.value,
+        tagline: updated.tagline,
         price: updated.price.amount,
         currency: updated.price.currency,
         category: updated.category,
@@ -255,5 +296,65 @@ export class ProductService {
     });
 
     return { deleted: true };
+  }
+
+  async getMerchantInventory(ownerId: string) {
+    // Use findByOwner with a generous perPage to avoid the previous
+    // findAll() that pulled every product in the DB and then filtered
+    // in JS. Server-side ownerId filter is indexed (product_current/ownerId).
+    const result = await this.products.findByOwner(ownerId, { page: 1, perPage: 1000 }, {});
+    if (result._tag === "Err") return presentDomainError(result.error);
+    return result.value.items.map((p) => ({
+      id: p.id.value,
+      name: p.name.value,
+      category: p.category,
+      status: p.status,
+      priceCents: Math.round(p.price.amount * 100),
+      currency: p.price.currency,
+      stock: Object.fromEntries(Object.entries(p.stock).map(([size, qty]) => [size, qty.value])),
+      totalStock: Object.values(p.stock).reduce((s, qty) => s + qty.value, 0),
+      createdAt: p.createdAt.toString(),
+    }));
+  }
+
+  /**
+   * Merchant-facing product list. Returns full detail (description, tagline, images)
+   * for the caller's own products, paginated and filterable server-side. Backs
+   * /merchant/products and the merchant dashboard.
+   *
+   * Returns { items, total } so the caller can render pagination controls.
+   * The repo's findByOwner already filters by ownerId server-side, so this
+   * is fast even at scale.
+   *
+   * Note: status is optional and may be undefined (returns all statuses).
+   */
+  async getMyProducts(
+    ownerId: string,
+    pagination: PaginationInput,
+    filter: OwnerProductFilterInput = {}
+  ): Promise<{ items: MerchantProductJson[]; total: number }> {
+    const result = await this.products.findByOwner(ownerId, pagination, filter);
+    if (result._tag === "Err") return presentDomainError(result.error);
+    return {
+      items: result.value.items.map((p) => toMerchantProductJson(p, ownerId)),
+      total: result.value.total,
+    };
+  }
+
+  async getAllProducts() {
+    const result = await this.products.findAll();
+    if (result._tag === "Err") return presentDomainError(result.error);
+    return result.value.map((p) => ({
+      id: p.id.value,
+      name: p.name.value,
+      ownerId: p.ownerId,
+      category: p.category,
+      status: p.status,
+      priceCents: Math.round(p.price.amount * 100),
+      currency: p.price.currency,
+      stock: Object.fromEntries(Object.entries(p.stock).map(([size, qty]) => [size, qty.value])),
+      totalStock: Object.values(p.stock).reduce((s, qty) => s + qty.value, 0),
+      createdAt: p.createdAt.toString(),
+    }));
   }
 }

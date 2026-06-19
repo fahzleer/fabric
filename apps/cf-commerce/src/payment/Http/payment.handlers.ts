@@ -193,6 +193,19 @@ export const registerPaymentRoutes = (
 
     const chargeId = c.req.param("chargeId");
     const result = await promptPay.getStatus(chargeId);
+
+    if (result.status === "successful") {
+      const orderId = promptPay.lookupOrderId?.(chargeId);
+      if (orderId) {
+        void notifyPaymentResult(orderId, chargeId, true, undefined);
+      }
+    } else if (result.status === "failed" || result.status === "expired") {
+      const orderId = promptPay.lookupOrderId?.(chargeId);
+      if (orderId) {
+        void notifyPaymentResult(orderId, chargeId, false, result.status);
+      }
+    }
+
     return c.json({ ok: true, value: result });
   });
 

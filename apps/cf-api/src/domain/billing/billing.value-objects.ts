@@ -64,6 +64,8 @@ export interface Merchant {
   readonly stripeCustomerId: Maybe<string>;
   readonly stripeSubscriptionId: Maybe<string>;
   readonly productCount: number;
+  readonly completedOrderCount: number;
+  readonly totalRevenueCents: number;
   readonly createdAt: string;
   readonly updatedAt: string;
   readonly planExpiresAt: Maybe<string>;

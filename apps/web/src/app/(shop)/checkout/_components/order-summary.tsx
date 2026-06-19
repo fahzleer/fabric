@@ -7,9 +7,9 @@ import {
 } from "@/application/atoms/checkout.atoms";
 import { getCartTotal } from "@/domain/cart/types";
 import type { ShoppingCart } from "@/domain/cart/types";
-import { type Maybe, isNone, isSome } from "@/lib/maybe";
 import { formatPrice } from "@/lib/price";
 import { Atom, useAtom, useAtomSet, useAtomValue } from "@effect-atom/atom-react";
+import { type Maybe, isNone, isSome } from "@fabric/types";
 import BigNumber from "bignumber.js";
 import Link from "next/link";
 

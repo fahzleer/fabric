@@ -1,5 +1,6 @@
 import type { MemcachedAdapter } from "@fabric/cache";
 import type { Result } from "@fabric/types";
+import { isSome } from "@fabric/types";
 import { type } from "arktype";
 import type { Hono } from "hono";
 import type { PasetoVerifierService } from "../../infrastructure/auth/paseto-verifier.service";
@@ -223,7 +224,7 @@ export function registerAuthRoutes(
     if (storedResult._tag === "Err" || storedResult.value === null) {
       return c.json({ error: "Refresh token not found" }, 401);
     }
-    if (storedResult.value.revokedAt._tag === "Some") {
+    if (isSome(storedResult.value.revokedAt)) {
       await tokenRepo.revokeFamily(tokenFamily);
       return c.json({ error: "Refresh token has been revoked" }, 401);
     }

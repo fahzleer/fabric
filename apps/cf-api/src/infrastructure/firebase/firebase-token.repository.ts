@@ -1,6 +1,6 @@
 import type { FirebaseRefreshTokenRecord, FirebaseTokenBlacklistRecord } from "@fabric/firebase";
-import { None, Some } from "@fabric/types";
-import type { RepositoryError, Result } from "@fabric/types";
+import { Err, None, Ok, Some, isSome } from "@fabric/types";
+import type { Maybe, RepositoryError, Result } from "@fabric/types";
 import { Temporal } from "@js-temporal/polyfill";
 import type { Database } from "firebase-admin/database";
 import { makeRepositoryError } from "../../application/ports/product.repository.port";
@@ -11,7 +11,7 @@ export interface StoredRefreshToken {
   readonly tokenFamily: string;
   readonly tokenHash: string;
   readonly expiresAt: Temporal.Instant;
-  readonly revokedAt: { _tag: "None" } | { _tag: "Some"; value: Temporal.Instant };
+  readonly revokedAt: Maybe<Temporal.Instant>;
   readonly createdAt: Temporal.Instant;
 }
 
@@ -33,38 +33,32 @@ export class FirebaseTokenRepository implements ITokenRepositoryPort {
         tokenFamily: token.tokenFamily,
         tokenHash: token.tokenHash,
         expiresAt: token.expiresAt.toString(),
-        revokedAt: token.revokedAt._tag === "Some" ? token.revokedAt.value.toString() : null,
+        revokedAt: isSome(token.revokedAt) ? token.revokedAt.value.toString() : null,
         createdAt: token.createdAt.toString(),
       };
       await this.db.ref(`refresh_tokens/${token.id}`).set(record);
-      return { _tag: "Ok", value: undefined };
+      return Ok(undefined);
     } catch (cause) {
-      return { _tag: "Err", error: makeRepositoryError("Failed to save refresh token", cause) };
+      return Err(makeRepositoryError("Failed to save refresh token", cause));
     }
   }
 
   async findByJti(jti: string): Promise<Result<StoredRefreshToken | null, RepositoryError>> {
     try {
       const snap = await this.db.ref(`refresh_tokens/${jti}`).once("value");
-      if (!snap.exists()) return { _tag: "Ok", value: null };
+      if (!snap.exists()) return Ok(null);
       const record = snap.val() as FirebaseRefreshTokenRecord;
-      return {
-        _tag: "Ok",
-        value: {
-          id: jti,
-          userId: record.userId,
-          tokenFamily: record.tokenFamily,
-          tokenHash: record.tokenHash,
-          expiresAt: Temporal.Instant.from(record.expiresAt),
-          revokedAt: record.revokedAt ? Some(Temporal.Instant.from(record.revokedAt)) : None(),
-          createdAt: Temporal.Instant.from(record.createdAt),
-        },
-      };
+      return Ok({
+        id: jti,
+        userId: record.userId,
+        tokenFamily: record.tokenFamily,
+        tokenHash: record.tokenHash,
+        expiresAt: Temporal.Instant.from(record.expiresAt),
+        revokedAt: record.revokedAt ? Some(Temporal.Instant.from(record.revokedAt)) : None(),
+        createdAt: Temporal.Instant.from(record.createdAt),
+      });
     } catch (cause) {
-      return {
-        _tag: "Err",
-        error: makeRepositoryError(`Failed to find refresh token ${jti}`, cause),
-      };
+      return Err(makeRepositoryError(`Failed to find refresh token ${jti}`, cause));
     }
   }
 
@@ -85,12 +79,9 @@ export class FirebaseTokenRepository implements ITokenRepositoryPort {
       if (Object.keys(updates).length > 0) {
         await this.db.ref().update(updates);
       }
-      return { _tag: "Ok", value: undefined };
+      return Ok(undefined);
     } catch (cause) {
-      return {
-        _tag: "Err",
-        error: makeRepositoryError(`Failed to revoke token family ${tokenFamily}`, cause),
-      };
+      return Err(makeRepositoryError(`Failed to revoke token family ${tokenFamily}`, cause));
     }
   }
 
@@ -109,9 +100,9 @@ export class FirebaseTokenRepository implements ITokenRepositoryPort {
         revokedAt: Temporal.Now.instant().toString(),
       };
       await this.db.ref(`token_blacklist/${jti}`).set(record);
-      return { _tag: "Ok", value: undefined };
+      return Ok(undefined);
     } catch (cause) {
-      return { _tag: "Err", error: makeRepositoryError(`Failed to blacklist token ${jti}`, cause) };
+      return Err(makeRepositoryError(`Failed to blacklist token ${jti}`, cause));
     }
   }
 }

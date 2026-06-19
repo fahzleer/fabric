@@ -66,9 +66,13 @@ export const auth = betterAuth({
     nextCookies(),
     admin({
       adminRoles: ["admin"],
+      defaultRole: "customer",
     }),
   ],
-  trustedOrigins: [process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"],
+  trustedOrigins: [
+    process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000",
+    "http://localhost:3002",
+  ],
 });
 
 export type Session = typeof auth.$Infer.Session;

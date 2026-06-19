@@ -38,6 +38,7 @@ export const readProductState = async (
     productId: string;
     ownerId: string;
     name: string;
+    tagline?: string;
     price: number;
     currency: string;
     category: string;
@@ -50,6 +51,7 @@ export const readProductState = async (
     productId: row.productId,
     ownerId: row.ownerId,
     name: row.name,
+    tagline: row.tagline ?? "",
     price: row.price,
     currency: row.currency,
     category: row.category,
@@ -68,6 +70,7 @@ export const writeProductState = async (
     productId: state.productId,
     ownerId: state.ownerId,
     name: state.name,
+    tagline: state.tagline,
     price: state.price,
     currency: state.currency,
     category: state.category,
@@ -87,6 +90,7 @@ export const readAllProductStates = async (ctx: Ctx): Promise<ProductState[]> =>
       productId: string;
       ownerId: string;
       name: string;
+      tagline?: string;
       price: number;
       currency: string;
       category: string;
@@ -94,7 +98,7 @@ export const readAllProductStates = async (ctx: Ctx): Promise<ProductState[]> =>
       rev: number;
       lastEventAt: string;
     };
-    results.push(row);
+    results.push({ ...row, tagline: row.tagline ?? "" });
   });
 
   results.sort((a, b) => b.lastEventAt.localeCompare(a.lastEventAt));

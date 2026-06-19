@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth";
-import { type Maybe, None, Some, isNone, isSome } from "@/lib/maybe";
 import { formatPrice } from "@/lib/price";
+import { type Maybe, None, Some, isNone, isSome } from "@fabric/types";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { ClearCartOnMount } from "./_components/clear-cart-on-mount";

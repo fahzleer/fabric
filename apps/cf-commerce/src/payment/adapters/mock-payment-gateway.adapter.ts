@@ -7,11 +7,9 @@ export class MockPaymentGateway implements IPaymentGateway {
     _currency: string,
     _token: string
   ): Promise<ChargeResult> {
-    const success = Math.random() < 0.95;
     return {
       paymentId: `mock_pay_${crypto.randomUUID()}`,
-      success,
-      ...(success ? {} : { failureReason: "Card declined (mock)" }),
+      success: true,
     };
   }
 

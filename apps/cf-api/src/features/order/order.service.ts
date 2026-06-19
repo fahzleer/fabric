@@ -17,7 +17,7 @@ import type {
 import type { ProductRepositoryPort } from "../../application/ports/product.repository.port";
 import type { PaginationInput } from "../../application/ports/product.repository.port";
 import type { VoucherRepositoryPort } from "../../application/ports/voucher.repository.port";
-import { clearCart } from "../../domain/cart/cart.entity";
+import { makeEmptyCart } from "../../domain/cart/cart.entity";
 import type { CartItem } from "../../domain/cart/cart.entity";
 import type { CartId } from "../../domain/cart/cart.value-objects";
 import { transitionOrderStatus } from "../../domain/order/order.entity";
@@ -196,7 +196,7 @@ export class OrderService {
     const order: Order = {
       id: { __brand: "OrderId" as const, value: orderId } as OrderId,
       userId,
-      cartId,
+      cartId: cart.id.value,
       lines: orderLines as unknown as NonEmptyArray<OrderLine>,
       status: initialStatus,
       shippingAddress,
@@ -223,10 +223,28 @@ export class OrderService {
       log.info(`Order placed (pending): orderId=${orderId} total=${totalCents} ${currency}`);
     } else {
       log.info(`Order placed (x402 confirmed): orderId=${orderId} total=${totalCents} ${currency}`);
+      // Non-card orders are immediately confirmed — record revenue per product owner
+      const revenueByOwner = new Map<string, number>();
+      for (const item of orderLines) {
+        const prod = await this.productRepo.findById(item.productId);
+        if (prod._tag === "Ok" && prod.value.ownerId) {
+          const prev = revenueByOwner.get(prod.value.ownerId) ?? 0;
+          revenueByOwner.set(
+            prod.value.ownerId,
+            prev + Math.round(item.unitPrice.amount * 100) * item.quantity
+          );
+        }
+      }
+      for (const [ownerId, revenue] of revenueByOwner) {
+        void this.merchantRepo.recordCompletedOrder(ownerId, revenue);
+      }
     }
 
-    const clearedCart = clearCart(cart);
-    await this.cartRepo.save(clearedCart);
+    const freshCart = makeEmptyCart(
+      { __brand: "CartId" as const, value: crypto.randomUUID() } as CartId,
+      cart.userId
+    );
+    await this.cartRepo.save(freshCart);
 
     void this.eventPublisher.publish({
       event_id: crypto.randomUUID(),
@@ -271,6 +289,170 @@ export class OrderService {
   async getUserOrders(userId: UserId, pagination: PaginationInput) {
     const result = await this.orderRepo.findByUserId(userId, pagination);
     if (result._tag === "Err") return presentDomainError(result.error);
+    return result.value;
+  }
+
+  async updateMerchantOrderStatus(
+    merchantUserId: UserId,
+    orderId: string,
+    newStatus: "shipped" | "delivered"
+  ): Promise<Order> {
+    const productsResult = await this.productRepo.findByOwner(merchantUserId.value, {
+      page: 1,
+      perPage: 1000,
+    });
+    if (productsResult._tag === "Err") return presentDomainError(productsResult.error);
+    const productIds = new Set(productsResult.value.items.map((p) => p.id.value));
+    const result = await this.orderRepo.findById({
+      __brand: "OrderId" as const,
+      value: orderId,
+    } as OrderId);
+    if (result._tag === "Err") return presentDomainError(result.error);
+    const hasOwnProduct = result.value.lines.some((l) => productIds.has(l.productId.value));
+    if (!hasOwnProduct)
+      return presentDomainError({
+        _tag: "OrderNotFoundError",
+        message: `Order ${orderId} not found`,
+      });
+    // confirmed → processing → shipped requires two steps; auto-bridge the gap
+    let intermediate = result.value;
+    if (newStatus === "shipped" && result.value.status === "confirmed") {
+      const toProcessing = transitionOrderStatus(result.value, "processing");
+      if (toProcessing._tag === "Err") return presentDomainError(toProcessing.error);
+      intermediate = toProcessing.value;
+    }
+    const transitioned = transitionOrderStatus(intermediate, newStatus);
+    if (transitioned._tag === "Err") return presentDomainError(transitioned.error);
+    const saved = await this.orderRepo.save(transitioned.value);
+    if (saved._tag === "Err") return presentDomainError(saved.error);
+    log.info(`Order status updated: orderId=${orderId} newStatus=${newStatus}`);
+    return saved.value;
+  }
+
+  async getAdminStats(): Promise<{
+    totalOrders: number;
+    totalRevenueCents: number;
+    currency: string;
+    confirmedOrders: number;
+    pendingOrders: number;
+  }> {
+    const result = await this.orderRepo.findAll({ page: 1, perPage: 10000 });
+    if (result._tag === "Err")
+      return {
+        totalOrders: 0,
+        totalRevenueCents: 0,
+        currency: "THB",
+        confirmedOrders: 0,
+        pendingOrders: 0,
+      };
+    const orders = result.value.items;
+    const active = orders.filter((o) => !["cancelled"].includes(o.status));
+    const confirmed = orders.filter((o) =>
+      ["confirmed", "shipped", "delivered"].includes(o.status)
+    );
+    const pending = orders.filter((o) => o.status === "pending");
+    return {
+      totalOrders: active.length,
+      totalRevenueCents: confirmed.reduce((s, o) => s + o.totalAmountInCents, 0),
+      currency: orders[0]?.currency ?? "THB",
+      confirmedOrders: confirmed.length,
+      pendingOrders: pending.length,
+    };
+  }
+
+  async getAdminOrders(pagination: { page: number; perPage: number }): Promise<unknown> {
+    const result = await this.orderRepo.findAll(pagination);
+    if (result._tag === "Err") return presentDomainError(result.error);
+    return {
+      items: result.value.items.map((o) => ({
+        id: o.id.value,
+        status: o.status,
+        totalAmountInCents: o.totalAmountInCents,
+        currency: o.currency,
+        itemCount: o.lines.reduce((s, l) => s + l.quantity, 0),
+        placedAt: o.placedAt.toString(),
+        customerId: o.userId.value,
+      })),
+      total: result.value.total,
+      page: result.value.page,
+      perPage: result.value.perPage,
+    };
+  }
+
+  async getMerchantOrders(
+    merchantUserId: UserId,
+    pagination: { page: number; perPage: number }
+  ): Promise<unknown> {
+    const productsResult = await this.productRepo.findByOwner(merchantUserId.value, {
+      page: 1,
+      perPage: 1000,
+    });
+    if (productsResult._tag === "Err") return presentDomainError(productsResult.error);
+    const productIds = productsResult.value.items.map((p) => p.id.value);
+    if (productIds.length === 0)
+      return { items: [], total: 0, page: pagination.page, perPage: pagination.perPage };
+    const result = await this.orderRepo.findForMerchant(productIds, pagination);
+    if (result._tag === "Err") return presentDomainError(result.error);
+    return result.value;
+  }
+
+  async getAdminAnalytics(): Promise<unknown> {
+    const [ordersResult, merchantsResult] = await Promise.all([
+      this.orderRepo.findAll({ page: 1, perPage: 10000 }),
+      this.merchantRepo.findAllForAdmin(),
+    ]);
+    const orders = ordersResult._tag === "Ok" ? ordersResult.value.items : [];
+    const merchants = merchantsResult._tag === "Ok" ? merchantsResult.value : [];
+
+    const byStatus = orders.reduce<Record<string, number>>((acc, o) => {
+      acc[o.status] = (acc[o.status] ?? 0) + 1;
+      return acc;
+    }, {});
+    const revenueOrders = orders.filter((o) =>
+      ["confirmed", "processing", "shipped", "delivered"].includes(o.status)
+    );
+    const totalRevenueCents = revenueOrders.reduce((s, o) => s + o.totalAmountInCents, 0);
+    const totalMerchantRevenueCents = merchants.reduce((s, m) => s + m.totalRevenueCents, 0);
+
+    return {
+      totalOrders: orders.length,
+      totalRevenueCents,
+      ordersByStatus: byStatus,
+      totalMerchants: merchants.length,
+      totalMerchantRevenueCents,
+      currency: orders[0]?.currency ?? "THB",
+    };
+  }
+
+  async getAdminMerchants(): Promise<unknown> {
+    const merchantsResult = await this.merchantRepo.findAllForAdmin();
+    if (merchantsResult._tag === "Err") return { merchants: [] };
+    return {
+      merchants: merchantsResult.value.map((m) => ({
+        ...m,
+        availableBalanceCents: Math.max(0, Math.round(m.totalRevenueCents * 0.95) - m.paidOutCents),
+      })),
+    };
+  }
+
+  async getMerchantOrder(merchantUserId: UserId, orderId: string): Promise<Order> {
+    const productsResult = await this.productRepo.findByOwner(merchantUserId.value, {
+      page: 1,
+      perPage: 1000,
+    });
+    if (productsResult._tag === "Err") return presentDomainError(productsResult.error);
+    const productIds = new Set(productsResult.value.items.map((p) => p.id.value));
+    const result = await this.orderRepo.findById({
+      __brand: "OrderId" as const,
+      value: orderId,
+    } as OrderId);
+    if (result._tag === "Err") return presentDomainError(result.error);
+    const hasOwnProduct = result.value.lines.some((l) => productIds.has(l.productId.value));
+    if (!hasOwnProduct)
+      return presentDomainError({
+        _tag: "OrderNotFoundError",
+        message: `Order ${orderId} not found`,
+      });
     return result.value;
   }
 

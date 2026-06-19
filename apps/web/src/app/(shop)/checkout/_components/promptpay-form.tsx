@@ -8,10 +8,10 @@ import {
 } from "@/application/atoms/checkout.atoms";
 import { getCartTotal } from "@/domain/cart/types";
 import type { ShoppingCart } from "@/domain/cart/types";
-import { type Maybe, None, Some, isNone, isSome } from "@/lib/maybe";
 import { formatPrice } from "@/lib/price";
 import { syncCartToServer } from "@/lib/sync-cart";
 import { Atom, useAtom, useAtomSet, useAtomValue } from "@effect-atom/atom-react";
+import { Err, type Maybe, None, Ok, type Result, Some, isErr, isNone, isSome } from "@fabric/types";
 import { Option } from "effect";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef } from "react";
@@ -48,10 +48,8 @@ type PromptPayShippingAddress = {
 
 type RawShippingAddress = Omit<PromptPayShippingAddress, "province"> & { province?: string };
 
-type OrderResult = { ok: true; orderId: string } | { ok: false; message: string };
-type QrResult =
-  | { ok: true; chargeId: string; qrImageUrl: string; expiresAt: Date }
-  | { ok: false; message: string };
+type OrderResult = Result<string, string>;
+type QrResult = Result<{ chargeId: string; qrImageUrl: string; expiresAt: Date }, string>;
 type PollAction = "continue" | "expire" | "failed" | "paid";
 
 type PromptPayFlowDeps = {
@@ -107,14 +105,14 @@ async function createPromptPayOrder(
         : res.status === 422
           ? "Invalid order. Please go back and check your cart."
           : "Could not create order. Please try again.";
-    return { ok: false, message };
+    return Err(message);
   }
   const order = (await res.json()) as { id?: { value?: string } | string };
   const orderId = typeof order.id === "string" ? order.id : order.id?.value;
   if (!orderId) {
-    return { ok: false, message: "Order created but ID missing. Contact support." };
+    return Err("Order created but ID missing. Contact support.");
   }
-  return { ok: true, orderId };
+  return Ok(orderId);
 }
 
 async function createPromptPayQr(orderId: string, authToken: Maybe<string>): Promise<QrResult> {
@@ -128,7 +126,7 @@ async function createPromptPayQr(orderId: string, authToken: Maybe<string>): Pro
     body: JSON.stringify({ orderId }),
   });
   if (!res.ok) {
-    return { ok: false, message: "Could not generate QR code. Please try again." };
+    return Err("Could not generate QR code. Please try again.");
   }
   const data = (await res.json()) as {
     chargeId?: string;
@@ -136,12 +134,12 @@ async function createPromptPayQr(orderId: string, authToken: Maybe<string>): Pro
     expiresAt?: string;
   };
   if (!(data.chargeId && data.qrImageUrl)) {
-    return { ok: false, message: "QR code data incomplete. Please try again." };
+    return Err("QR code data incomplete. Please try again.");
   }
   const expiresAt = data.expiresAt
     ? new Date(data.expiresAt)
     : new Date(Date.now() + QR_DURATION_MS);
-  return { ok: true, chargeId: data.chargeId, qrImageUrl: data.qrImageUrl, expiresAt };
+  return Ok({ chargeId: data.chargeId, qrImageUrl: data.qrImageUrl, expiresAt });
 }
 
 async function checkPromptPayStatus(
@@ -229,25 +227,25 @@ async function executePromptPayFlow(
     province: rawShipping.province ?? "Bangkok",
   };
   const orderResult = await createPromptPayOrder(cart.id, voucherCode, shipping, authToken);
-  if (!orderResult.ok) {
-    deps.setPhase({ _tag: "error", message: orderResult.message });
+  if (isErr(orderResult)) {
+    deps.setPhase({ _tag: "error", message: orderResult.error });
     return;
   }
   deps.setPhase({ _tag: "generating" });
-  const qrResult = await createPromptPayQr(orderResult.orderId, authToken);
-  if (!qrResult.ok) {
-    deps.setPhase({ _tag: "error", message: qrResult.message });
+  const qrResult = await createPromptPayQr(orderResult.value, authToken);
+  if (isErr(qrResult)) {
+    deps.setPhase({ _tag: "error", message: qrResult.error });
     return;
   }
   deps.setPhase({
     _tag: "waiting",
-    chargeId: qrResult.chargeId,
-    qrImageUrl: qrResult.qrImageUrl,
-    expiresAt: qrResult.expiresAt,
-    orderId: orderResult.orderId,
+    chargeId: qrResult.value.chargeId,
+    qrImageUrl: qrResult.value.qrImageUrl,
+    expiresAt: qrResult.value.expiresAt,
+    orderId: orderResult.value,
   });
-  deps.startCountdown(qrResult.expiresAt);
-  deps.startPolling(qrResult.chargeId, orderResult.orderId, qrResult.expiresAt);
+  deps.startCountdown(qrResult.value.expiresAt);
+  deps.startPolling(qrResult.value.chargeId, orderResult.value, qrResult.value.expiresAt);
 }
 
 function WaitingSection({ phase, timeLeft }: { phase: Phase; timeLeft: number }) {

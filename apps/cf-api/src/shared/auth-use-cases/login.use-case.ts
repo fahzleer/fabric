@@ -1,5 +1,6 @@
 import type {
   InvalidCredentialsError,
+  Maybe,
   RepositoryError,
   Result,
   TokenIssuanceError,
@@ -24,7 +25,7 @@ export type LoginDeps = {
           id: { value: string };
           email: { value: string };
           role: UserRole;
-          passwordHash: { _tag: "Some"; value: string } | { _tag: "None" };
+          passwordHash: Maybe<string>;
         },
         RepositoryError
       >

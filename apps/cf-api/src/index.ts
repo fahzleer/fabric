@@ -1,11 +1,12 @@
 import { MemcachedAdapter } from "@fabric/cache/memcached";
 import { createFirebaseFromEnv } from "@fabric/firebase";
-import { Result } from "better-result";
+import { Err, Ok, type Result, isErr } from "@fabric/types";
 import { deleteApp } from "firebase-admin/app";
 import { onRequest } from "firebase-functions/v2/https";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { loadConfig } from "./config";
+import { registerAffiliateRoutes } from "./features/affiliate/affiliate.handlers";
 import { registerAuthRoutes } from "./features/auth/auth.handlers";
 import { registerInternalRoutes } from "./features/auth/internal.handlers";
 import { registerBillingRoutes } from "./features/billing/billing.handlers";
@@ -24,6 +25,7 @@ import { PasetoVerifierService } from "./infrastructure/auth/paseto-verifier.ser
 import { StripeBillingAdapter } from "./infrastructure/billing/stripe-billing.adapter";
 import { HttpEventPublisherAdapter } from "./infrastructure/events/http-event-publisher.adapter";
 import { FirebaseActivityRepository } from "./infrastructure/firebase/firebase-activity.repository";
+import { FirebaseAffiliateRepository } from "./infrastructure/firebase/firebase-affiliate.repository";
 import { FirebaseCartRepository } from "./infrastructure/firebase/firebase-cart.repository";
 import { FirebaseLockoutAdapter } from "./infrastructure/firebase/firebase-lockout.adapter";
 import { FirebaseMerchantRepository } from "./infrastructure/firebase/firebase-merchant.repository";
@@ -46,6 +48,17 @@ import {
 
 let bootPromise: ReturnType<typeof startBoot> | null = null;
 
+type BetterResult<T, E> =
+  | { readonly ok: true; readonly value: T }
+  | { readonly ok: false; readonly error: E };
+
+function fromBetterResult<T, E>(result: Result<T, E> | BetterResult<T, E>): Result<T, E> {
+  if ("ok" in result) {
+    return result.ok ? Ok(result.value) : Err(result.error);
+  }
+  return result;
+}
+
 async function startBoot() {
   const secrets = await loadSecrets();
   const config = loadConfig(secrets);
@@ -54,8 +67,8 @@ async function startBoot() {
     .map((r) => r.trim())
     .filter(Boolean);
 
-  const firebaseResult = createFirebaseFromEnv();
-  if (Result.isError(firebaseResult)) {
+  const firebaseResult = fromBetterResult(createFirebaseFromEnv());
+  if (isErr(firebaseResult)) {
     throw new Error(`Firebase init failed: ${firebaseResult.error.message}`);
   }
   const firebase = firebaseResult.value;
@@ -79,20 +92,27 @@ async function startBoot() {
   const verifier = new PasetoVerifierService();
   const merchantRepo = new FirebaseMerchantRepository(db);
   const stripeAdapter = new StripeBillingAdapter(config.stripeSecretKey);
-  const billingService = new BillingService(stripeAdapter, stripeAdapter, merchantRepo, {
-    stripePriceIds: {
-      starter: config.stripePriceStarter,
-      professional: config.stripePriceProfessional,
-      enterprise: config.stripePriceEnterprise,
+  const billingService = new BillingService(
+    stripeAdapter,
+    stripeAdapter,
+    merchantRepo,
+    {
+      stripePriceIds: {
+        starter: config.stripePriceStarter,
+        professional: config.stripePriceProfessional,
+        enterprise: config.stripePriceEnterprise,
+      },
+      portalReturnUrl: config.stripePortalReturnUrl,
+      webhookSecret: config.stripeWebhookSecret,
     },
-    portalReturnUrl: config.stripePortalReturnUrl,
-    webhookSecret: config.stripeWebhookSecret,
-  });
+    productRepo
+  );
 
   registerCleanup("firebase", () => deleteApp(firebase.app));
   registerCleanup("memcached", () => memcached.quit());
   setupGracefulShutdown();
 
+  const affiliateRepo = new FirebaseAffiliateRepository(db);
   const payoutRepo = new FirebasePayoutRepository(db);
   const payoutService = new PayoutService(payoutRepo);
   const productService = new ProductService(productRepo, eventPublisher, activityRepo);
@@ -134,6 +154,7 @@ async function startBoot() {
   });
 
   registerProductRoutes(app, productService, verifier, merchantRepo);
+  registerAffiliateRoutes(app, affiliateRepo, verifier);
   registerCartRoutes(app, cartService, verifier);
   registerOrderRoutes(app, orderService, verifier);
   registerAuthRoutes(app, userAdapter, tokenRepo, lockoutStore, verifier, activityRepo, memcached);

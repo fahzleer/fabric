@@ -1,7 +1,7 @@
 "use server";
 
 import { createMerchantApi } from "@/lib/merchant-api";
-import { isSome } from "@fabric/types";
+import { isErr, isSome } from "@fabric/types";
 import { revalidatePath } from "next/cache";
 
 export type RequestPayoutState = {
@@ -35,8 +35,8 @@ export async function requestPayoutAction(
   const amountCents = Math.round(amountBaht * 100);
   const result = await api.requestPayout(amountCents, bankInfo);
 
-  if (!result.ok) {
-    if (result._tag === "InsufficientBalanceError") {
+  if (isErr(result)) {
+    if (result.error.startsWith("[InsufficientBalanceError]")) {
       return { error: "Insufficient available balance for this withdrawal amount" };
     }
     return { error: result.error };

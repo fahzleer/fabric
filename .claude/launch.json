@@ -5,7 +5,8 @@
       "name": "web",
       "runtimeExecutable": "bun",
       "runtimeArgs": ["run", "dev", "--filter=web"],
-      "port": 3000
+      "port": 3002,
+      "autoPort": false
     },
     {
       "name": "cf-api",

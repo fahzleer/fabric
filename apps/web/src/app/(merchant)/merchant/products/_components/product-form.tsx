@@ -1,8 +1,18 @@
 "use client";
 
+import { isOk } from "@fabric/types";
 import Link from "next/link";
 import { useQueryState } from "nuqs";
-import { createProductAction, updateProductAction } from "../_lib/actions";
+import { memo, useRef, useTransition } from "react";
+import { toast } from "sonner";
+import {
+  createProductAction,
+  generateProductContentAction,
+  updateProductAction,
+} from "../_lib/actions";
+import { DescriptionField } from "./description-field";
+import { ImageField, type ImageFieldHandle } from "./image-field";
+import { TaglineField } from "./tagline-field";
 
 const CATEGORIES = [
   { value: "basic", label: "Basic" },
@@ -19,11 +29,12 @@ const STATUSES = [
 
 const SIZES = ["XS", "S", "M", "L", "XL", "XXL"] as const;
 
-interface ProductFormProps {
+export interface ProductFormProps {
   mode: "create" | "edit";
   productId?: string;
   defaultValues?: {
     name?: string;
+    tagline?: string;
     description?: string;
     price?: number;
     priceCurrency?: string;
@@ -32,22 +43,68 @@ interface ProductFormProps {
     stock?: Record<string, number>;
     images?: { url: string; alt: string; isPrimary: boolean; order: number }[];
   };
+  cancelHref?: string;
+  formAction?: (formData: FormData) => Promise<void>;
 }
 
 const inputClass =
   "block w-full rounded-lg border border-white/10 bg-gray-800 px-3 py-2.5 text-sm text-white placeholder-gray-500 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500";
 const labelClass = "block text-sm font-medium text-gray-300 mb-1";
 
-export function ProductForm({ mode, productId, defaultValues = {} }: ProductFormProps) {
+export const ProductForm = memo(function ProductForm({
+  mode,
+  productId,
+  defaultValues = {},
+  cancelHref = "/merchant/products",
+  formAction: formActionProp,
+}: ProductFormProps) {
   const [errorMsg] = useQueryState("error");
+  const [pendingAll, startAllTransition] = useTransition();
+
+  const descriptionRef = useRef<HTMLTextAreaElement>(null);
+  const taglineRef = useRef<HTMLInputElement>(null);
+  const imageFieldRef = useRef<ImageFieldHandle>(null);
+  const formRef = useRef<HTMLFormElement>(null);
 
   const action =
-    mode === "create" ? createProductAction : updateProductAction.bind(null, productId ?? "");
+    formActionProp ??
+    (mode === "create" ? createProductAction : updateProductAction.bind(null, productId ?? ""));
 
   const d = defaultValues;
 
+  function handleGenerateAll() {
+    const form = formRef.current;
+    if (!form) return;
+
+    const fd = new FormData(form);
+    const name = String(fd.get("name") ?? "").trim();
+    if (!name) {
+      toast.error("กรุณากรอกชื่อสินค้าก่อนจึงจะให้ AI ช่วยเขียนได้");
+      return;
+    }
+
+    startAllTransition(async () => {
+      const result = await generateProductContentAction({
+        name,
+        category: String(fd.get("category") ?? "basic"),
+        price: Number.parseFloat(String(fd.get("price") ?? "0")),
+        currency: String(fd.get("priceCurrency") ?? "THB"),
+      });
+
+      if (isOk(result)) {
+        if (taglineRef.current) taglineRef.current.value = result.value.tagline;
+        if (descriptionRef.current) descriptionRef.current.value = result.value.description;
+        imageFieldRef.current?.setAlt(result.value.altText);
+        toast.success("AI ร่างเนื้อหาทั้งหมดให้แล้ว — แก้ไขได้ตามต้องการ");
+      } else {
+        toast.error(result.error);
+      }
+    });
+  }
+
   return (
     <form
+      ref={formRef}
       action={action}
       className="space-y-6 rounded-xl border border-white/10 bg-gray-800/50 p-8"
     >
@@ -56,6 +113,24 @@ export function ProductForm({ mode, productId, defaultValues = {} }: ProductForm
           <p className="text-sm text-red-400">{errorMsg}</p>
         </div>
       )}
+
+      {/* AI bundle generator */}
+      <div className="flex items-center justify-between rounded-lg border border-emerald-500/20 bg-emerald-500/5 px-4 py-3">
+        <div>
+          <p className="text-sm font-medium text-emerald-300">✨ AI Draft</p>
+          <p className="text-xs text-emerald-300/70">
+            Generate tagline, description, and alt text in one click
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={handleGenerateAll}
+          disabled={pendingAll}
+          className="rounded-md bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {pendingAll ? "กำลังเขียน…" : "Generate all"}
+        </button>
+      </div>
 
       {/* Name */}
       <div>
@@ -73,20 +148,11 @@ export function ProductForm({ mode, productId, defaultValues = {} }: ProductForm
         />
       </div>
 
-      {/* Description */}
-      <div>
-        <label htmlFor="description" className={labelClass}>
-          Description
-        </label>
-        <textarea
-          id="description"
-          name="description"
-          rows={3}
-          defaultValue={d.description ?? ""}
-          placeholder="Product description…"
-          className={inputClass}
-        />
-      </div>
+      {/* Tagline (with AI assist) */}
+      <TaglineField ref={taglineRef} defaultValue={d.tagline} />
+
+      {/* Description (with AI assist) */}
+      <DescriptionField ref={descriptionRef} defaultValue={d.description} />
 
       {/* Price + Currency */}
       <div className="grid grid-cols-2 gap-4">
@@ -188,55 +254,13 @@ export function ProductForm({ mode, productId, defaultValues = {} }: ProductForm
         </div>
       </fieldset>
 
-      {/* Images (JSON hidden field — simplified) */}
-      <div>
-        <label htmlFor="imageUrl" className={labelClass}>
-          Primary image URL
-        </label>
-        <input
-          id="imageUrl"
-          type="url"
-          placeholder="https://…"
-          className={inputClass}
-          defaultValue={d.images?.find((i) => i.isPrimary)?.url ?? ""}
-          onChange={(e) => {
-            const url = e.target.value.trim();
-            const hiddenInput =
-              e.currentTarget.form?.querySelector<HTMLInputElement>('input[name="images"]');
-            if (hiddenInput) {
-              hiddenInput.value = JSON.stringify([
-                {
-                  url: url || "https://placehold.co/400x400",
-                  alt: "Product image",
-                  isPrimary: true,
-                  order: 0,
-                },
-              ]);
-            }
-          }}
-        />
-        <input
-          type="hidden"
-          name="images"
-          defaultValue={JSON.stringify(
-            d.images && d.images.length > 0
-              ? d.images
-              : [
-                  {
-                    url: "https://placehold.co/400x400",
-                    alt: "Product image",
-                    isPrimary: true,
-                    order: 0,
-                  },
-                ]
-          )}
-        />
-      </div>
+      {/* Images (with AI alt-text assist) */}
+      <ImageField ref={imageFieldRef} defaultImages={d.images} />
 
       {/* Actions */}
       <div className="flex gap-3 pt-2">
         <Link
-          href="/merchant/products"
+          href={cancelHref}
           className="flex-1 rounded-lg border border-white/10 px-4 py-2.5 text-center text-sm font-medium text-gray-300 hover:bg-white/5"
         >
           Cancel
@@ -250,4 +274,4 @@ export function ProductForm({ mode, productId, defaultValues = {} }: ProductForm
       </div>
     </form>
   );
-}
+});

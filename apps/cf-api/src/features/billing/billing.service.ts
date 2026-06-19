@@ -1,7 +1,8 @@
-import { Err, None, Ok, Some, isSome } from "@fabric/types";
+import { Err, None, Ok, Some, isErr, isSome } from "@fabric/types";
 import type { Result } from "@fabric/types";
 import type { BillingPort, StripeSubscription } from "../../application/ports/billing.port";
 import type { MerchantRepositoryPort } from "../../application/ports/merchant.repository.port";
+import type { ProductRepositoryPort } from "../../application/ports/product.repository.port";
 import type {
   BillingError,
   BillingRepositoryError as BillingRepositoryErrorType,
@@ -50,7 +51,8 @@ export class BillingService {
     private readonly billing: BillingPort,
     private readonly stripeAdapter: StripeBillingAdapter,
     private readonly merchantRepo: MerchantRepositoryPort,
-    private readonly config: BillingConfig
+    private readonly config: BillingConfig,
+    private readonly productRepo?: ProductRepositoryPort
   ) {}
 
   async onboardMerchant(
@@ -74,6 +76,8 @@ export class BillingService {
       stripeCustomerId: None<string>(),
       stripeSubscriptionId: None<string>(),
       productCount: 0,
+      completedOrderCount: 0,
+      totalRevenueCents: 0,
       planExpiresAt: None<string>(),
       storeSlug: None<string>(),
     });
@@ -167,25 +171,35 @@ export class BillingService {
 
   async getAnalytics(
     userId: string
-  ): Promise<{ ok: true; value: MerchantAnalytics } | { ok: false; error: string; _tag: string }> {
+  ): Promise<Result<MerchantAnalytics, MerchantNotFoundErrorType | BillingRepositoryErrorType>> {
     const result = await this.merchantRepo.findByUserId(userId);
-    if (result._tag === "Err") {
-      return { ok: false, error: result.error.message, _tag: result.error._tag };
-    }
-    const m = result.value as Merchant & {
-      completedOrderCount?: number;
-      totalRevenueCents?: number;
-    };
-    return {
-      ok: true,
-      value: {
-        completedOrderCount: m.completedOrderCount ?? 0,
-        totalRevenueCents: m.totalRevenueCents ?? 0,
-        productCount: m.productCount,
-        plan: m.plan,
-        planStatus: m.planStatus,
-      },
-    };
+    if (isErr(result)) return result;
+
+    const m = result.value;
+
+    // productCount is the live count from the product table, not the
+    // denormalized counter on the merchant record. The counter is only kept
+    // in sync via incrementProductCount/decrementProductCount on the create
+    // and delete product handlers, so seeded or pre-existing products
+    // (added before the counter was wired) appear as 0. The live count is
+    // the source of truth for the analytics display; the counter remains
+    // authoritative for billing plan-limit enforcement.
+    const liveCount = await this.computeLiveProductCount(userId, m.productCount);
+
+    return Ok({
+      completedOrderCount: m.completedOrderCount,
+      totalRevenueCents: m.totalRevenueCents,
+      productCount: liveCount,
+      plan: m.plan,
+      planStatus: m.planStatus,
+    });
+  }
+
+  private async computeLiveProductCount(userId: string, fallback: number): Promise<number> {
+    if (!this.productRepo) return fallback;
+    const result = await this.productRepo.findByOwner(userId, { page: 1, perPage: 1 });
+    if (isErr(result)) return fallback;
+    return result.value.total;
   }
 
   async handleStripeWebhook(

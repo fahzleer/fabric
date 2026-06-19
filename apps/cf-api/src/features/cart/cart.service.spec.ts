@@ -242,31 +242,28 @@ describe("CartService.updateItemQty", () => {
 });
 
 describe("CartService.clearCart", () => {
-  test("findByUserId Err → throws HTTPException", async () => {
-    const { svc } = makeDeps({
-      findByUserId: async () => ({ _tag: "Err", error: REPO_ERR }),
-    });
-    await expect(svc.clearCart(USER_ID)).rejects.toThrow();
-  });
-
-  test("findByUserId Ok(None) → returns {cleared:true} without calling save", async () => {
-    const { svc, carts } = makeDeps({
-      findByUserId: async () => ({ _tag: "Ok", value: None() }),
-    });
-    const result = await svc.clearCart(USER_ID);
-    expect(result).toEqual({ cleared: true });
-    expect(carts.save).not.toHaveBeenCalled();
-  });
-
-  test("findByUserId Ok(Some(cart)) → saves cleared cart, returns {cleared:true}", async () => {
-    const { svc, carts } = makeDeps({
-      findByUserId: async () => ({ _tag: "Ok", value: Some(CART_WITH_ITEM) }),
-    });
+  test("always saves a fresh empty cart with new UUID and returns {cleared:true}", async () => {
+    const { svc, carts } = makeDeps({});
     const result = await svc.clearCart(USER_ID);
     expect(result).toEqual({ cleared: true });
     expect(carts.save).toHaveBeenCalledTimes(1);
 
     const savedCart = (carts.save as ReturnType<typeof mock>).mock.calls[0]?.[0] as Cart;
     expect(savedCart.items).toHaveLength(0);
+    expect(savedCart.id.value).toBeTruthy();
+  });
+
+  test("fresh cart has a different UUID each call", async () => {
+    const { svc } = makeDeps({});
+    await svc.clearCart(USER_ID);
+    await svc.clearCart(USER_ID);
+
+    const { svc: svc2, carts: carts2 } = makeDeps({});
+    await svc2.clearCart(USER_ID);
+    await svc2.clearCart(USER_ID);
+    const ids = (carts2.save as ReturnType<typeof mock>).mock.calls.map(
+      (c) => (c[0] as Cart).id.value
+    );
+    expect(ids[0]).not.toBe(ids[1]);
   });
 });

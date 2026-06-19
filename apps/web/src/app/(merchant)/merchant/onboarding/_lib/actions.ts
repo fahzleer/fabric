@@ -1,7 +1,7 @@
 "use server";
 
 import { createMerchantApi } from "@/lib/merchant-api";
-import { isSome } from "@fabric/types";
+import { isErr, isSome } from "@fabric/types";
 import { redirect } from "next/navigation";
 
 export async function onboardMerchantAction(formData: FormData) {
@@ -18,7 +18,7 @@ export async function onboardMerchantAction(formData: FormData) {
 
   const result = await maybeApi.value.onboardMerchant(storeName);
 
-  if (!result.ok) {
+  if (isErr(result)) {
     const msg = encodeURIComponent(result.error ?? "Onboarding failed");
     redirect(`/merchant/onboarding?error=${msg}`);
   }

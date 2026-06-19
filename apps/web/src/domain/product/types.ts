@@ -44,7 +44,7 @@ export {
 } from "@fabric/types";
 
 import type { Maybe, ProductSize } from "@fabric/types";
-import { None, Some } from "@fabric/types";
+import { None, Some, isSome } from "@fabric/types";
 
 export interface StockInfo {
   readonly size: ProductSize;
@@ -123,7 +123,7 @@ export const getProductStockForSize = (p: Product, size: ProductSize): Maybe<Sto
 
 export const isProductSizeAvailable = (p: Product, size: ProductSize): boolean => {
   const stock = getProductStockForSize(p, size);
-  return stock._tag === "Some" ? isStockInStock(stock.value) : false;
+  return isSome(stock) ? isStockInStock(stock.value) : false;
 };
 
 export const getProductAvailableSizes = (p: Product): ProductSize[] =>

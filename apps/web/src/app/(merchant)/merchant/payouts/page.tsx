@@ -1,6 +1,6 @@
 import { createMerchantApi } from "@/lib/merchant-api";
 import type { PayoutRequest } from "@/lib/merchant-api";
-import { isSome } from "@fabric/types";
+import { isErr, isOk, isSome } from "@fabric/types";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
@@ -60,11 +60,11 @@ export default async function MerchantPayoutsPage() {
     api.listPayouts(),
   ]);
 
-  if (!balanceResult.ok && balanceResult._tag === "MerchantNotFoundError")
+  if (isErr(balanceResult) && balanceResult.error.startsWith("[MerchantNotFoundError]"))
     redirect("/merchant/onboarding");
 
-  const balance = balanceResult.ok ? balanceResult.value : undefined;
-  const payouts = payoutsResult.ok ? payoutsResult.value : [];
+  const balance = isOk(balanceResult) ? balanceResult.value : undefined;
+  const payouts = isOk(payoutsResult) ? payoutsResult.value : [];
 
   const availableCents = balance?.availableBalanceCents ?? 0;
   const totalRevenueCents = balance?.totalRevenueCents ?? 0;
@@ -101,7 +101,7 @@ export default async function MerchantPayoutsPage() {
             Already paid out: <strong className="text-gray-300">{formatBaht(paidOutCents)}</strong>
           </span>
         </div>
-        {!balanceResult.ok && (
+        {isErr(balanceResult) && (
           <p className="mt-2 text-xs text-red-400">Could not load balance: {balanceResult.error}</p>
         )}
       </div>

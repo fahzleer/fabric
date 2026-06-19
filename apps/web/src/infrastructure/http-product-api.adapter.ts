@@ -1,3 +1,5 @@
+import type { CurrencyCode } from "@fabric/types";
+import { makeBrandedId } from "@fabric/types";
 import { Effect } from "effect";
 import { unstable_cache } from "next/cache";
 import type { NetworkError, ProductApiPort } from "../application/ports/product-api.port";
@@ -20,6 +22,7 @@ const CACHE_TAGS = {
 type RawProductSummary = {
   readonly id: string;
   readonly name: string;
+  readonly tagline?: string;
   readonly price: number;
   readonly priceCurrency: string;
   readonly category: string;
@@ -44,6 +47,7 @@ type RawProduct = {
   readonly id: string;
   readonly name: string;
   readonly description: string;
+  readonly tagline?: string;
   readonly price: number;
   readonly priceCurrency: string;
   readonly category: string;
@@ -62,14 +66,14 @@ type RawProduct = {
 
 function mapSummary(raw: RawProductSummary): ProductSummary {
   return {
-    id: { __brand: "ProductId" as const, value: raw.id },
-    name: { __brand: "ProductName" as const, value: raw.name },
+    id: makeBrandedId("ProductId", raw.id),
+    name: makeBrandedId("ProductName", raw.name),
     slug: raw.name.toLowerCase().replace(/\s+/g, "-"),
-    tagline: "",
+    tagline: raw.tagline ?? "",
     price: {
       __brand: "ProductPrice" as const,
       amount: raw.price,
-      currency: raw.priceCurrency as "THB" | "USD" | "EUR" | "GBP" | "JPY" | "SGD",
+      currency: raw.priceCurrency as CurrencyCode,
     },
     primaryImage: raw.primaryImage
       ? ({
@@ -102,15 +106,15 @@ function mapProduct(raw: RawProduct): Product {
   })) as unknown as Product["images"];
 
   return {
-    id: { __brand: "ProductId" as const, value: raw.id },
-    name: { __brand: "ProductName" as const, value: raw.name },
+    id: makeBrandedId("ProductId", raw.id),
+    name: makeBrandedId("ProductName", raw.name),
     slug: raw.name.toLowerCase().replace(/\s+/g, "-"),
     description: raw.description,
-    tagline: "",
+    tagline: raw.tagline ?? "",
     price: {
       __brand: "ProductPrice" as const,
       amount: raw.price,
-      currency: raw.priceCurrency as "THB" | "USD" | "EUR" | "GBP" | "JPY" | "SGD",
+      currency: raw.priceCurrency as CurrencyCode,
     },
     category: raw.category as Product["category"],
     status: raw.status as Product["status"],

@@ -3,8 +3,9 @@
 import { cartAtom } from "@/application/atoms/cart.atoms";
 import type { ShoppingCart } from "@/domain/cart/types";
 import { useDexieCartSync } from "@/infrastructure/dexie/use-dexie-cart-sync";
-import { type Maybe, None, Some } from "@/lib/maybe";
+import { syncCartToServer } from "@/lib/sync-cart";
 import { useAtomValue } from "@effect-atom/atom-react";
+import { type Maybe, None, Some, isSome } from "@fabric/types";
 import { Option } from "effect";
 import { parseAsStringLiteral, useQueryState } from "nuqs";
 import { AddressForm } from "./_components/address-form";
@@ -27,6 +28,20 @@ export default function CheckoutPage() {
   const cartOption = useAtomValue(cartAtom);
 
   const cart: Maybe<ShoppingCart> = Option.isSome(cartOption) ? Some(cartOption.value) : None();
+
+  const goToSummary = async () => {
+    if (isSome(cart)) {
+      try {
+        const res = await fetch("/api/auth/get-session", { credentials: "include" });
+        const data = (await res.json()) as { session?: { token?: string } };
+        const token = data.session?.token;
+        if (token) await syncCartToServer(cart.value.items, token);
+      } catch {
+        // proceed even if sync fails — preview will show local totals
+      }
+    }
+    setStep("summary");
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -52,7 +67,7 @@ export default function CheckoutPage() {
           ))}
         </div>
 
-        {step === "address" && <AddressForm onNext={() => setStep("summary")} />}
+        {step === "address" && <AddressForm onNext={goToSummary} />}
         {step === "summary" && (
           <OrderSummary
             cart={cart}

@@ -1,5 +1,5 @@
 import { createMerchantApi } from "@/lib/merchant-api";
-import { isSome } from "@fabric/types";
+import { isErr, isSome } from "@fabric/types";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { connection } from "next/server";
@@ -42,10 +42,10 @@ export default async function MerchantProductsPage() {
       </div>
 
       {/* Error state */}
-      {!result.ok ? (
+      {isErr(result) ? (
         <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-6">
           <p className="text-sm text-red-400">{result.error}</p>
-          {result._tag === "SubscriptionInactive" && (
+          {result.error.startsWith("[SubscriptionInactive]") && (
             <Link
               href="/merchant/billing"
               className="mt-3 inline-block text-sm text-emerald-400 hover:text-emerald-300"

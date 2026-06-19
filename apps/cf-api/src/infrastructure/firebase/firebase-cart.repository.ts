@@ -1,6 +1,6 @@
 import type { FirebaseCartItemRecord } from "@fabric/firebase";
 import { CartNotFoundError } from "@fabric/types";
-import { None, Some } from "@fabric/types";
+import { None, Some, isSome } from "@fabric/types";
 import type { RepositoryError } from "@fabric/types";
 import type { Maybe, Result } from "@fabric/types";
 import { Temporal } from "@js-temporal/polyfill";
@@ -19,7 +19,7 @@ import type { ProductSize } from "../../domain/product/product.value-objects";
 import type { UserId } from "../../domain/user/user.value-objects";
 
 function cartKey(cart: Cart): string {
-  return cart.userId._tag === "Some" ? cart.userId.value.value : `anon_${cart.id.value}`;
+  return isSome(cart.userId) ? cart.userId.value.value : `anon_${cart.id.value}`;
 }
 
 interface CartMeta {
@@ -90,7 +90,7 @@ export class FirebaseCartRepository implements CartRepositoryPort {
       const key = cartKey(cart);
       const meta: CartMeta = {
         id: cart.id.value,
-        userId: cart.userId._tag === "Some" ? cart.userId.value.value : null,
+        userId: isSome(cart.userId) ? cart.userId.value.value : null,
         createdAt: cart.createdAt.toString(),
         updatedAt: Temporal.Now.instant().toString(),
       };

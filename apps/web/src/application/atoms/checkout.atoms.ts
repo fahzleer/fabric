@@ -24,11 +24,29 @@ export type PricingPreview = {
   voucherError: string | null;
 };
 
-export const checkoutStepAtom = Atom.make<CheckoutStep>("address");
-export const shippingAddressAtom = Atom.make(Option.none<ShippingAddressFormData>());
-export const placedOrderIdAtom = Atom.make(Option.none<string>());
-export const voucherCodeAtom = Atom.make("");
-export const pricingPreviewAtom = Atom.make(Option.none<PricingPreview>());
+export const checkoutStepAtom = Atom.keepAlive(Atom.make<CheckoutStep>("address"));
+export const placedOrderIdAtom = Atom.keepAlive(Atom.make(Option.none<string>()));
+export const voucherCodeAtom = Atom.keepAlive(Atom.make(""));
+export const pricingPreviewAtom = Atom.keepAlive(Atom.make(Option.none<PricingPreview>()));
+
+const SESSION_KEY = "fabric_shipping_address";
+
+export function saveShippingAddress(addr: ShippingAddressFormData): void {
+  if (typeof sessionStorage !== "undefined")
+    sessionStorage.setItem(SESSION_KEY, JSON.stringify(addr));
+}
+
+export function loadShippingAddress(): Option.Option<ShippingAddressFormData> {
+  if (typeof sessionStorage === "undefined") return Option.none();
+  try {
+    const raw = sessionStorage.getItem(SESSION_KEY);
+    return raw ? Option.some(JSON.parse(raw) as ShippingAddressFormData) : Option.none();
+  } catch {
+    return Option.none();
+  }
+}
+
+export const shippingAddressAtom = Atom.keepAlive(Atom.make(loadShippingAddress()));
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3010";
 

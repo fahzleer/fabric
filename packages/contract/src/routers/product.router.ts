@@ -27,6 +27,7 @@ export type ProductImageDto = {
 export type ProductSummaryDto = {
   readonly id: string;
   readonly name: string;
+  readonly tagline: string;
   readonly price: number;
   readonly priceCurrency: string;
   readonly category: ProductCategory;

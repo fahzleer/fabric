@@ -9,11 +9,13 @@ import {
 } from "@/application/atoms/checkout.atoms";
 import { getCartTotal } from "@/domain/cart/types";
 import type { ShoppingCart } from "@/domain/cart/types";
-import { type Maybe, None, Some, isNone, isSome } from "@/lib/maybe";
 import { formatPrice } from "@/lib/price";
+import { syncCartToServer } from "@/lib/sync-cart";
 import { Atom, Result, useAtom, useAtomSet, useAtomValue } from "@effect-atom/atom-react";
+import { type Maybe, None, Some, isNone, isSome } from "@fabric/types";
 import { Effect, Option } from "effect";
 import { useRouter } from "next/navigation";
+import { getAddress } from "viem";
 import { base, baseSepolia } from "viem/chains";
 import { useAccount, useConnect, useSignTypedData, useSwitchChain } from "wagmi";
 
@@ -71,6 +73,7 @@ type ShippingAddress = {
   postalCode: string;
   country: string;
   phone: string;
+  province: string;
 };
 
 type Status =
@@ -119,7 +122,7 @@ const buildEip3009TypedData = (
     primaryType: "TransferWithAuthorization" as const,
     message: {
       from,
-      to: requirements.payTo as `0x${string}`,
+      to: getAddress(requirements.payTo as `0x${string}`),
       value: BigInt(requirements.maxAmountRequired),
       validAfter: 0n,
       validBefore: BigInt(validBefore),
@@ -140,16 +143,18 @@ async function fetchSessionToken(): Promise<Maybe<string>> {
   }
 }
 
+type RawShippingAddress = Omit<ShippingAddress, "province"> & { province?: string };
+
 function buildOrderBody(
   cartId: string,
   voucherCode: string,
-  shippingAddress: ShippingAddress
+  rawShipping: RawShippingAddress
 ): object {
   return {
     cartId,
     paymentMethod: "crypto",
     voucherCode: voucherCode || undefined,
-    shippingAddress,
+    shippingAddress: { ...rawShipping, province: rawShipping.province ?? "Bangkok" },
   };
 }
 
@@ -222,7 +227,7 @@ function resolvePayButtonLabel(isLoading: boolean, estimatedUsdc: Option.Option<
 async function executeX402Payment(
   cart: ShoppingCart,
   voucherCode: string,
-  shippingAddress: ShippingAddress,
+  shippingAddress: RawShippingAddress,
   address: `0x${string}`,
   isOnCorrectChain: boolean,
   deps: X402PaymentDeps
@@ -232,13 +237,16 @@ async function executeX402Payment(
     await deps.switchChainAsync({ chainId: TARGET_CHAIN.id });
   }
   const authToken = await fetchSessionToken();
+  if (isSome(authToken)) {
+    await syncCartToServer(cart.items, authToken.value);
+  }
   const orderBody = buildOrderBody(cart.id, voucherCode, shippingAddress);
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     ...(isSome(authToken) ? { Authorization: `Bearer ${authToken.value}` } : {}),
   };
   deps.setStatus("probing");
-  const probeRes = await fetch(`${API_BASE}/orders`, {
+  const probeRes = await fetch(`${API_BASE}/api/orders`, {
     method: "POST",
     headers,
     body: JSON.stringify(orderBody),
@@ -260,7 +268,7 @@ async function executeX402Payment(
   const signature = await deps.signTypedDataAsync(typedData);
   const xPaymentHeader = buildXPaymentHeader(requirements, address, signature, typedData);
   deps.setStatus("submitting");
-  const orderRes = await fetch(`${API_BASE}/orders`, {
+  const orderRes = await fetch(`${API_BASE}/api/orders`, {
     method: "POST",
     headers: { ...headers, "X-Payment": xPaymentHeader },
     body: JSON.stringify(orderBody),
