@@ -124,7 +124,10 @@ function AdminProductRow({
         ) : (
           <div className="flex flex-wrap gap-1">
             {Object.entries(p.stock).map(([size, qty]) => (
-              <span key={size} className={`rounded px-1.5 py-0.5 text-xs font-mono ${stockBadgeClass(qty)}`}>
+              <span
+                key={size}
+                className={`rounded px-1.5 py-0.5 text-xs font-mono ${stockBadgeClass(qty)}`}
+              >
                 {size}:{qty}
               </span>
             ))}
@@ -132,7 +135,9 @@ function AdminProductRow({
         )}
       </td>
       <td className="px-4 py-3 text-center">
-        <span className={`text-sm font-bold ${isOut ? "text-red-400" : isLow ? "text-amber-400" : "text-white"}`}>
+        <span
+          className={`text-sm font-bold ${isOut ? "text-red-400" : isLow ? "text-amber-400" : "text-white"}`}
+        >
           {p.totalStock}
         </span>
       </td>

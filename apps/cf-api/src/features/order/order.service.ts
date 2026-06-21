@@ -544,9 +544,7 @@ export class OrderService {
     log.warn(`placeOrder: pricing error (${pricingResult.error._tag}) — subtotal fallback`);
     const subtotal = items.reduce(
       (acc, item) =>
-        acc.plus(
-          new BigNumber(Math.round(item.unitPrice.amount * 100)).times(item.quantity.value)
-        ),
+        acc.plus(new BigNumber(Math.round(item.unitPrice.amount * 100)).times(item.quantity.value)),
       new BigNumber(0)
     );
     return { totalCents: subtotal.toNumber(), shippingCents: 0, discountCents: 0 };

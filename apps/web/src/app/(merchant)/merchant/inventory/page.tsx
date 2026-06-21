@@ -32,13 +32,17 @@ function MerchantProductRow({ p }: { p: MerchantProduct }) {
   const isLow = p.totalStock > 0 && p.totalStock <= 5;
   const isOut = p.totalStock === 0 && p.status === "active";
   return (
-    <tr className={`transition-colors ${isOut ? "bg-red-950/20" : isLow ? "bg-amber-950/20" : "hover:bg-white/2"}`}>
+    <tr
+      className={`transition-colors ${isOut ? "bg-red-950/20" : isLow ? "bg-amber-950/20" : "hover:bg-white/2"}`}
+    >
       <td className="px-4 py-3">
         <p className="font-medium text-white">{p.name}</p>
         <p className="text-xs text-gray-500 capitalize">{p.category}</p>
       </td>
       <td className="px-4 py-3">
-        <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${STATUS_STYLES[p.status] ?? "bg-gray-500/20 text-gray-400"}`}>
+        <span
+          className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${STATUS_STYLES[p.status] ?? "bg-gray-500/20 text-gray-400"}`}
+        >
           {p.status}
         </span>
       </td>
@@ -51,7 +55,10 @@ function MerchantProductRow({ p }: { p: MerchantProduct }) {
         ) : (
           <div className="flex flex-wrap gap-1">
             {Object.entries(p.stock).map(([size, qty]) => (
-              <span key={size} className={`rounded px-1.5 py-0.5 text-xs font-mono ${stockBadgeClass(qty)}`}>
+              <span
+                key={size}
+                className={`rounded px-1.5 py-0.5 text-xs font-mono ${stockBadgeClass(qty)}`}
+              >
                 {size}:{qty}
               </span>
             ))}
@@ -59,7 +66,9 @@ function MerchantProductRow({ p }: { p: MerchantProduct }) {
         )}
       </td>
       <td className="px-4 py-3 text-center">
-        <span className={`text-sm font-bold ${isOut ? "text-red-400" : isLow ? "text-amber-400" : "text-white"}`}>
+        <span
+          className={`text-sm font-bold ${isOut ? "text-red-400" : isLow ? "text-amber-400" : "text-white"}`}
+        >
           {p.totalStock}
         </span>
       </td>
