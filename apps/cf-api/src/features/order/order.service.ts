@@ -159,27 +159,10 @@ export class OrderService {
       currency
     );
 
-    let totalCents: number;
-    let shippingCents: number;
-    let discountCents: number;
-
-    if (pricingResult._tag === "Ok") {
-      totalCents = pricingResult.value.totalCents;
-      shippingCents = pricingResult.value.shippingCents;
-      discountCents = pricingResult.value.discountCents;
-    } else {
-      log.warn(`placeOrder: pricing error (${pricingResult.error._tag}) — subtotal fallback`);
-      const subtotal = cart.items.reduce(
-        (acc, item) =>
-          acc.plus(
-            new BigNumber(Math.round(item.unitPrice.amount * 100)).times(item.quantity.value)
-          ),
-        new BigNumber(0)
-      );
-      totalCents = subtotal.toNumber();
-      shippingCents = 0;
-      discountCents = 0;
-    }
+    const { totalCents, shippingCents, discountCents } = this.resolvePricingTotals(
+      pricingResult,
+      cart.items
+    );
 
     const orderLines: OrderLine[] = cart.items.map((item) => ({
       productId: item.productId,
@@ -224,20 +207,7 @@ export class OrderService {
     } else {
       log.info(`Order placed (x402 confirmed): orderId=${orderId} total=${totalCents} ${currency}`);
       // Non-card orders are immediately confirmed — record revenue per product owner
-      const revenueByOwner = new Map<string, number>();
-      for (const item of orderLines) {
-        const prod = await this.productRepo.findById(item.productId);
-        if (prod._tag === "Ok" && prod.value.ownerId) {
-          const prev = revenueByOwner.get(prod.value.ownerId) ?? 0;
-          revenueByOwner.set(
-            prod.value.ownerId,
-            prev + Math.round(item.unitPrice.amount * 100) * item.quantity
-          );
-        }
-      }
-      for (const [ownerId, revenue] of revenueByOwner) {
-        void this.merchantRepo.recordCompletedOrder(ownerId, revenue);
-      }
+      await this.recordRevenueByOwner(orderLines);
     }
 
     const freshCart = makeEmptyCart(
@@ -558,6 +528,45 @@ export class OrderService {
       InvalidDiscount: `Voucher "${code}" has an invalid discount configuration`,
     };
     return msgs[tag] ?? `Voucher "${code}" could not be applied`;
+  }
+
+  private resolvePricingTotals(
+    pricingResult: Awaited<ReturnType<PricingPort["calculateCheckout"]>>,
+    items: ReadonlyArray<CartItem>
+  ): { totalCents: number; shippingCents: number; discountCents: number } {
+    if (pricingResult._tag === "Ok") {
+      return {
+        totalCents: pricingResult.value.totalCents,
+        shippingCents: pricingResult.value.shippingCents,
+        discountCents: pricingResult.value.discountCents,
+      };
+    }
+    log.warn(`placeOrder: pricing error (${pricingResult.error._tag}) — subtotal fallback`);
+    const subtotal = items.reduce(
+      (acc, item) =>
+        acc.plus(
+          new BigNumber(Math.round(item.unitPrice.amount * 100)).times(item.quantity.value)
+        ),
+      new BigNumber(0)
+    );
+    return { totalCents: subtotal.toNumber(), shippingCents: 0, discountCents: 0 };
+  }
+
+  private async recordRevenueByOwner(orderLines: OrderLine[]): Promise<void> {
+    const revenueByOwner = new Map<string, number>();
+    for (const item of orderLines) {
+      const prod = await this.productRepo.findById(item.productId);
+      if (prod._tag === "Ok" && prod.value.ownerId) {
+        const prev = revenueByOwner.get(prod.value.ownerId) ?? 0;
+        revenueByOwner.set(
+          prod.value.ownerId,
+          prev + Math.round(item.unitPrice.amount * 100) * item.quantity
+        );
+      }
+    }
+    for (const [ownerId, revenue] of revenueByOwner) {
+      void this.merchantRepo.recordCompletedOrder(ownerId, revenue);
+    }
   }
 
   private subtotalOnlyFallback(

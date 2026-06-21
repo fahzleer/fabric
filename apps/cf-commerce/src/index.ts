@@ -115,6 +115,43 @@ if (typeof Bun !== "undefined") {
   });
 }
 
+import type { Request, Response } from "firebase-functions/v2/https";
+
+function buildHeaders(reqHeaders: Record<string, string | string[] | undefined>): Headers {
+  const headers = new Headers();
+  for (const [key, value] of Object.entries(reqHeaders)) {
+    if (value === undefined) continue;
+    if (Array.isArray(value)) {
+      for (const v of value) headers.append(key, v);
+    } else {
+      headers.set(key, value);
+    }
+  }
+  return headers;
+}
+
+async function handleCloudFunctionRequest(req: Request, res: Response): Promise<void> {
+  const { app } = await boot();
+
+  const protocol = (req.headers["x-forwarded-proto"] as string | undefined) ?? "https";
+  const host = req.headers.host ?? req.hostname;
+  const url = `${protocol}://${host}${req.url}`;
+
+  const headers = buildHeaders(req.headers as Record<string, string | string[] | undefined>);
+  const hasBody = req.method !== "GET" && req.method !== "HEAD";
+  const webReq = new Request(url, {
+    method: req.method,
+    headers,
+    body: hasBody ? JSON.stringify(req.body) : undefined,
+  });
+
+  const honoRes = await app.fetch(webReq);
+  res.status(honoRes.status);
+  honoRes.headers.forEach((value: string, key: string) => res.setHeader(key, value));
+  const body = await honoRes.text();
+  res.send(body);
+}
+
 export const cfCommerce = onRequest(
   {
     region: "asia-east1",
@@ -124,37 +161,5 @@ export const cfCommerce = onRequest(
     concurrency: 80,
     secrets: ["INTERNAL_SECRET"],
   },
-  (req, res): Promise<void> => {
-    return (async (): Promise<void> => {
-      const { app } = await boot();
-
-      const protocol = (req.headers["x-forwarded-proto"] as string | undefined) ?? "https";
-      const host = req.headers.host ?? req.hostname;
-      const url = `${protocol}://${host}${req.url}`;
-
-      const headers = new Headers();
-      for (const [key, value] of Object.entries(req.headers)) {
-        if (value !== undefined) {
-          if (Array.isArray(value)) {
-            for (const v of value) headers.append(key, v);
-          } else {
-            headers.set(key, value);
-          }
-        }
-      }
-
-      const hasBody = req.method !== "GET" && req.method !== "HEAD";
-      const webReq = new Request(url, {
-        method: req.method,
-        headers,
-        body: hasBody ? JSON.stringify(req.body) : undefined,
-      });
-
-      const honoRes = await app.fetch(webReq);
-      res.status(honoRes.status);
-      honoRes.headers.forEach((value: string, key: string) => res.setHeader(key, value));
-      const body = await honoRes.text();
-      res.send(body);
-    })();
-  }
+  (req, res) => handleCloudFunctionRequest(req, res)
 );

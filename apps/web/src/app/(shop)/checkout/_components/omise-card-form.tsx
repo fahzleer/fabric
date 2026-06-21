@@ -228,12 +228,40 @@ export function OmiseCardForm({ cart, onBack }: OmiseCardFormProps) {
     }
   };
 
+  const tokenizeAndPay = (
+    deps: PaymentDeps,
+    cartValue: NonNullable<typeof cart>["value"],
+    shippingValue: NonNullable<typeof shippingAddress>["value"]
+  ) => {
+    window.Omise.createToken(
+      "card",
+      {
+        name: cardName.trim(),
+        number: cardNumber.replace(/\s/g, ""),
+        expiration_month: Number.parseInt(expMonth, 10),
+        expiration_year: Number.parseInt(expYear, 10),
+        security_code: cvv.trim(),
+      },
+      async (statusCode, response) => {
+        if (statusCode !== 200 || !response.id) {
+          setError(Some(response.message ?? "Card tokenization failed. Please check your card details."));
+          setStatus("error");
+          return;
+        }
+        setStatus("submitting");
+        try {
+          await executeOmisePayment(response.id, cartValue, voucherCode, shippingValue, deps);
+        } catch (e) {
+          setError(Some(e instanceof Error ? e.message : "Unknown error"));
+          setStatus("error");
+        }
+      }
+    );
+  };
+
   const handlePay = async () => {
     if (isNone(cart) || cart.value.items.length === 0) return;
-    if (Option.isNone(shippingAddress)) {
-      onBack();
-      return;
-    }
+    if (Option.isNone(shippingAddress)) { onBack(); return; }
     if (!(window.Omise && omiseReady)) {
       setError(Some("Payment library not ready. Please wait a moment and try again."));
       return;
@@ -246,45 +274,8 @@ export function OmiseCardForm({ cart, onBack }: OmiseCardFormProps) {
     setError(None());
     setStatus("tokenizing");
 
-    const deps: PaymentDeps = {
-      setError,
-      setStatus,
-      setPlacedOrderId,
-      push: router.push,
-    };
-
-    window.Omise.createToken(
-      "card",
-      {
-        name: cardName.trim(),
-        number: cardNumber.replace(/\s/g, ""),
-        expiration_month: Number.parseInt(expMonth, 10),
-        expiration_year: Number.parseInt(expYear, 10),
-        security_code: cvv.trim(),
-      },
-      async (statusCode, response) => {
-        if (statusCode !== 200 || !response.id) {
-          setError(
-            Some(response.message ?? "Card tokenization failed. Please check your card details.")
-          );
-          setStatus("error");
-          return;
-        }
-        setStatus("submitting");
-        try {
-          await executeOmisePayment(
-            response.id,
-            cart.value,
-            voucherCode,
-            shippingAddress.value,
-            deps
-          );
-        } catch (e) {
-          setError(Some(e instanceof Error ? e.message : "Unknown error"));
-          setStatus("error");
-        }
-      }
-    );
+    const deps: PaymentDeps = { setError, setStatus, setPlacedOrderId, push: router.push };
+    tokenizeAndPay(deps, cart.value, shippingAddress.value);
   };
 
   const isLoading = status === "tokenizing" || status === "submitting";

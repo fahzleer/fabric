@@ -78,12 +78,81 @@ async function getOrders(token: string): Promise<AdminOrderItem[]> {
   }
 }
 
+function stockBadgeClass(qty: number): string {
+  if (qty === 0) return "bg-red-500/20 text-red-400";
+  if (qty <= 5) return "bg-amber-500/20 text-amber-400";
+  return "bg-white/10 text-gray-300";
+}
+
+function AdminProductRow({
+  p,
+  sold,
+}: {
+  p: AdminProduct;
+  sold: number;
+}) {
+  const isLow = p.totalStock > 0 && p.totalStock <= 5;
+  const isOut = p.totalStock === 0 && p.status === "active";
+  return (
+    <tr
+      className={`transition-colors ${isOut ? "bg-red-950/20" : isLow ? "bg-amber-950/20" : "hover:bg-white/2"}`}
+    >
+      <td className="px-4 py-3">
+        <p className="font-medium text-white">{p.name}</p>
+        <p className="text-xs text-gray-500 font-mono">{p.id.slice(0, 8)}…</p>
+      </td>
+      <td className="px-4 py-3">
+        <span
+          className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${CATEGORY_STYLES[p.category] ?? "bg-gray-500/20 text-gray-400"}`}
+        >
+          {p.category}
+        </span>
+      </td>
+      <td className="px-4 py-3">
+        <span
+          className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${STATUS_STYLES[p.status] ?? "bg-gray-500/20 text-gray-400"}`}
+        >
+          {p.status}
+        </span>
+      </td>
+      <td className="px-4 py-3 text-gray-300 whitespace-nowrap">
+        {formatPrice({ amount: p.priceCents / 100, currency: p.currency })}
+      </td>
+      <td className="px-4 py-3">
+        {Object.keys(p.stock).length === 0 ? (
+          <span className="text-gray-600 text-xs">—</span>
+        ) : (
+          <div className="flex flex-wrap gap-1">
+            {Object.entries(p.stock).map(([size, qty]) => (
+              <span key={size} className={`rounded px-1.5 py-0.5 text-xs font-mono ${stockBadgeClass(qty)}`}>
+                {size}:{qty}
+              </span>
+            ))}
+          </div>
+        )}
+      </td>
+      <td className="px-4 py-3 text-center">
+        <span className={`text-sm font-bold ${isOut ? "text-red-400" : isLow ? "text-amber-400" : "text-white"}`}>
+          {p.totalStock}
+        </span>
+      </td>
+      <td className="px-4 py-3 text-center text-gray-400 text-sm">
+        {sold > 0 ? (
+          <span className="font-medium text-emerald-400">{sold}</span>
+        ) : (
+          <span className="text-gray-600">0</span>
+        )}
+      </td>
+    </tr>
+  );
+}
+
 const ACTIVE_ORDER_STATUSES = new Set(["confirmed", "processing", "shipped", "delivered"]);
 
 function buildSoldByProduct(orders: AdminOrderItem[]): Map<string, number> {
   const sold = new Map<string, number>();
   for (const order of orders) {
-    if (!ACTIVE_ORDER_STATUSES.has(order.status) || !order.lines) continue;
+    if (!(ACTIVE_ORDER_STATUSES.has(order.status) && order.lines)) continue;
     for (const line of order.lines) {
       sold.set(line.productId, (sold.get(line.productId) ?? 0) + line.quantity);
     }
@@ -229,75 +298,9 @@ export default async function InventoryPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5 bg-gray-900/30">
-              {products.map((p) => {
-                const sold = soldByProduct.get(p.id) ?? 0;
-                const isLow = p.totalStock > 0 && p.totalStock <= 5;
-                const isOut = p.totalStock === 0 && p.status === "active";
-                return (
-                  <tr
-                    key={p.id}
-                    className={`transition-colors ${isOut ? "bg-red-950/20" : isLow ? "bg-amber-950/20" : "hover:bg-white/2"}`}
-                  >
-                    <td className="px-4 py-3">
-                      <p className="font-medium text-white">{p.name}</p>
-                      <p className="text-xs text-gray-500 font-mono">{p.id.slice(0, 8)}…</p>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span
-                        className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${CATEGORY_STYLES[p.category] ?? "bg-gray-500/20 text-gray-400"}`}
-                      >
-                        {p.category}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span
-                        className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${STATUS_STYLES[p.status] ?? "bg-gray-500/20 text-gray-400"}`}
-                      >
-                        {p.status}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-gray-300 whitespace-nowrap">
-                      {formatPrice({ amount: p.priceCents / 100, currency: p.currency })}
-                    </td>
-                    <td className="px-4 py-3">
-                      {Object.keys(p.stock).length === 0 ? (
-                        <span className="text-gray-600 text-xs">—</span>
-                      ) : (
-                        <div className="flex flex-wrap gap-1">
-                          {Object.entries(p.stock).map(([size, qty]) => (
-                            <span
-                              key={size}
-                              className={`rounded px-1.5 py-0.5 text-xs font-mono ${
-                                qty === 0
-                                  ? "bg-red-500/20 text-red-400"
-                                  : qty <= 5
-                                    ? "bg-amber-500/20 text-amber-400"
-                                    : "bg-white/10 text-gray-300"
-                              }`}
-                            >
-                              {size}:{qty}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-center">
-                      <span
-                        className={`text-sm font-bold ${isOut ? "text-red-400" : isLow ? "text-amber-400" : "text-white"}`}
-                      >
-                        {p.totalStock}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-center text-gray-400 text-sm">
-                      {sold > 0 ? (
-                        <span className="font-medium text-emerald-400">{sold}</span>
-                      ) : (
-                        <span className="text-gray-600">0</span>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
+              {products.map((p) => (
+                <AdminProductRow key={p.id} p={p} sold={soldByProduct.get(p.id) ?? 0} />
+              ))}
             </tbody>
           </table>
           <div className="border-t border-white/10 bg-gray-800/40 px-4 py-3 flex items-center justify-between">

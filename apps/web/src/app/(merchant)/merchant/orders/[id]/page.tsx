@@ -138,8 +138,8 @@ export default async function MerchantOrderDetailPage({
             </tr>
           </thead>
           <tbody>
-            {(order.lines ?? []).map((line, i) => (
-              <tr key={i} className="border-t border-white/5">
+            {(order.lines ?? []).map((line) => (
+              <tr key={`${line.productId}-${line.size}`} className="border-t border-white/5">
                 <td className="px-5 py-3 text-sm text-white">{line.productName}</td>
                 <td className="px-5 py-3 text-sm text-gray-400 uppercase">{line.size}</td>
                 <td className="px-5 py-3 text-sm text-gray-200 text-center">{line.quantity}</td>

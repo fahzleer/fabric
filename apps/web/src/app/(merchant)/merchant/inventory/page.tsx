@@ -11,6 +11,62 @@ const STATUS_STYLES: Record<string, string> = {
   archived: "bg-red-500/20 text-red-300",
 };
 
+type MerchantProduct = {
+  id: string;
+  name: string;
+  category: string;
+  status: string;
+  priceCents: number;
+  currency: string;
+  stock: Record<string, number>;
+  totalStock: number;
+};
+
+function stockBadgeClass(qty: number): string {
+  if (qty === 0) return "bg-red-500/20 text-red-400";
+  if (qty <= 5) return "bg-amber-500/20 text-amber-400";
+  return "bg-white/10 text-gray-300";
+}
+
+function MerchantProductRow({ p }: { p: MerchantProduct }) {
+  const isLow = p.totalStock > 0 && p.totalStock <= 5;
+  const isOut = p.totalStock === 0 && p.status === "active";
+  return (
+    <tr className={`transition-colors ${isOut ? "bg-red-950/20" : isLow ? "bg-amber-950/20" : "hover:bg-white/2"}`}>
+      <td className="px-4 py-3">
+        <p className="font-medium text-white">{p.name}</p>
+        <p className="text-xs text-gray-500 capitalize">{p.category}</p>
+      </td>
+      <td className="px-4 py-3">
+        <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${STATUS_STYLES[p.status] ?? "bg-gray-500/20 text-gray-400"}`}>
+          {p.status}
+        </span>
+      </td>
+      <td className="px-4 py-3 text-gray-300 whitespace-nowrap">
+        {formatThb(p.priceCents, p.currency)}
+      </td>
+      <td className="px-4 py-3">
+        {Object.keys(p.stock).length === 0 ? (
+          <span className="text-gray-600 text-xs">—</span>
+        ) : (
+          <div className="flex flex-wrap gap-1">
+            {Object.entries(p.stock).map(([size, qty]) => (
+              <span key={size} className={`rounded px-1.5 py-0.5 text-xs font-mono ${stockBadgeClass(qty)}`}>
+                {size}:{qty}
+              </span>
+            ))}
+          </div>
+        )}
+      </td>
+      <td className="px-4 py-3 text-center">
+        <span className={`text-sm font-bold ${isOut ? "text-red-400" : isLow ? "text-amber-400" : "text-white"}`}>
+          {p.totalStock}
+        </span>
+      </td>
+    </tr>
+  );
+}
+
 function formatThb(cents: number, currency: string) {
   return new Intl.NumberFormat("th-TH", {
     style: "currency",
@@ -124,60 +180,9 @@ export default async function MerchantInventoryPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5 bg-gray-900/30">
-              {products.map((p) => {
-                const isLow = p.totalStock > 0 && p.totalStock <= 5;
-                const isOut = p.totalStock === 0 && p.status === "active";
-                return (
-                  <tr
-                    key={p.id}
-                    className={`transition-colors ${isOut ? "bg-red-950/20" : isLow ? "bg-amber-950/20" : "hover:bg-white/2"}`}
-                  >
-                    <td className="px-4 py-3">
-                      <p className="font-medium text-white">{p.name}</p>
-                      <p className="text-xs text-gray-500 capitalize">{p.category}</p>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span
-                        className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${STATUS_STYLES[p.status] ?? "bg-gray-500/20 text-gray-400"}`}
-                      >
-                        {p.status}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-gray-300 whitespace-nowrap">
-                      {formatThb(p.priceCents, p.currency)}
-                    </td>
-                    <td className="px-4 py-3">
-                      {Object.keys(p.stock).length === 0 ? (
-                        <span className="text-gray-600 text-xs">—</span>
-                      ) : (
-                        <div className="flex flex-wrap gap-1">
-                          {Object.entries(p.stock).map(([size, qty]) => (
-                            <span
-                              key={size}
-                              className={`rounded px-1.5 py-0.5 text-xs font-mono ${
-                                qty === 0
-                                  ? "bg-red-500/20 text-red-400"
-                                  : qty <= 5
-                                    ? "bg-amber-500/20 text-amber-400"
-                                    : "bg-white/10 text-gray-300"
-                              }`}
-                            >
-                              {size}:{qty}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-center">
-                      <span
-                        className={`text-sm font-bold ${isOut ? "text-red-400" : isLow ? "text-amber-400" : "text-white"}`}
-                      >
-                        {p.totalStock}
-                      </span>
-                    </td>
-                  </tr>
-                );
-              })}
+              {products.map((p) => (
+                <MerchantProductRow key={p.id} p={p} />
+              ))}
             </tbody>
           </table>
           <div className="border-t border-white/10 bg-gray-800/40 px-4 py-3 flex items-center justify-between">
