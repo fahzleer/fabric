@@ -115,7 +115,9 @@ if (typeof Bun !== "undefined") {
   });
 }
 
-import type { Request, Response } from "firebase-functions/v2/https";
+type FnHandler = Parameters<typeof onRequest>[0];
+type FnRequest = Parameters<FnHandler>[0];
+type FnResponse = Parameters<FnHandler>[1];
 
 function buildHeaders(reqHeaders: Record<string, string | string[] | undefined>): Headers {
   const headers = new Headers();
@@ -130,7 +132,7 @@ function buildHeaders(reqHeaders: Record<string, string | string[] | undefined>)
   return headers;
 }
 
-async function handleCloudFunctionRequest(req: Request, res: Response): Promise<void> {
+async function handleCloudFunctionRequest(req: FnRequest, res: FnResponse): Promise<void> {
   const { app } = await boot();
 
   const protocol = (req.headers["x-forwarded-proto"] as string | undefined) ?? "https";
