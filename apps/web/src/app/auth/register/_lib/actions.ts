@@ -41,7 +41,7 @@ export async function registerAction(formData: FormData) {
       cause: error instanceof Error ? error.cause : undefined,
     });
 
-    if (raw.toLowerCase().includes("already") || raw.includes("422")) {
+    if (raw.toLowerCase().includes("already") || raw.toLowerCase().includes("user already exists")) {
       maybeError = Some("An account with this email already exists.");
     } else if (process.env.NODE_ENV !== "production" && raw) {
       // In dev, surface the actual error so DB/config issues are visible
