@@ -12,6 +12,7 @@ import {
 } from "../_lib/actions";
 import { DescriptionField } from "./description-field";
 import { ImageField, type ImageFieldHandle } from "./image-field";
+import { ProductSubmitButton } from "./product-submit-button";
 import { TaglineField } from "./tagline-field";
 
 const CATEGORIES = [
@@ -265,12 +266,7 @@ export const ProductForm = memo(function ProductForm({
         >
           Cancel
         </Link>
-        <button
-          type="submit"
-          className="flex-1 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-emerald-500"
-        >
-          {mode === "create" ? "Create product" : "Save changes"}
-        </button>
+        <ProductSubmitButton mode={mode} />
       </div>
     </form>
   );

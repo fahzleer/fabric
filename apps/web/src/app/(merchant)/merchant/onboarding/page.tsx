@@ -3,6 +3,7 @@ import { isOk, isSome } from "@fabric/types";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { connection } from "next/server";
+import { SubmitButton } from "./_components/submit-button";
 import { onboardMerchantAction } from "./_lib/actions";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://fabric.cool";
@@ -142,12 +143,7 @@ export default async function MerchantOnboardingPage({
             </p>
           </div>
 
-          <button
-            type="submit"
-            className="w-full rounded-lg bg-emerald-600 py-2.5 text-sm font-medium text-white hover:bg-emerald-500 active:bg-emerald-700"
-          >
-            Create store
-          </button>
+          <SubmitButton />
         </form>
       </div>
     );
