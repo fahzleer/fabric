@@ -5,6 +5,7 @@ import type { ShippingAddressFormData } from "@/application/atoms/checkout.atoms
 import { Atom, useAtom, useAtomSet } from "@effect-atom/atom-react";
 import { Option } from "effect";
 import type React from "react";
+import { useState } from "react";
 
 const addressFormAtom = Atom.make<ShippingAddressFormData>({
   recipientName: "",
@@ -18,13 +19,14 @@ const addressFormAtom = Atom.make<ShippingAddressFormData>({
 const addressErrorsAtom = Atom.make<Partial<Record<keyof ShippingAddressFormData, string>>>({});
 
 interface AddressFormProps {
-  onNext: () => void;
+  onNext: () => void | Promise<void>;
 }
 
 export function AddressForm({ onNext }: AddressFormProps) {
   const setShippingAddress = useAtomSet(shippingAddressAtom);
   const [form, setForm] = useAtom(addressFormAtom);
   const [errors, setErrors] = useAtom(addressErrorsAtom);
+  const [isPending, setIsPending] = useState(false);
 
   const validate = (): boolean => {
     const newErrors: Partial<Record<keyof ShippingAddressFormData, string>> = {};
@@ -37,12 +39,17 @@ export function AddressForm({ onNext }: AddressFormProps) {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
     saveShippingAddress(form);
     setShippingAddress(Option.some(form));
-    onNext();
+    setIsPending(true);
+    try {
+      await onNext();
+    } finally {
+      setIsPending(false);
+    }
   };
 
   const fieldClass = (err?: string) =>
@@ -154,9 +161,10 @@ export function AddressForm({ onNext }: AddressFormProps) {
 
       <button
         type="submit"
-        className="w-full rounded-lg bg-blue-600 px-4 py-3 text-white font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        disabled={isPending}
+        className="w-full rounded-lg bg-blue-600 px-4 py-3 text-white font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-60"
       >
-        Continue to Order Summary
+        {isPending ? "Loading…" : "Continue to Order Summary"}
       </button>
     </form>
   );

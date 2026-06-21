@@ -166,7 +166,10 @@ export class BillingService {
   async getMerchantStatus(
     userId: string
   ): Promise<Result<Merchant, MerchantNotFoundErrorType | BillingRepositoryErrorType>> {
-    return this.merchantRepo.findByUserId(userId);
+    const result = await this.merchantRepo.findByUserId(userId);
+    if (isErr(result)) return result;
+    const liveCount = await this.computeLiveProductCount(userId, result.value.productCount);
+    return Ok({ ...result.value, productCount: liveCount });
   }
 
   async getAnalytics(
