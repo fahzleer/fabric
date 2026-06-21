@@ -78,6 +78,27 @@ async function getOrders(token: string): Promise<AdminOrderItem[]> {
   }
 }
 
+const ACTIVE_ORDER_STATUSES = new Set(["confirmed", "processing", "shipped", "delivered"]);
+
+function buildSoldByProduct(orders: AdminOrderItem[]): Map<string, number> {
+  const sold = new Map<string, number>();
+  for (const order of orders) {
+    if (!ACTIVE_ORDER_STATUSES.has(order.status) || !order.lines) continue;
+    for (const line of order.lines) {
+      sold.set(line.productId, (sold.get(line.productId) ?? 0) + line.quantity);
+    }
+  }
+  return sold;
+}
+
+function groupByStatus(products: AdminProduct[]): Record<string, number> {
+  const counts: Record<string, number> = {};
+  for (const p of products) {
+    counts[p.status] = (counts[p.status] ?? 0) + 1;
+  }
+  return counts;
+}
+
 const STATUS_STYLES: Record<string, string> = {
   active: "bg-emerald-500/20 text-emerald-300",
   draft: "bg-gray-500/20 text-gray-400",
@@ -104,25 +125,13 @@ export default async function InventoryPage() {
 
   const [products, orders] = await Promise.all([getProducts(token), getOrders(token)]);
 
-  const soldByProduct = new Map<string, number>();
-  for (const order of orders) {
-    if (!["confirmed", "processing", "shipped", "delivered"].includes(order.status)) continue;
-    if (order.lines) {
-      for (const line of order.lines) {
-        soldByProduct.set(line.productId, (soldByProduct.get(line.productId) ?? 0) + line.quantity);
-      }
-    }
-  }
+  const soldByProduct = buildSoldByProduct(orders);
+  const productsByStatus = groupByStatus(products);
 
   const totalStock = products.reduce((s, p) => s + p.totalStock, 0);
   const lowStockProducts = products.filter((p) => p.totalStock > 0 && p.totalStock <= 5);
   const outOfStockProducts = products.filter((p) => p.totalStock === 0 && p.status === "active");
   const activeProducts = products.filter((p) => p.status === "active");
-
-  const productsByStatus: Record<string, number> = {};
-  for (const p of products) {
-    productsByStatus[p.status] = (productsByStatus[p.status] ?? 0) + 1;
-  }
 
   return (
     <div className="space-y-8 max-w-6xl">
