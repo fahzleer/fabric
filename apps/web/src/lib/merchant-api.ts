@@ -51,9 +51,12 @@ export type MerchantStatus = {
 export type MerchantProduct = {
   id: string;
   name: string;
+  tagline?: string;
+  description?: string;
   price: number;
   priceCurrency: string;
   category: string;
+  genre?: string;
   status: string;
   stock: Record<string, number>;
   images: { url: string; alt: string; isPrimary: boolean; order: number }[];
@@ -258,9 +261,11 @@ function _buildMerchantApi(user: { id: string; email: string; role?: string }, t
     async createProduct(body: {
       name: string;
       description?: string;
+      tagline?: string;
       price: number;
       priceCurrency?: string;
       category: string;
+      genre?: string;
       stock: Record<string, number>;
       images: { url: string; alt: string; isPrimary: boolean; order: number }[];
     }): Promise<ApiResult<MerchantProduct>> {

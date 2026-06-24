@@ -22,6 +22,15 @@ const CATEGORIES = [
   { value: "custom", label: "Custom" },
 ] as const;
 
+const GENRES = [
+  { value: "", label: "— ไม่ระบุ —" },
+  { value: "emo", label: "Emo" },
+  { value: "deathcore", label: "Deathcore" },
+  { value: "punk", label: "Punk" },
+  { value: "metal", label: "Metal" },
+  { value: "hardcore", label: "Hardcore" },
+] as const;
+
 const STATUSES = [
   { value: "draft", label: "Draft" },
   { value: "active", label: "Active" },
@@ -40,6 +49,7 @@ export interface ProductFormProps {
     price?: number;
     priceCurrency?: string;
     category?: string;
+    genre?: string;
     status?: string;
     stock?: Record<string, number>;
     images?: { url: string; alt: string; isPrimary: boolean; order: number }[];
@@ -192,24 +202,38 @@ export const ProductForm = memo(function ProductForm({
         </div>
       </div>
 
-      {/* Category */}
-      <div>
-        <label htmlFor="category" className={labelClass}>
-          Category *
-        </label>
-        <select
-          id="category"
-          name="category"
-          required
-          defaultValue={d.category ?? "basic"}
-          className={inputClass}
-        >
-          {CATEGORIES.map((c) => (
-            <option key={c.value} value={c.value}>
-              {c.label}
-            </option>
-          ))}
-        </select>
+      {/* Category + Genre */}
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label htmlFor="category" className={labelClass}>
+            Category *
+          </label>
+          <select
+            id="category"
+            name="category"
+            required
+            defaultValue={d.category ?? "basic"}
+            className={inputClass}
+          >
+            {CATEGORIES.map((c) => (
+              <option key={c.value} value={c.value}>
+                {c.label}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label htmlFor="genre" className={labelClass}>
+            Genre
+          </label>
+          <select id="genre" name="genre" defaultValue={d.genre ?? ""} className={inputClass}>
+            {GENRES.map((g) => (
+              <option key={g.value} value={g.value}>
+                {g.label}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {/* Status (edit mode only) */}

@@ -1,16 +1,23 @@
+import { AuthorBio } from "@/components/seo/author-bio";
+import { FaqSection } from "@/components/seo/faq-section";
+import { FreshnessLabel } from "@/components/seo/freshness-label";
+import { TrustBadges } from "@/components/seo/trust-badges";
 import { makeProductId } from "@/domain/product/types";
 import { productApiAdapter } from "@/infrastructure/http-product-api.adapter";
+import { auth } from "@/lib/auth";
 import { preloadProduct } from "@/lib/data";
 import { formatPrice } from "@/lib/price";
 import { fetchStoreForProduct } from "@/lib/store-api";
 import { isSome } from "@fabric/types";
 import { Effect } from "effect";
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { AddToCartButton } from "./_components/add-to-cart-button";
+import { ProductPixelTracker } from "./_components/product-pixel-tracker";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -51,6 +58,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         : undefined,
       type: "website",
       locale: "th_TH",
+      siteName: "Fabric",
     },
     twitter: {
       card: "summary_large_image",
@@ -71,6 +79,56 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
+type ProductData = ReturnType<typeof productApiAdapter.getProduct> extends Effect.Effect<
+  infer A,
+  unknown,
+  unknown
+>
+  ? A
+  : never;
+
+function buildProductSchema(
+  product: ProductData,
+  productUrl: string,
+  updatedAt: string,
+  storeName: string,
+  availableSizes: string[]
+) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name.value,
+    description: product.description,
+    image: product.images.map((img) => img.url),
+    url: productUrl,
+    dateModified: updatedAt,
+    brand: { "@type": "Brand", name: storeName },
+    offers: {
+      "@type": "Offer",
+      priceCurrency: product.price.currency,
+      price: product.price.amount,
+      availability:
+        availableSizes.length > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+      itemCondition: "https://schema.org/NewCondition",
+      url: productUrl,
+      seller: { "@type": "Organization", name: storeName },
+    },
+    ...(product.material.length > 0 ? { material: product.material } : {}),
+  };
+}
+
+function buildBreadcrumbSchema(baseUrl: string, productName: string, productUrl: string) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: baseUrl },
+      { "@type": "ListItem", position: 2, name: "Products", item: `${baseUrl}/products` },
+      { "@type": "ListItem", position: 3, name: productName, item: productUrl },
+    ],
+  };
+}
+
 export default async function ProductPage({ params: paramsPromise }: PageProps) {
   const params = await paramsPromise;
   const productId = makeProductId(params.id);
@@ -79,10 +137,14 @@ export default async function ProductPage({ params: paramsPromise }: PageProps) 
 
   await connection();
 
-  const [result, storeInfo] = await Promise.all([
+  const [result, storeInfo, session] = await Promise.all([
     Effect.runPromise(Effect.either(productApiAdapter.getProduct(productId))),
     fetchStoreForProduct(params.id),
+    auth.api.getSession({ headers: await headers() }),
   ]);
+
+  const role = (session?.user as { role?: string })?.role;
+  const isMerchant = role === "store_owner" || role === "admin";
 
   if (result._tag === "Left") {
     notFound();
@@ -97,13 +159,55 @@ export default async function ProductPage({ params: paramsPromise }: PageProps) 
     .filter((s) => s.quantity - s.reserved > 0)
     .map((s) => s.size);
 
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://fabric.cool";
+  const productUrl = `${baseUrl}/product/${params.id}`;
+
+  const updatedAt = product.metadata.updatedAt.slice(0, 10);
+
+  const storeName = isSome(storeInfo) ? storeInfo.value.storeName : "Fabric";
+  const productSchema = buildProductSchema(
+    product,
+    productUrl,
+    updatedAt,
+    storeName,
+    availableSizes
+  );
+  const breadcrumbSchema = buildBreadcrumbSchema(baseUrl, product.name.value, productUrl);
+
   return (
     <div className="min-h-screen bg-gray-50">
+      <script
+        type="application/ld+json"
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: controlled server-side JSON-LD, no user input
+        dangerouslySetInnerHTML={{ __html: JSON.stringify([productSchema, breadcrumbSchema]) }}
+      />
+      <ProductPixelTracker
+        productId={params.id}
+        productName={product.name.value}
+        price={product.price.amount}
+        currency={product.price.currency}
+      />
       <header className="border-b border-gray-200 bg-white shadow-sm">
         <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
-          <Link href="/products" className="text-blue-600 hover:text-blue-800">
-            ← Back to Products
-          </Link>
+          <nav aria-label="breadcrumb" className="text-sm text-gray-500">
+            <ol className="flex items-center gap-1">
+              <li>
+                <Link href="/" className="hover:text-gray-700">
+                  หน้าแรก
+                </Link>
+              </li>
+              <li aria-hidden="true">/</li>
+              <li>
+                <Link href="/products" className="hover:text-gray-700">
+                  สินค้า
+                </Link>
+              </li>
+              <li aria-hidden="true">/</li>
+              <li className="text-gray-900 font-medium truncate max-w-[200px] sm:max-w-md">
+                {product.name.value}
+              </li>
+            </ol>
+          </nav>
         </div>
       </header>
 
@@ -164,14 +268,28 @@ export default async function ProductPage({ params: paramsPromise }: PageProps) 
               <p className="mt-2 text-gray-600">{product.description}</p>
             </div>
 
+            <TrustBadges className="mt-4" />
+
             <div className="mt-6">
-              <AddToCartButton
-                productId={productId}
-                availableSizes={availableSizes}
-                price={product.price}
-                productName={product.name.value}
-                productImageUrl={primaryImage.url}
-              />
+              {isMerchant ? (
+                <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                  คุณกำลังดูในฐานะ merchant —{" "}
+                  <Link
+                    href="/merchant/dashboard"
+                    className="font-medium underline hover:text-amber-900"
+                  >
+                    ไปที่ร้านค้าของคุณ →
+                  </Link>
+                </div>
+              ) : (
+                <AddToCartButton
+                  productId={productId}
+                  availableSizes={availableSizes}
+                  price={product.price}
+                  productName={product.name.value}
+                  productImageUrl={primaryImage.url}
+                />
+              )}
             </div>
 
             <div className="mt-8 border-t border-gray-200 pt-8 space-y-4">
@@ -190,6 +308,54 @@ export default async function ProductPage({ params: paramsPromise }: PageProps) 
             </div>
           </div>
         </div>
+
+        <FaqSection
+          items={[
+            {
+              question: `${product.name.value} มีไซส์อะไรบ้าง?`,
+              answer:
+                availableSizes.length > 0
+                  ? `ไซส์ที่มีในสต็อก: ${availableSizes.join(", ")} หากไซส์ที่ต้องการหมด สามารถติดต่อร้านค้าเพื่อสั่งจองได้`
+                  : "ขณะนี้สินค้าหมดสต็อกชั่วคราว กรุณาติดต่อร้านค้าเพื่อสอบถาม",
+            },
+            {
+              question: "ชำระเงินได้ด้วยวิธีใดบ้าง?",
+              answer:
+                "รองรับการชำระเงินผ่าน PromptPay (สแกน QR), บัตรเครดิต/เดบิต (Visa, Mastercard) และ Crypto (USDC บน Base network)",
+            },
+            {
+              question: "จัดส่งสินค้าภายในกี่วัน?",
+              answer: "จัดส่งภายใน 2–3 วันทำการหลังจากยืนยันการชำระเงิน ส่งทั่วไทยผ่านบริษัทขนส่งชั้นนำ",
+            },
+            {
+              question: "สามารถคืนหรือเปลี่ยนสินค้าได้ไหม?",
+              answer:
+                "สามารถแจ้งคืนหรือเปลี่ยนสินค้าได้ภายใน 7 วันหลังได้รับสินค้า หากสินค้ามีความชำรุดหรือไม่ตรงกับที่สั่ง",
+            },
+            {
+              question: "สินค้าของ Fabric มีคุณภาพอย่างไร?",
+              answer:
+                product.material.length > 0
+                  ? `ผลิตจาก ${product.material} คัดสรรวัตถุดิบคุณภาพสูง ผ่านการควบคุมคุณภาพก่อนจัดส่ง`
+                  : "คัดสรรวัตถุดิบคุณภาพสูง ผ่านการควบคุมคุณภาพก่อนจัดส่งทุกชิ้น",
+            },
+          ]}
+        />
+
+        <div className="mt-12 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-t border-gray-200 pt-8">
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900">พร้อมชำระเงิน?</h2>
+            <FreshnessLabel updatedAt={updatedAt} quarter="Q2 2026" />
+          </div>
+          <Link
+            href="/checkout"
+            className="rounded-lg bg-gray-900 px-6 py-3 text-sm font-medium text-white hover:bg-gray-700"
+          >
+            ไปที่หน้าชำระเงิน
+          </Link>
+        </div>
+
+        <AuthorBio name="Fabric Editorial" jobTitle="Product Team" updatedAt={updatedAt} />
       </main>
     </div>
   );

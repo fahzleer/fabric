@@ -147,8 +147,8 @@ export default async function MerchantInvoicesPage() {
                     <td className="px-4 py-3 font-mono text-xs text-gray-400">
                       {o.id.slice(0, 8)}…
                     </td>
-                    <td className="px-4 py-3 text-gray-400 text-xs font-mono">
-                      {o.customerId.slice(0, 8)}…
+                    <td className="px-4 py-3 text-gray-400 text-xs">
+                      {`${o.customerId.slice(0, 8)}…`}
                     </td>
                     <td className="px-4 py-3 font-medium text-white">
                       {formatThb(o.totalAmountInCents, o.currency)}

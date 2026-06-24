@@ -48,23 +48,36 @@ export async function generateSalesInsightAction(): Promise<SalesInsightResult> 
     [
       {
         role: "system",
-        content:
-          "คุณเป็นที่ปรึกษาธุรกิจอีคอมเมิร์ซ วิเคราะห์ตัวเลขยอดขายของร้านค้าแล้วสรุปเป็นภาษาไทยที่เข้าใจง่าย กระชับ 2-3 ประโยค จากนั้นให้คำแนะนำที่ลงมือทำได้จริง 1 ข้อ ใช้ตัวเลขจากข้อมูลที่ให้เท่านั้น ห้ามแต่งตัวเลขขึ้นเอง ห้ามใช้ bullet point ห้ามใช้ emoji ตอบเป็นย่อหน้าเดียว",
+        content: `คุณเป็นที่ปรึกษาธุรกิจอีคอมเมิร์ซ ตอบเป็นภาษาไทยในรูปแบบนี้เท่านั้น:
+
+ภาพรวม
+[1 ประโยคสั้น ใช้ตัวเลขจริง ไม่เริ่มด้วย "แสดงว่า" หรือ "สะท้อน"]
+
+สิ่งที่ควรทำ
+[1 ประโยคสั้น แนะนำการกระทำที่ทำได้เลย]
+
+กฎเหล็ก: ห้ามเพิ่มหัวข้ออื่น ห้าม emoji ห้าม bullet ห้ามแต่งตัวเลข ห้ามเกิน 40 คำ
+
+ตัวอย่างที่ดี:
+ภาพรวม
+มีออเดอร์สำเร็จ 1 รายการ มูลค่า 1,600 บาท สินค้า 3 ชิ้น
+สิ่งที่ควรทำ
+เพิ่มสินค้าให้ครบ 10 รายการเพื่อดึงลูกค้ากลุ่มใหม่`,
       },
       {
         role: "user",
-        content: `ข้อมูลร้านค้า:\n- รายได้รวมจากออเดอร์ที่สำเร็จ: ${revenueBaht.toLocaleString("th-TH")} บาท\n- จำนวนออเดอร์ที่สำเร็จ: ${completedOrderCount.toLocaleString("th-TH")} ออเดอร์\n- มูลค่าเฉลี่ยต่อออเดอร์: ${avgOrderBaht.toLocaleString("th-TH")} บาท\n- จำนวนสินค้าที่ลงขายในร้าน: ${productCount.toLocaleString("th-TH")} รายการ\n- แพ็กเกจที่ใช้: ${plan}\n\nช่วยวิเคราะห์ภาพรวมและแนะนำสิ่งที่ควรทำต่อ`,
+        content: `ข้อมูลร้านค้า:\n- รายได้รวม: ${revenueBaht.toLocaleString("th-TH")} บาท\n- ออเดอร์สำเร็จ: ${completedOrderCount.toLocaleString("th-TH")} รายการ\n- มูลค่าเฉลี่ยต่อออเดอร์: ${avgOrderBaht.toLocaleString("th-TH")} บาท\n- สินค้าในร้าน: ${productCount.toLocaleString("th-TH")} รายการ\n- แพ็กเกจ: ${plan}`,
       },
     ],
     {
-      temperature: 0.7,
-      maxTokens: 350,
+      temperature: 0.3,
+      maxTokens: 120,
       guardrails: [
         ...DEFAULT_GUARDRAILS,
         CONTENT_RULES.noEmoji,
-        CONTENT_RULES.noBulletPoints,
         CONTENT_RULES.noLeadingQuote,
-        maxLength(450),
+        CONTENT_RULES.noBulletPoints,
+        maxLength(180),
       ],
     }
   );

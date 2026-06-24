@@ -2,7 +2,7 @@ import { getSessionCookie } from 'better-auth/cookies'
 import type { NextRequest } from 'next/server'
 import { NextResponse, userAgent } from 'next/server'
 
-const PROTECTED_PREFIXES = ['/products', '/product']
+const PROTECTED_PREFIXES = ['/checkout', '/cart', '/account', '/merchant', '/admin']
 const AUTH_ONLY_PREFIXES = ['/auth/login', '/auth/register']
 
 export function middleware(request: NextRequest): NextResponse {
@@ -30,6 +30,14 @@ export function middleware(request: NextRequest): NextResponse {
 	response.headers.set('x-is-bot', isBot ? '1' : '0')
 	response.headers.set('x-browser', browser.name ?? 'unknown')
 	response.headers.set('x-os', os.name ?? 'unknown')
+
+	const geo = pathname.startsWith('/en/my') ? 'my'
+		: pathname.startsWith('/en/ph') ? 'ph'
+		: pathname.startsWith('/id') ? 'id'
+		: pathname.startsWith('/vi') ? 'vi'
+		: 'th'
+	response.cookies.set('fabric_geo', geo, { path: '/', maxAge: 60 * 60 * 24 * 30 })
+
 	return response
 }
 

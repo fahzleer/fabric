@@ -7,6 +7,7 @@ import type { ActivityRepositoryPort } from "../../application/ports/activity.re
 import type { CartRepositoryPort } from "../../application/ports/cart.repository.port";
 import type { EventPublisherPort } from "../../application/ports/event-publisher.port";
 import type { MerchantRepositoryPort } from "../../application/ports/merchant.repository.port";
+import type { NotificationPort } from "../../application/ports/notification.port";
 import type { OrderRepositoryPort } from "../../application/ports/order.repository.port";
 import type { PaymentPort } from "../../application/ports/payment.port";
 import type {
@@ -42,7 +43,8 @@ export class OrderService {
     private readonly voucherRepo: VoucherRepositoryPort,
     private readonly eventPublisher: EventPublisherPort,
     private readonly activity: ActivityRepositoryPort,
-    private readonly merchantRepo: MerchantRepositoryPort
+    private readonly merchantRepo: MerchantRepositoryPort,
+    private readonly notification?: NotificationPort
   ) {}
 
   async previewCheckout(
@@ -122,7 +124,8 @@ export class OrderService {
     shippingAddress: ShippingAddress,
     paymentToken: string | undefined,
     paymentMethod: PaymentMethod = "card",
-    voucherCode?: string
+    voucherCode?: string,
+    userEmail?: string
   ): Promise<Order> {
     const cartResult = await this.resolveCart(userId, cartId);
     if (cartResult._tag === "Err") return presentDomainError(cartResult.error);
@@ -237,6 +240,16 @@ export class OrderService {
       eventType: "order_placed",
       eventData: { orderId, totalCents, currency, paymentMethod, itemCount: cart.items.length },
     });
+
+    this.sendOrderNotification(
+      userId,
+      orderId,
+      userEmail,
+      shippingAddress,
+      totalCents,
+      currency,
+      cart.items.length
+    );
 
     return atomicResult.value;
   }
@@ -489,6 +502,27 @@ export class OrderService {
       id: crypto.randomUUID(),
       eventType: "order_failed",
       eventData: { orderId, reason },
+    });
+  }
+
+  private sendOrderNotification(
+    userId: UserId,
+    orderId: string,
+    userEmail: string | undefined,
+    shippingAddress: ShippingAddress,
+    totalCents: number,
+    currency: string,
+    itemCount: number
+  ): void {
+    void this.notification?.notifyOrderPlaced({
+      orderId,
+      userId: userId.value,
+      ...(userEmail ? { userEmail } : {}),
+      ...(shippingAddress.phoneNumber ? { customerPhone: shippingAddress.phoneNumber } : {}),
+      ...(shippingAddress.recipientName ? { recipientName: shippingAddress.recipientName } : {}),
+      totalCents,
+      currency,
+      itemCount,
     });
   }
 

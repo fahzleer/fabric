@@ -3,6 +3,7 @@
 import { cartAtom } from "@/application/atoms/cart.atoms";
 import type { ProductId, ProductPrice, ProductSize } from "@/domain/product/types";
 import { dexieCartAdapter } from "@/infrastructure/dexie/dexie-cart.adapter";
+import { trackEvent } from "@/lib/analytics";
 import { Atom, useAtom, useAtomSet } from "@effect-atom/atom-react";
 import { type Maybe, None, Some, isNone, isSome } from "@fabric/types";
 import { Effect, Option } from "effect";
@@ -50,6 +51,12 @@ export function AddToCartButton({
         setCart(Option.some(cart));
         setStatus("added");
         setTimeout(() => setStatus("idle"), 2000);
+        trackEvent("cart_item_added", {
+          productId: productId.value,
+          productName,
+          price: price.amount,
+          currency: price.currency,
+        });
       })
       .catch(() => setStatus("error"));
   };
@@ -102,20 +109,36 @@ export function AddToCartButton({
         </div>
       </div>
 
-      {/* Add to cart button */}
+      {/* Add to cart button — aria-disabled avoids accessibility-tree recalc (INP) */}
+      <div aria-live="polite" aria-atomic="true" className="sr-only">
+        {status === "added" ? "Added to cart" : ""}
+      </div>
       <button
         type="button"
         onClick={handleAddToCart}
-        disabled={status === "adding"}
-        className={`w-full rounded-lg px-6 py-3 text-white font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors ${
+        aria-disabled={status === "adding"}
+        aria-label={
+          status === "adding"
+            ? "Adding to cart"
+            : status === "added"
+              ? "Added to cart"
+              : "Add to cart"
+        }
+        className={`w-full rounded-lg px-6 py-3 text-white font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors [min-block-size:3rem] ${
           status === "added"
             ? "bg-green-600 hover:bg-green-700"
             : status === "adding"
-              ? "bg-blue-400 cursor-not-allowed"
+              ? "bg-blue-400 pointer-events-none"
               : "bg-blue-600 hover:bg-blue-700"
         }`}
       >
-        {status === "adding" ? "Adding..." : status === "added" ? "✓ Added to Cart" : "Add to Cart"}
+        <span className="inline-block w-full text-center">
+          {status === "adding"
+            ? "Adding..."
+            : status === "added"
+              ? "✓ Added to Cart"
+              : "Add to Cart"}
+        </span>
       </button>
     </div>
   );

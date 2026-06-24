@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
-import { LoginForm } from "./_components";
+import { LoginForm, type SocialProvider } from "./_components";
 
 export const metadata: Metadata = {
   title: "Sign In — Fabric",
@@ -9,7 +9,11 @@ export const metadata: Metadata = {
 };
 
 export default function LoginPage() {
-  const facebookEnabled = false;
+  const enabledProviders = [
+    process.env.GOOGLE_CLIENT_ID && "google",
+    process.env.FACEBOOK_CLIENT_ID && "facebook",
+    process.env.LINE_CHANNEL_ID && "line",
+  ].filter(Boolean) as SocialProvider[];
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
@@ -23,7 +27,7 @@ export default function LoginPage() {
         {/* Login Card — Suspense required because LoginForm uses useSearchParams() */}
         <div className="rounded-2xl border border-gray-200 bg-white p-8 shadow-sm">
           <Suspense fallback={<div className="h-48 animate-pulse rounded-lg bg-gray-100" />}>
-            <LoginForm facebookEnabled={facebookEnabled} />
+            <LoginForm enabledProviders={enabledProviders} />
           </Suspense>
         </div>
 

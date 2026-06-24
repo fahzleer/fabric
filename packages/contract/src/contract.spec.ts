@@ -96,6 +96,7 @@ describe("ProductSummaryDto has all required fields", () => {
     price: 499,
     priceCurrency: "THB",
     category: "basic",
+    genre: null,
     status: "active",
     primaryImage: {
       url: "/img/main.jpg",
@@ -173,6 +174,7 @@ describe("ProductSummaryDto has all required fields", () => {
       price: 499,
       priceCurrency: "THB",
       category: "basic",
+      genre: null,
       status: "active",
       primaryImage: null,
       availableSizes: [],

@@ -39,13 +39,13 @@ export function UserMenu({ initialSession }: UserMenuProps) {
       <div className="flex items-center gap-3">
         <Link
           href="/auth/login"
-          className="text-sm font-medium text-gray-400 hover:text-white transition-colors"
+          className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors"
         >
           Sign in
         </Link>
         <Link
           href="/products"
-          className="rounded-lg bg-white px-3 py-1.5 text-sm font-medium text-gray-900 hover:bg-gray-100 transition-colors"
+          className="rounded-lg bg-gray-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-gray-800 transition-colors"
         >
           Get started
         </Link>
@@ -62,7 +62,7 @@ export function UserMenu({ initialSession }: UserMenuProps) {
   return (
     <div className="flex items-center gap-3">
       {isAdmin && (
-        <span className="rounded-full bg-amber-500/20 px-2.5 py-0.5 text-xs font-semibold text-amber-300">
+        <span className="rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-700">
           Admin
         </span>
       )}
@@ -70,19 +70,28 @@ export function UserMenu({ initialSession }: UserMenuProps) {
       {(isStoreOwner || isAdmin) && (
         <Link
           href="/merchant/dashboard"
-          className="text-sm font-medium text-emerald-400 hover:text-emerald-300 transition-colors"
+          className="text-sm font-medium text-emerald-600 hover:text-emerald-700 transition-colors"
         >
           My Store
         </Link>
       )}
 
-      <span className="hidden text-sm text-gray-400 sm:block">{user.email}</span>
+      {!(isStoreOwner || isAdmin) && (
+        <Link
+          href="/account/orders"
+          className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors"
+        >
+          คำสั่งซื้อ
+        </Link>
+      )}
+
+      <span className="hidden text-sm text-gray-500 sm:block">{user.name ?? user.email}</span>
 
       <button
         type="button"
         onClick={handleLogout}
         disabled={isLoggingOut}
-        className="rounded-lg border border-white/20 px-3 py-1.5 text-sm font-medium text-gray-300 transition-colors hover:border-white/40 hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50"
+        className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm font-medium text-gray-600 transition-colors hover:border-gray-300 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {isLoggingOut ? "Signing out…" : "Sign out"}
       </button>

@@ -1,4 +1,5 @@
-import { createMerchantApi } from "@/lib/merchant-api";
+import { ClearCartOnMount } from "@/app/(shop)/order/[id]/confirmation/_components/clear-cart-on-mount";
+import { type MerchantStatus, createMerchantApi } from "@/lib/merchant-api";
 import { isOk, isSome } from "@fabric/types";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -59,14 +60,115 @@ function CapacityBar({ capacityPct }: { capacityPct: number }) {
   );
 }
 
-export default async function MerchantDashboardPage() {
+function StatsCards({
+  billing,
+  planKey,
+  statusKey,
+  maxProducts,
+}: {
+  billing: MerchantStatus;
+  planKey: string;
+  statusKey: string;
+  maxProducts: string;
+}) {
+  return (
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div className="rounded-xl border border-white/10 bg-gray-800/50 px-6 py-5">
+        <p className="text-xs font-medium uppercase tracking-wider text-gray-400">Current Plan</p>
+        <div className="mt-2 flex items-center gap-2">
+          <span
+            className={`rounded-full border px-2.5 py-0.5 text-xs font-semibold capitalize ${PLAN_COLOURS[planKey] ?? PLAN_COLOURS.free}`}
+          >
+            {planKey}
+          </span>
+        </div>
+        <p
+          className={`mt-2 text-sm font-medium capitalize ${STATUS_COLOURS[statusKey] ?? "text-gray-400"}`}
+        >
+          {statusKey}
+        </p>
+      </div>
+      <div className="rounded-xl border border-white/10 bg-gray-800/50 px-6 py-5">
+        <p className="text-xs font-medium uppercase tracking-wider text-gray-400">Products</p>
+        <p className="mt-2 text-3xl font-bold text-white">{billing.productCount ?? 0}</p>
+        <p className="mt-1 text-xs text-gray-500">of {maxProducts} on your plan</p>
+        {isSome(billing.productCapacityUsed) && (
+          <CapacityBar capacityPct={billing.productCapacityUsed.value} />
+        )}
+      </div>
+      <div className="rounded-xl border border-white/10 bg-gray-800/50 px-6 py-5">
+        <p className="text-xs font-medium uppercase tracking-wider text-gray-400">Quick Actions</p>
+        <div className="mt-3 flex flex-col gap-2">
+          <Link
+            href="/merchant/products"
+            className="text-sm text-emerald-400 hover:text-emerald-300"
+          >
+            → View products
+          </Link>
+          <Link
+            href="/merchant/billing"
+            className="text-sm text-emerald-400 hover:text-emerald-300"
+          >
+            → Manage billing
+          </Link>
+          {planKey === "free" && (
+            <Link
+              href="/merchant/billing"
+              className="text-sm font-medium text-amber-400 hover:text-amber-300"
+            >
+              ↑ Upgrade plan
+            </Link>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PlanLimits({ billing, maxProducts }: { billing: MerchantStatus; maxProducts: string }) {
+  return (
+    <div className="rounded-xl border border-white/10 bg-gray-800/30 p-6">
+      <h2 className="text-sm font-semibold text-gray-300">Plan limits</h2>
+      <div className="mt-3 grid grid-cols-2 gap-4 text-sm sm:grid-cols-3">
+        <div>
+          <span className="text-gray-400">Max products</span>
+          <p className="mt-0.5 font-medium text-white">{maxProducts}</p>
+        </div>
+        <div>
+          <span className="text-gray-400">Monthly orders</span>
+          <p className="mt-0.5 font-medium text-white">
+            {billing.limits.maxOrdersPerMonth === -1
+              ? "Unlimited"
+              : billing.limits.maxOrdersPerMonth.toLocaleString()}
+          </p>
+        </div>
+        {isSome(billing.planExpiresAt) && (
+          <div>
+            <span className="text-gray-400">Renews</span>
+            <p className="mt-0.5 font-medium text-white">
+              {new Date(billing.planExpiresAt.value).toLocaleDateString()}
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export default async function MerchantDashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ welcome?: string }>;
+}) {
   await connection();
+  const { welcome } = await searchParams;
 
   const maybeApi = await createMerchantApi();
 
   if (!isSome(maybeApi)) {
     return (
       <div className="flex h-full items-center justify-center">
+        {welcome === "1" && <ClearCartOnMount />}
         <p className="text-gray-400">Unable to load merchant data. Please refresh.</p>
       </div>
     );
@@ -80,20 +182,24 @@ export default async function MerchantDashboardPage() {
     isSome(billingResult.value.onboarded) &&
     billingResult.value.onboarded.value;
   if (!isOnboarded) {
-    return <NotOnboardedView />;
+    return (
+      <>
+        {welcome === "1" && <ClearCartOnMount />}
+        <NotOnboardedView />
+      </>
+    );
   }
 
   const billing = billingResult.value;
 
   const planKey = billing.plan ?? "free";
   const statusKey = billing.planStatus ?? "inactive";
-  const capacityPct = billing.productCapacityUsed;
   const maxProducts =
     billing.limits.maxProducts === -1 ? "∞" : String(billing.limits.maxProducts ?? 0);
 
   return (
     <div className="space-y-8">
-      {/* Header */}
+      {welcome === "1" && <ClearCartOnMount />}
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white">Dashboard</h1>
@@ -106,92 +212,13 @@ export default async function MerchantDashboardPage() {
           + New product
         </Link>
       </div>
-
-      {/* Plan + status cards */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        {/* Plan */}
-        <div className="rounded-xl border border-white/10 bg-gray-800/50 px-6 py-5">
-          <p className="text-xs font-medium uppercase tracking-wider text-gray-400">Current Plan</p>
-          <div className="mt-2 flex items-center gap-2">
-            <span
-              className={`rounded-full border px-2.5 py-0.5 text-xs font-semibold capitalize ${PLAN_COLOURS[planKey] ?? PLAN_COLOURS.free}`}
-            >
-              {planKey}
-            </span>
-          </div>
-          <p
-            className={`mt-2 text-sm font-medium capitalize ${STATUS_COLOURS[statusKey] ?? "text-gray-400"}`}
-          >
-            {statusKey}
-          </p>
-        </div>
-
-        {/* Product capacity */}
-        <div className="rounded-xl border border-white/10 bg-gray-800/50 px-6 py-5">
-          <p className="text-xs font-medium uppercase tracking-wider text-gray-400">Products</p>
-          <p className="mt-2 text-3xl font-bold text-white">{billing?.productCount ?? 0}</p>
-          <p className="mt-1 text-xs text-gray-500">of {maxProducts} on your plan</p>
-          {isSome(capacityPct) && <CapacityBar capacityPct={capacityPct.value} />}
-        </div>
-
-        {/* Quick actions */}
-        <div className="rounded-xl border border-white/10 bg-gray-800/50 px-6 py-5">
-          <p className="text-xs font-medium uppercase tracking-wider text-gray-400">
-            Quick Actions
-          </p>
-          <div className="mt-3 flex flex-col gap-2">
-            <Link
-              href="/merchant/products"
-              className="text-sm text-emerald-400 hover:text-emerald-300"
-            >
-              → View products
-            </Link>
-            <Link
-              href="/merchant/billing"
-              className="text-sm text-emerald-400 hover:text-emerald-300"
-            >
-              → Manage billing
-            </Link>
-            {planKey === "free" && (
-              <Link
-                href="/merchant/billing"
-                className="text-sm font-medium text-amber-400 hover:text-amber-300"
-              >
-                ↑ Upgrade plan
-              </Link>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Plan limits info */}
-      {billing && (
-        <div className="rounded-xl border border-white/10 bg-gray-800/30 p-6">
-          <h2 className="text-sm font-semibold text-gray-300">Plan limits</h2>
-          <div className="mt-3 grid grid-cols-2 gap-4 text-sm sm:grid-cols-3">
-            <div>
-              <span className="text-gray-400">Max products</span>
-              <p className="mt-0.5 font-medium text-white">{maxProducts}</p>
-            </div>
-            <div>
-              <span className="text-gray-400">Monthly orders</span>
-              <p className="mt-0.5 font-medium text-white">
-                {billing.limits.maxOrdersPerMonth === -1
-                  ? "Unlimited"
-                  : billing.limits.maxOrdersPerMonth.toLocaleString()}
-              </p>
-            </div>
-            {isSome(billing.planExpiresAt) && (
-              <div>
-                <span className="text-gray-400">Renews</span>
-                <p className="mt-0.5 font-medium text-white">
-                  {new Date(billing.planExpiresAt.value).toLocaleDateString()}
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+      <StatsCards
+        billing={billing}
+        planKey={planKey}
+        statusKey={statusKey}
+        maxProducts={maxProducts}
+      />
+      <PlanLimits billing={billing} maxProducts={maxProducts} />
     </div>
   );
 }

@@ -8,6 +8,7 @@ import type {
 } from "./product.errors";
 import type {
   ProductCategory,
+  ProductGenre,
   ProductId,
   ProductImage,
   ProductName,
@@ -28,6 +29,7 @@ export interface Product {
   readonly tagline: string;
   readonly price: ProductPrice;
   readonly category: ProductCategory;
+  readonly genre?: ProductGenre;
   readonly status: ProductStatus;
   readonly stock: StockMap;
   readonly images: NonEmptyArray<ProductImage>;
@@ -103,6 +105,7 @@ export interface ProductSummary {
   readonly tagline: string;
   readonly price: ProductPrice;
   readonly category: ProductCategory;
+  readonly genre?: ProductGenre;
   readonly status: ProductStatus;
   readonly primaryImage: ProductImage;
   readonly isInStock: boolean;
@@ -116,6 +119,7 @@ export const toProductSummary = (product: Product): ProductSummary => ({
   tagline: product.tagline,
   price: product.price,
   category: product.category,
+  ...(product.genre ? { genre: product.genre } : {}),
   status: product.status,
   primaryImage: getPrimaryImage(product),
   isInStock: isProductAvailable(product),

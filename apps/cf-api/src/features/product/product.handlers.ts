@@ -20,6 +20,7 @@ function productToJson(p: Product) {
     price: p.price.amount,
     priceCurrency: p.price.currency,
     category: p.category,
+    genre: p.genre ?? null,
     status: p.status,
     stock: Object.fromEntries(Object.entries(p.stock).map(([size, qty]) => [size, qty.value])),
     images: p.images.map((img) => ({
@@ -42,6 +43,7 @@ function productSummaryToJson(s: ProductSummary) {
     price: s.price.amount,
     priceCurrency: s.price.currency,
     category: s.category,
+    genre: s.genre ?? null,
     status: s.status,
     isInStock: s.isInStock,
     availableSizes: s.availableSizes,
@@ -70,6 +72,7 @@ const CreateProductBody = type({
   price: "number > 0",
   "priceCurrency?": "string == 3",
   category: '"basic" | "premium" | "limited_edition" | "custom"',
+  "genre?": '"emo" | "deathcore" | "punk" | "metal" | "hardcore"',
   stock: "Record<string, number>",
   images: ImageSchema.array(),
 });
@@ -81,15 +84,34 @@ const UpdateProductBody = type({
   "price?": "number > 0",
   "priceCurrency?": "string == 3",
   "category?": '"basic" | "premium" | "limited_edition" | "custom"',
+  "genre?": '"emo" | "deathcore" | "punk" | "metal" | "hardcore"',
   "status?": '"draft" | "active" | "archived"',
   "stock?": "Record<string, number>",
   "images?": ImageSchema.array(),
 });
 
+type CreateValidated = typeof CreateProductBody.infer;
+
+function buildCreatePayload(validated: CreateValidated, ownerId: string) {
+  return {
+    ownerId,
+    name: validated.name,
+    description: validated.description ?? "",
+    tagline: validated.tagline ?? "",
+    price: validated.price,
+    priceCurrency: validated.priceCurrency ?? "THB",
+    category: validated.category,
+    ...(validated.genre ? { genre: validated.genre } : {}),
+    stock: validated.stock as Record<string, number>,
+    images: validated.images,
+  };
+}
+
 function parseListQueryParams(c: Context) {
   const page = Math.max(1, Number(c.req.query("page") ?? "1"));
   const perPage = Math.min(100, Math.max(1, Number(c.req.query("perPage") ?? "20")));
   const category = c.req.query("category")?.trim() || undefined;
+  const genre = c.req.query("genre")?.trim() || undefined;
   const minPrice = c.req.query("minPrice")
     ? Math.max(0, Number(c.req.query("minPrice")))
     : undefined;
@@ -101,7 +123,7 @@ function parseListQueryParams(c: Context) {
     sortRaw !== undefined && VALID_SORT_FIELDS.has(sortRaw as ProductSortField)
       ? (sortRaw as ProductSortField)
       : undefined;
-  return { page, perPage, category, minPrice, maxPrice, sort };
+  return { page, perPage, category, genre, minPrice, maxPrice, sort };
 }
 
 async function checkStoreOwnerPlanLimit(
@@ -155,6 +177,7 @@ function buildUpdatePayload(validated: typeof UpdateProductBody.infer) {
     ...(validated.price !== undefined ? { price: validated.price } : {}),
     ...(validated.priceCurrency ? { priceCurrency: validated.priceCurrency } : {}),
     ...(validated.category ? { category: validated.category } : {}),
+    ...(validated.genre !== undefined ? { genre: validated.genre } : {}),
     ...(validated.status ? { status: validated.status } : {}),
     ...(validated.stock ? { stock: validated.stock as Record<string, number> } : {}),
     ...(validated.images ? { images: validated.images } : {}),
@@ -168,11 +191,12 @@ export function registerProductRoutes(
   merchantRepo: MerchantRepositoryPort
 ): void {
   app.get("/api/products", async (c) => {
-    const { page, perPage, category, minPrice, maxPrice, sort } = parseListQueryParams(c);
+    const { page, perPage, category, genre, minPrice, maxPrice, sort } = parseListQueryParams(c);
     const result = await service.getActiveProducts(
       { page, perPage },
       {
         ...(category ? { category } : {}),
+        ...(genre ? { genre } : {}),
         ...(minPrice !== undefined ? { minPrice } : {}),
         ...(maxPrice !== undefined ? { maxPrice } : {}),
         ...(sort ? { sort } : {}),
@@ -224,17 +248,7 @@ export function registerProductRoutes(
         if (limitErr) return limitErr;
       }
 
-      const result = await service.createProduct({
-        ownerId: userId,
-        name: validated.name,
-        description: validated.description ?? "",
-        tagline: validated.tagline ?? "",
-        price: validated.price,
-        priceCurrency: validated.priceCurrency ?? "THB",
-        category: validated.category,
-        stock: validated.stock as Record<string, number>,
-        images: validated.images,
-      });
+      const result = await service.createProduct(buildCreatePayload(validated, userId));
 
       if (role === "store_owner") {
         void merchantRepo.incrementProductCount(userId);

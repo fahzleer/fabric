@@ -19,6 +19,7 @@ export interface FirebaseProductRecord {
   price: number;
   currency: string;
   category: string;
+  genre?: string;
   status: "draft" | "active" | "archived";
   stock: Record<string, number>;
   imageUrls: string[];

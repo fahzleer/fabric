@@ -19,7 +19,7 @@ export function CartBadge() {
   return (
     <Link
       href="/cart"
-      className="relative inline-flex items-center p-2 text-gray-400 hover:text-white transition-colors"
+      className="relative inline-flex items-center p-2 text-gray-400 hover:text-gray-600 transition-colors"
     >
       {/* Cart icon */}
       <svg

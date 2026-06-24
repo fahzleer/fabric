@@ -24,6 +24,8 @@ export type ProductImageDto = {
   readonly order: number;
 };
 
+export type ProductGenre = "emo" | "deathcore" | "punk" | "metal" | "hardcore";
+
 export type ProductSummaryDto = {
   readonly id: string;
   readonly name: string;
@@ -31,6 +33,7 @@ export type ProductSummaryDto = {
   readonly price: number;
   readonly priceCurrency: string;
   readonly category: ProductCategory;
+  readonly genre: ProductGenre | null;
   readonly status: ProductStatus;
   readonly primaryImage: ProductImageDto | null;
   readonly availableSizes: readonly ProductSize[];
@@ -54,6 +57,7 @@ export type ListProductsInput = {
   readonly page?: number;
   readonly perPage?: number;
   readonly category?: ProductCategory;
+  readonly genre?: ProductGenre;
   readonly minPrice?: number;
   readonly maxPrice?: number;
   readonly sort?: ProductSortField;

@@ -15,6 +15,16 @@ export interface CfApiConfig {
   readonly stripePriceProfessional: string;
   readonly stripePriceEnterprise: string;
   readonly stripePortalReturnUrl: string;
+  readonly lineNotifyToken: string | undefined;
+  readonly lineOaChannelToken: string | undefined;
+  readonly lineOaAdminUid: string | undefined;
+  readonly sendgridApiKey: string | undefined;
+  readonly sendgridFromEmail: string;
+  readonly twilioAccountSid: string | undefined;
+  readonly twilioAuthToken: string | undefined;
+  readonly twilioFromPhone: string | undefined;
+  readonly hubspotAccessToken: string | undefined;
+  readonly segmentWriteKey: string | undefined;
 }
 
 const REQUIRED_VARS = ["PASETO_KEY", "INTERNAL_SECRET", "CORS_ORIGIN"] as const;
@@ -44,5 +54,15 @@ export function loadConfig(secrets?: SecretsMap): CfApiConfig {
     stripePriceEnterprise: get("STRIPE_PRICE_ENTERPRISE") ?? "",
     stripePortalReturnUrl:
       get("STRIPE_PORTAL_RETURN_URL") ?? "http://localhost:3000/merchant/billing",
+    lineNotifyToken: get("LINE_NOTIFY_TOKEN"),
+    lineOaChannelToken: get("LINE_OA_CHANNEL_TOKEN"),
+    lineOaAdminUid: get("LINE_OA_ADMIN_UID"),
+    sendgridApiKey: get("SENDGRID_API_KEY"),
+    sendgridFromEmail: get("SENDGRID_FROM_EMAIL") ?? "noreply@fabric.cool",
+    twilioAccountSid: get("TWILIO_ACCOUNT_SID"),
+    twilioAuthToken: get("TWILIO_AUTH_TOKEN"),
+    twilioFromPhone: get("TWILIO_FROM_PHONE"),
+    hubspotAccessToken: get("HUBSPOT_ACCESS_TOKEN"),
+    segmentWriteKey: get("SEGMENT_WRITE_KEY"),
   };
 }

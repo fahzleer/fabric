@@ -57,7 +57,28 @@ export function SalesInsightCard({ hasData }: { hasData: boolean }) {
       )}
 
       {text && (
-        <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-gray-200">{text}</p>
+        <div className="mt-4 space-y-3">
+          {text
+            .split(/\n\n+/)
+            .map((block) => block.trim())
+            .filter(Boolean)
+            .map((block) => {
+              const lines = block
+                .split("\n")
+                .map((l) => l.trim())
+                .filter(Boolean);
+              const heading = lines[0] ?? block.slice(0, 20);
+              const body = lines.slice(1).join(" ");
+              return (
+                <div key={heading}>
+                  <p className="text-xs font-semibold uppercase tracking-wider text-violet-400">
+                    {heading}
+                  </p>
+                  {body && <p className="mt-0.5 text-sm leading-relaxed text-gray-200">{body}</p>}
+                </div>
+              );
+            })}
+        </div>
       )}
 
       {!(text || error || pending) && (

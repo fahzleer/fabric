@@ -32,6 +32,7 @@ function toFirebaseRecord(product: Product, rev: number): FirebaseProductRecord 
     price: product.price.amount,
     currency: product.price.currency,
     category: product.category,
+    ...(product.genre ? { genre: product.genre } : {}),
     status: product.status,
     stock: Object.fromEntries(
       Object.entries(product.stock).map(([size, qty]) => [size, qty.value])
@@ -86,12 +87,13 @@ function fromFirebaseRecord(record: FirebaseProductRecord): Product {
       currency: record.currency as Product["price"]["currency"],
     }),
     category: record.category as Product["category"],
+    ...(record.genre ? { genre: record.genre as Product["genre"] } : {}),
     status: record.status as Product["status"],
     stock: Object.freeze(stock),
     images: Object.freeze(images),
     createdAt: Temporal.Instant.from(record.createdAt),
     updatedAt: Temporal.Instant.from(record.updatedAt),
-  });
+  }) as unknown as Product;
 }
 
 export class FirebaseProductRepository implements ProductRepositoryPort {
@@ -126,7 +128,6 @@ export class FirebaseProductRepository implements ProductRepositoryPort {
   ): Promise<Result<PaginatedResult<ProductSummary>, RepositoryError>> {
     try {
       const { page, perPage } = pagination;
-      const { minPrice, maxPrice, category } = filter;
 
       // Build the Firebase query. The base filter is status=active, which
       // uses the existing `orderByChild("status")` index. Firebase RTDB only
@@ -157,8 +158,11 @@ export class FirebaseProductRepository implements ProductRepositoryPort {
         allProducts.push(fromFirebaseRecord(child.val() as FirebaseProductRecord));
       });
 
+      const { minPrice, maxPrice, category, genre } = filter;
+
       const filtered = allProducts.filter((p) => {
         if (category !== undefined && p.category !== category) return false;
+        if (genre !== undefined && p.genre !== genre) return false;
         if (minPrice !== undefined && p.price.amount < minPrice) return false;
         if (maxPrice !== undefined && p.price.amount > maxPrice) return false;
         return true;

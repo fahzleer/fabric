@@ -24,6 +24,7 @@ export type ProductSortField =
 
 export type ProductFilterInput = {
   readonly category?: string;
+  readonly genre?: string;
   readonly minPrice?: number;
   readonly maxPrice?: number;
   readonly status?: string;
@@ -32,6 +33,7 @@ export type ProductFilterInput = {
 
 export type OwnerProductFilterInput = {
   readonly category?: string;
+  readonly genre?: string;
   readonly status?: string;
   readonly sort?: ProductSortField;
 };

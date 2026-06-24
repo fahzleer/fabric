@@ -26,6 +26,7 @@ type RawProductSummary = {
   readonly price: number;
   readonly priceCurrency: string;
   readonly category: string;
+  readonly genre: string | null;
   readonly status: string;
   readonly primaryImage: {
     readonly url: string;
@@ -84,9 +85,10 @@ function mapSummary(raw: RawProductSummary): ProductSummary {
         } as ProductImage)
       : ({ url: "/placeholder.jpg", altText: "", isPrimary: true, order: 0 } as ProductImage),
     category: raw.category as ProductSummary["category"],
+    ...(raw.genre ? { genre: raw.genre as ProductSummary["genre"] } : {}),
     status: raw.status as ProductSummary["status"],
     inStock: raw.isInStock,
-  };
+  } as ProductSummary;
 }
 
 function mapProduct(raw: RawProduct): Product {

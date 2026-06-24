@@ -13,27 +13,22 @@ function HeroCard({ product }: { product: ProductSummary }) {
   return (
     <Link
       href={`/product/${product.id.value}`}
-      className="group relative flex h-full min-h-120 overflow-hidden rounded-2xl bg-gray-900 shadow-lg transition-shadow hover:shadow-xl"
+      className="group block overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-shadow hover:shadow-md"
     >
-      {/* Background image */}
-      <Image
-        src={product.primaryImage.url}
-        alt={product.primaryImage.altText}
-        fill
-        sizes="66vw"
-        priority
-        className="object-contain transition-transform duration-500 group-hover:scale-105"
-        style={{ backgroundColor: "#111827" }}
-      />
-
-      {/* Gradient overlay — only bottom strip for readability */}
-      <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/10 to-transparent" />
-
-      {/* Content */}
-      <div className="relative mt-auto p-6">
-        <h3 className="text-2xl font-bold text-white">{product.name.value}</h3>
-        <p className="mt-1 text-sm text-gray-300">{product.tagline}</p>
-        <p className="mt-3 text-xl font-bold text-white">{formattedPrice}</p>
+      <div className="relative aspect-[4/3] overflow-hidden bg-gray-50">
+        <Image
+          src={product.primaryImage.url}
+          alt={product.primaryImage.altText}
+          fill
+          sizes="66vw"
+          priority
+          className="object-cover transition-transform duration-500 group-hover:scale-105"
+        />
+      </div>
+      <div className="p-6">
+        <h3 className="text-2xl font-bold text-gray-900">{product.name.value}</h3>
+        <p className="mt-1 text-sm text-gray-500">{product.tagline}</p>
+        <p className="mt-3 text-xl font-bold text-gray-900">{formattedPrice}</p>
       </div>
     </Link>
   );
@@ -45,25 +40,20 @@ function SmallCard({ product }: { product: ProductSummary }) {
   return (
     <Link
       href={`/product/${product.id.value}`}
-      className="group relative flex overflow-hidden rounded-2xl bg-gray-800 shadow-md transition-shadow hover:shadow-lg"
+      className="group block overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-shadow hover:shadow-md"
     >
-      {/* Background image */}
-      <Image
-        src={product.primaryImage.url}
-        alt={product.primaryImage.altText}
-        fill
-        sizes="33vw"
-        className="object-contain transition-transform duration-500 group-hover:scale-105"
-        style={{ backgroundColor: "#1f2937" }}
-      />
-
-      {/* Gradient overlay — only bottom strip for readability */}
-      <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/5 to-transparent" />
-
-      {/* Content */}
-      <div className="relative mt-auto p-4">
-        <h3 className="text-lg font-bold text-white">{product.name.value}</h3>
-        <p className="mt-0.5 text-xl font-bold text-white">{formattedPrice}</p>
+      <div className="relative aspect-square overflow-hidden bg-gray-50">
+        <Image
+          src={product.primaryImage.url}
+          alt={product.primaryImage.altText}
+          fill
+          sizes="33vw"
+          className="object-cover transition-transform duration-500 group-hover:scale-105"
+        />
+      </div>
+      <div className="p-4">
+        <h3 className="text-base font-semibold text-gray-900">{product.name.value}</h3>
+        <p className="mt-0.5 text-lg font-bold text-gray-900">{formattedPrice}</p>
       </div>
     </Link>
   );
@@ -76,16 +66,15 @@ export function FeaturedProductsGrid({ products }: Props) {
   if (!hero) return null;
 
   return (
-    <div className="grid h-130 grid-cols-3 gap-4">
-      {/* Hero — spans 2 cols and full height */}
-      <div className="col-span-2 row-span-2">
+    <div className="grid grid-cols-3 gap-4">
+      <div className="col-span-2">
         <HeroCard product={hero} />
       </div>
-
-      {/* Smaller cards — stack on right */}
-      {rest.map((product) => (
-        <SmallCard key={product.id.value} product={product} />
-      ))}
+      <div className="flex flex-col gap-4">
+        {rest.map((product) => (
+          <SmallCard key={product.id.value} product={product} />
+        ))}
+      </div>
     </div>
   );
 }

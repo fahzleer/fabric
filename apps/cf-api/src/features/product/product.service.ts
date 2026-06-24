@@ -1,4 +1,10 @@
-import type { CurrencyCode, NonEmptyArray, ProductCategory, ProductStatus } from "@fabric/types";
+import type {
+  CurrencyCode,
+  NonEmptyArray,
+  ProductCategory,
+  ProductGenre,
+  ProductStatus,
+} from "@fabric/types";
 import { isNonEmpty } from "@fabric/types";
 import { Temporal } from "@js-temporal/polyfill";
 import type { ActivityRepositoryPort } from "../../application/ports/activity.repository.port";
@@ -27,6 +33,7 @@ export type CreateProductInput = {
   readonly price: number;
   readonly priceCurrency: string;
   readonly category: ProductCategory;
+  readonly genre?: ProductGenre;
   readonly stock: Record<string, number>;
   readonly images: Array<{ url: string; alt: string; isPrimary: boolean; order: number }>;
 };
@@ -156,6 +163,7 @@ export class ProductService {
       tagline: input.tagline,
       price,
       category: input.category,
+      ...(input.genre ? { genre: input.genre } : {}),
       status: "active",
       stock: buildStock(input.stock),
       images: buildImages(input.images),

@@ -83,6 +83,9 @@ export const ProductStatusSchema = type("'draft' | 'active' | 'archived'");
 export type ProductCategory = "basic" | "premium" | "limited_edition" | "custom";
 export const ProductCategorySchema = type("'basic' | 'premium' | 'limited_edition' | 'custom'");
 
+export type ProductGenre = "emo" | "deathcore" | "punk" | "metal" | "hardcore";
+export const ProductGenreSchema = type("'emo' | 'deathcore' | 'punk' | 'metal' | 'hardcore'");
+
 export interface StockQuantityError extends TaggedError<"StockQuantityError"> {}
 export type StockQuantity = { readonly __brand: "StockQuantity"; readonly value: number };
 

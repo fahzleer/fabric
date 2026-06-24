@@ -4,6 +4,7 @@ import { type Maybe, None, Some, isNone, isSome } from "@fabric/types";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { ClearCartOnMount } from "./_components/clear-cart-on-mount";
+import { OrderTracker } from "./_components/order-tracker";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3010";
 const INTERNAL_SECRET = process.env.INTERNAL_SECRET ?? "";
@@ -223,8 +224,15 @@ export default async function OrderConfirmationPage({ params }: PageProps) {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Runs client-side: clears IndexedDB cart after order is confirmed */}
       <ClearCartOnMount />
+      {isSome(order) && (
+        <OrderTracker
+          orderId={id}
+          totalCents={order.value.totalAmountInCents}
+          currency={order.value.currency}
+          itemCount={order.value.lines.length}
+        />
+      )}
 
       <div className="mx-auto max-w-2xl px-4 py-16 sm:px-6 lg:px-8">
         {/* Success icon */}

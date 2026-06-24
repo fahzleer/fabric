@@ -7,6 +7,7 @@ export type {
   ProductSize,
   ProductStatus,
   ProductCategory,
+  ProductGenre,
   StockQuantity,
   StockQuantityError,
   ProductImage,
@@ -68,6 +69,7 @@ export const isStockInStock = (s: StockInfo): boolean => getStockAvailable(s) > 
 import type {
   NonEmptyArray,
   ProductCategory,
+  ProductGenre,
   ProductId,
   ProductImage,
   ProductName,
@@ -104,6 +106,7 @@ export interface ProductSummary {
   readonly price: ProductPrice;
   readonly primaryImage: ProductImage;
   readonly category: ProductCategory;
+  readonly genre?: ProductGenre;
   readonly status: ProductStatus;
   readonly inStock: boolean;
 }

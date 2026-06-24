@@ -1,1 +1,1 @@
-export { LoginForm } from "./login-form";
+export { LoginForm, type SocialProvider } from "./login-form";

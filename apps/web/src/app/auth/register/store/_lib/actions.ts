@@ -103,5 +103,5 @@ export async function registerStoreAction(formData: FormData) {
 
   await onboardMerchantProfile(storeName);
 
-  redirect("/merchant/dashboard");
+  redirect("/merchant/dashboard?welcome=1");
 }

@@ -211,6 +211,140 @@ async function executeOmisePayment(
 
 const MOCK_MODE = !OMISE_PUBLIC_KEY;
 
+type ExtendedDeps = PaymentDeps & { onBack: () => void };
+
+function initOmiseLibrary(setOmiseReady: (v: boolean) => void): void {
+  if (window.Omise && OMISE_PUBLIC_KEY) {
+    window.Omise.setPublicKey(OMISE_PUBLIC_KEY);
+    setOmiseReady(true);
+  }
+}
+
+function MockModeCard({
+  totalAmount,
+  currency,
+  status,
+  error,
+  onBack,
+  onPay,
+}: {
+  totalAmount: number;
+  currency: string;
+  status: Status;
+  error: Maybe<string>;
+  onBack: () => void;
+  onPay: () => void;
+}) {
+  return (
+    <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-5">
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-gray-900">Pay by Card</h2>
+        <span className="rounded-full bg-yellow-100 px-2.5 py-0.5 text-xs font-medium text-yellow-800">
+          Test mode
+        </span>
+      </div>
+      <p className="text-sm text-gray-500">
+        No Omise key configured — using mock payment gateway. Click the button to simulate a
+        successful payment.
+      </p>
+      {status === "error" && isSome(error) && (
+        <div className="rounded-lg bg-red-50 border border-red-200 p-3 text-sm text-red-700">
+          {error.value}
+        </div>
+      )}
+      <div className="border-t border-gray-200 pt-4">
+        <div className="flex justify-between font-semibold text-gray-900">
+          <span>Total</span>
+          <span>{formatPrice({ amount: totalAmount, currency })}</span>
+        </div>
+      </div>
+      <div className="flex gap-3">
+        <button
+          type="button"
+          onClick={onBack}
+          disabled={status === "submitting"}
+          className="flex-1 rounded-lg border border-gray-300 px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+        >
+          ← Back
+        </button>
+        <button
+          type="button"
+          onClick={onPay}
+          disabled={status === "submitting"}
+          className="flex-1 rounded-lg bg-blue-600 px-4 py-3 text-white font-medium hover:bg-blue-700 disabled:opacity-50"
+        >
+          {status === "submitting"
+            ? "Placing order…"
+            : `Pay ${formatPrice({ amount: totalAmount, currency })}`}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+async function execMockPay(
+  cart: Maybe<ShoppingCart>,
+  shippingAddress: Option.Option<RawShippingAddress>,
+  voucherCode: string,
+  deps: ExtendedDeps
+): Promise<void> {
+  if (isNone(cart) || cart.value.items.length === 0) return;
+  if (Option.isNone(shippingAddress)) {
+    deps.onBack();
+    return;
+  }
+  deps.setError(None());
+  deps.setStatus("submitting");
+  try {
+    await executeOmisePayment(
+      `tok_mock_${crypto.randomUUID()}`,
+      cart.value,
+      voucherCode,
+      shippingAddress.value,
+      deps
+    );
+  } catch (e) {
+    deps.setError(Some(e instanceof Error ? e.message : "Unknown error"));
+    deps.setStatus("error");
+  }
+}
+
+function areCardFieldsFilled(
+  cardName: string,
+  cardNumber: string,
+  expMonth: string,
+  expYear: string,
+  cvv: string
+): boolean {
+  return !!(cardName.trim() && cardNumber.trim() && expMonth && expYear && cvv.trim());
+}
+
+function execCardPay(
+  cart: Maybe<ShoppingCart>,
+  shippingAddress: Option.Option<RawShippingAddress>,
+  omiseReady: boolean,
+  card: CardFields,
+  voucherCode: string,
+  deps: ExtendedDeps
+): void {
+  if (isNone(cart) || cart.value.items.length === 0) return;
+  if (Option.isNone(shippingAddress)) {
+    deps.onBack();
+    return;
+  }
+  if (!(window.Omise && omiseReady)) {
+    deps.setError(Some("Payment library not ready. Please wait a moment and try again."));
+    return;
+  }
+  if (!areCardFieldsFilled(card.name, card.number, card.expMonth, card.expYear, card.cvv)) {
+    deps.setError(Some("Please fill in all card details."));
+    return;
+  }
+  deps.setError(None());
+  deps.setStatus("tokenizing");
+  tokenizeAndPay(card, voucherCode, deps, cart.value, shippingAddress.value);
+}
+
 export function OmiseCardForm({ cart, onBack }: OmiseCardFormProps) {
   const router = useRouter();
   const shippingAddressFromAtom = useAtomValue(shippingAddressAtom);
@@ -241,63 +375,19 @@ export function OmiseCardForm({ cart, onBack }: OmiseCardFormProps) {
       ? getCartTotal(cart.value)
       : 0;
 
-  const initOmise = () => {
-    if (window.Omise && OMISE_PUBLIC_KEY) {
-      window.Omise.setPublicKey(OMISE_PUBLIC_KEY);
-      setOmiseReady(true);
-    }
-  };
+  const deps: ExtendedDeps = { setError, setStatus, setPlacedOrderId, push: router.push, onBack };
 
-  const handleMockPay = async () => {
-    if (isNone(cart) || cart.value.items.length === 0) return;
-    if (Option.isNone(shippingAddress)) {
-      onBack();
-      return;
-    }
-    setError(None());
-    setStatus("submitting");
-    const deps: PaymentDeps = { setError, setStatus, setPlacedOrderId, push: router.push };
-    try {
-      await executeOmisePayment(
-        `tok_mock_${crypto.randomUUID()}`,
-        cart.value,
-        voucherCode,
-        shippingAddress.value,
-        deps
-      );
-    } catch (e) {
-      setError(Some(e instanceof Error ? e.message : "Unknown error"));
-      setStatus("error");
-    }
-  };
+  const handleMockPay = () => execMockPay(cart, shippingAddress, voucherCode, deps);
 
-  const handlePay = async () => {
-    if (isNone(cart) || cart.value.items.length === 0) return;
-    if (Option.isNone(shippingAddress)) {
-      onBack();
-      return;
-    }
-    if (!(window.Omise && omiseReady)) {
-      setError(Some("Payment library not ready. Please wait a moment and try again."));
-      return;
-    }
-    if (!(cardName.trim() && cardNumber.trim() && expMonth && expYear && cvv.trim())) {
-      setError(Some("Please fill in all card details."));
-      return;
-    }
-
-    setError(None());
-    setStatus("tokenizing");
-
-    const deps: PaymentDeps = { setError, setStatus, setPlacedOrderId, push: router.push };
-    tokenizeAndPay(
+  const handlePay = () =>
+    execCardPay(
+      cart,
+      shippingAddress,
+      omiseReady,
       { name: cardName, number: cardNumber, expMonth, expYear, cvv },
       voucherCode,
-      deps,
-      cart.value,
-      shippingAddress.value
+      deps
     );
-  };
 
   const isLoading = status === "tokenizing" || status === "submitting";
 
@@ -308,49 +398,14 @@ export function OmiseCardForm({ cart, onBack }: OmiseCardFormProps) {
 
   if (MOCK_MODE) {
     return (
-      <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-5">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-900">Pay by Card</h2>
-          <span className="rounded-full bg-yellow-100 px-2.5 py-0.5 text-xs font-medium text-yellow-800">
-            Test mode
-          </span>
-        </div>
-        <p className="text-sm text-gray-500">
-          No Omise key configured — using mock payment gateway. Click the button to simulate a
-          successful payment.
-        </p>
-        {status === "error" && isSome(error) && (
-          <div className="rounded-lg bg-red-50 border border-red-200 p-3 text-sm text-red-700">
-            {error.value}
-          </div>
-        )}
-        <div className="border-t border-gray-200 pt-4">
-          <div className="flex justify-between font-semibold text-gray-900">
-            <span>Total</span>
-            <span>{formatPrice({ amount: totalAmount, currency })}</span>
-          </div>
-        </div>
-        <div className="flex gap-3">
-          <button
-            type="button"
-            onClick={onBack}
-            disabled={status === "submitting"}
-            className="flex-1 rounded-lg border border-gray-300 px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
-          >
-            ← Back
-          </button>
-          <button
-            type="button"
-            onClick={handleMockPay}
-            disabled={status === "submitting"}
-            className="flex-1 rounded-lg bg-blue-600 px-4 py-3 text-white font-medium hover:bg-blue-700 disabled:opacity-50"
-          >
-            {status === "submitting"
-              ? "Placing order…"
-              : `Pay ${formatPrice({ amount: totalAmount, currency })}`}
-          </button>
-        </div>
-      </div>
+      <MockModeCard
+        totalAmount={totalAmount}
+        currency={currency}
+        status={status}
+        error={error}
+        onBack={onBack}
+        onPay={handleMockPay}
+      />
     );
   }
 
@@ -360,7 +415,7 @@ export function OmiseCardForm({ cart, onBack }: OmiseCardFormProps) {
         id="omise-js"
         src="https://cdn.omise.co/omise.js"
         strategy="lazyOnload"
-        onLoad={initOmise}
+        onLoad={() => initOmiseLibrary(setOmiseReady)}
         onError={() =>
           setError(Some("Failed to load payment library. Please refresh and try again."))
         }

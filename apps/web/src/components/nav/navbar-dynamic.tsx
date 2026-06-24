@@ -1,7 +1,7 @@
 "use client";
 
 import type { Session } from "@/lib/auth";
-import type { Maybe } from "@fabric/types";
+import { type Maybe, isSome } from "@fabric/types";
 import dynamic from "next/dynamic";
 
 const CartBadgeDynamic = dynamic(() => import("./cart-badge").then((m) => m.CartBadge), {
@@ -19,9 +19,12 @@ const UserMenuDynamic = dynamic(() => import("./user-menu").then((m) => m.UserMe
 });
 
 export function NavbarClientParts({ session }: { session: Maybe<Session> }) {
+  const role = isSome(session) ? (session.value.user as { role?: string }).role : undefined;
+  const isMerchant = role === "store_owner" || role === "admin";
+
   return (
     <div className="flex items-center gap-1">
-      <CartBadgeDynamic />
+      {!isMerchant && <CartBadgeDynamic />}
       <UserMenuDynamic initialSession={session} />
     </div>
   );

@@ -1,39 +1,41 @@
 @import "tailwindcss";
 
 :root {
-  --background: 40 30% 96%;
+  --background: 0 0% 100%;
   --foreground: 0 0% 4%;
 
-  --card: 40 20% 98%;
+  --card: 0 0% 100%;
   --card-foreground: 0 0% 4%;
 
-  --popover: 40 20% 98%;
+  --popover: 0 0% 100%;
   --popover-foreground: 0 0% 4%;
 
-  --primary: 33 30% 65%;
-  --primary-foreground: 0 0% 4%;
+  --primary: 0 0% 6%;
+  --primary-foreground: 0 0% 100%;
 
-  --secondary: 40 15% 90%;
+  --secondary: 0 0% 96%;
   --secondary-foreground: 0 0% 20%;
 
-  --muted: 40 10% 85%;
+  --muted: 0 0% 94%;
   --muted-foreground: 0 0% 42%;
 
-  --accent: 33 30% 65%;
+  --accent: 0 0% 94%;
   --accent-foreground: 0 0% 4%;
 
   --destructive: 0 72% 51%;
-  --destructive-foreground: 40 30% 96%;
+  --destructive-foreground: 0 0% 100%;
 
-  --border: 40 15% 88%;
-  --input: 40 15% 88%;
-  --ring: 33 30% 65%;
+  --border: 0 0% 91%;
+  --input: 0 0% 91%;
+  --ring: 0 0% 6%;
 
   --radius: 0.25rem;
 
-  --font-sans: "Inter Variable", "Inter", ui-sans-serif, system-ui, sans-serif;
+  /* Geist loaded via next/font; --font-geist-sans injected on <body> by layout.tsx */
+  --font-sans: var(--font-geist-sans, "Inter Variable", ui-sans-serif), "Noto Sans Thai", "Sarabun",
+    "Tahoma", system-ui, sans-serif;
   --font-serif: "Playfair Display", Georgia, "Times New Roman", serif;
-  --font-mono: "JetBrains Mono", "Fira Code", ui-monospace, monospace;
+  --font-mono: var(--font-geist-mono, "JetBrains Mono", "Fira Code", ui-monospace), monospace;
 
   --space-page: clamp(1rem, 5vw, 5rem);
   --space-section: clamp(2rem, 8vw, 8rem);

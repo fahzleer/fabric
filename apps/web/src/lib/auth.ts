@@ -1,7 +1,8 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
-import { admin } from "better-auth/plugins";
+import { admin, genericOAuth } from "better-auth/plugins";
+import { line } from "better-auth/plugins/generic-oauth";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import { authSchema } from "./auth-schema";
@@ -28,19 +29,19 @@ export const auth = betterAuth({
     autoSignIn: true,
   },
   socialProviders: {
-    ...(process.env.FACEBOOK_CLIENT_ID && process.env.FACEBOOK_CLIENT_SECRET
-      ? {
-          facebook: {
-            clientId: process.env.FACEBOOK_CLIENT_ID,
-            clientSecret: process.env.FACEBOOK_CLIENT_SECRET,
-          },
-        }
-      : {}),
     ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
       ? {
           google: {
             clientId: process.env.GOOGLE_CLIENT_ID,
             clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+          },
+        }
+      : {}),
+    ...(process.env.FACEBOOK_CLIENT_ID && process.env.FACEBOOK_CLIENT_SECRET
+      ? {
+          facebook: {
+            clientId: process.env.FACEBOOK_CLIENT_ID,
+            clientSecret: process.env.FACEBOOK_CLIENT_SECRET,
           },
         }
       : {}),
@@ -68,6 +69,23 @@ export const auth = betterAuth({
       adminRoles: ["admin"],
       defaultRole: "customer",
     }),
+    ...(process.env.LINE_CHANNEL_ID && process.env.LINE_CHANNEL_SECRET
+      ? [
+          genericOAuth({
+            config: [
+              {
+                ...line({
+                  clientId: process.env.LINE_CHANNEL_ID,
+                  clientSecret: process.env.LINE_CHANNEL_SECRET,
+                }),
+                mapProfileToUser: (userInfo: Record<string, unknown>) => ({
+                  email: (userInfo.email as string | undefined) ?? `${userInfo.id}@line.user`,
+                }),
+              },
+            ],
+          }),
+        ]
+      : []),
   ],
   trustedOrigins: [
     process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000",

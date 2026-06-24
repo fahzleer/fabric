@@ -103,7 +103,8 @@ export function registerOrderRoutes(
       ).ShippingAddress,
       validated.paymentToken,
       (validated.paymentMethod ?? "card") as import("@fabric/types").PaymentMethod,
-      validated.voucherCode
+      validated.voucherCode,
+      c.get("userEmail")
     );
     return c.json(result, 201);
   });

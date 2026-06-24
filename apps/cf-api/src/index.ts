@@ -13,6 +13,7 @@ import { registerBillingRoutes } from "./features/billing/billing.handlers";
 import { BillingService } from "./features/billing/billing.service";
 import { registerCartRoutes } from "./features/cart/cart.handlers";
 import { CartService } from "./features/cart/cart.service";
+import { registerMlRoutes } from "./features/ml/ml.handlers";
 import { registerOrderRoutes } from "./features/order/order.handlers";
 import { OrderService } from "./features/order/order.service";
 import { registerPromptPayRoutes } from "./features/payment/promptpay.handlers";
@@ -38,6 +39,13 @@ import { FirebaseVoucherRepository } from "./infrastructure/firebase/firebase-vo
 import { attachRequestSignal } from "./infrastructure/guards/auth.middleware";
 import { csrf } from "./infrastructure/guards/csrf.middleware";
 import { logError, requestLogger } from "./infrastructure/monitoring/logger";
+import { HubSpotAdapter } from "./infrastructure/notify/hubspot.adapter";
+import { LineNotifyAdapter } from "./infrastructure/notify/line-notify.adapter";
+import { LineOaAdapter } from "./infrastructure/notify/line-oa.adapter";
+import { NotificationService } from "./infrastructure/notify/notification.service";
+import { SegmentAdapter } from "./infrastructure/notify/segment.adapter";
+import { SendGridAdapter } from "./infrastructure/notify/sendgrid.adapter";
+import { TwilioAdapter } from "./infrastructure/notify/twilio.adapter";
 import { HttpPaymentAdapter } from "./infrastructure/payment/http-payment.adapter";
 import { HttpPricingAdapter } from "./infrastructure/pricing/pricing.adapter";
 import { loadSecrets } from "./infrastructure/secrets/secret-manager.service";
@@ -117,6 +125,24 @@ async function startBoot() {
   const payoutService = new PayoutService(payoutRepo);
   const productService = new ProductService(productRepo, eventPublisher, activityRepo);
   const cartService = new CartService(cartRepo, productRepo, activityRepo);
+  const notificationAdapters = [
+    config.lineNotifyToken ? new LineNotifyAdapter(config.lineNotifyToken) : null,
+    config.lineOaChannelToken
+      ? new LineOaAdapter(config.lineOaChannelToken, config.lineOaAdminUid)
+      : null,
+    config.sendgridApiKey
+      ? new SendGridAdapter(config.sendgridApiKey, config.sendgridFromEmail)
+      : null,
+    config.twilioAccountSid && config.twilioAuthToken && config.twilioFromPhone
+      ? new TwilioAdapter(config.twilioAccountSid, config.twilioAuthToken, config.twilioFromPhone)
+      : null,
+    config.hubspotAccessToken ? new HubSpotAdapter(config.hubspotAccessToken) : null,
+    config.segmentWriteKey ? new SegmentAdapter(config.segmentWriteKey) : null,
+  ].filter(Boolean) as import("./application/ports/notification.port").NotificationPort[];
+
+  const notification =
+    notificationAdapters.length > 0 ? new NotificationService(notificationAdapters) : undefined;
+
   const orderService = new OrderService(
     orderRepo,
     cartRepo,
@@ -126,7 +152,8 @@ async function startBoot() {
     voucherRepo,
     eventPublisher,
     activityRepo,
-    merchantRepo
+    merchantRepo,
+    notification
   );
 
   const app = new Hono();
@@ -163,6 +190,7 @@ async function startBoot() {
   registerInternalRoutes(app, config.pasetoKey, config.internalSecret);
   registerStoreRoutes(app, merchantRepo, productRepo);
   registerPayoutRoutes(app, payoutService, verifier);
+  registerMlRoutes(app);
   app.get("/api/health", (c) =>
     c.json({ status: "ok", service: "cf-api", regions: DEPLOY_REGIONS })
   );

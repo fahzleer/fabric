@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "ulimit -n 65536 && next dev --port 3002",
+    "dev": "ulimit -n 65536 && next dev --port 3002 --webpack",
     "build": "next build --webpack",
     "start": "next start",
     "lint": "biome lint ./src",

@@ -71,6 +71,7 @@ type UpdatePayload = {
   price?: number;
   priceCurrency?: string;
   category?: string;
+  genre?: string;
   status?: string;
   stock?: Record<string, number>;
   images?: { url: string; alt: string; isPrimary: boolean; order: number }[];
@@ -83,6 +84,7 @@ function buildUpdatePayload(fields: {
   price: number | undefined;
   currency: string | undefined;
   category: string | undefined;
+  genre: string | undefined;
   status: string | undefined;
   stock: Record<string, number>;
   images: { url: string; alt: string; isPrimary: boolean; order: number }[];
@@ -94,6 +96,7 @@ function buildUpdatePayload(fields: {
   if (fields.price) payload.price = fields.price;
   if (fields.currency) payload.priceCurrency = fields.currency;
   if (fields.category) payload.category = fields.category;
+  if (fields.genre) payload.genre = fields.genre;
   if (fields.status) payload.status = fields.status;
   if (Object.keys(fields.stock).length > 0) payload.stock = fields.stock;
   if (fields.images.length > 0) payload.images = fields.images;
@@ -143,8 +146,9 @@ export async function generateProductDescriptionAction(input: {
     [
       {
         role: "system",
-        content:
-          "คุณเป็นนักเขียนคำโฆษณาสินค้าแฟชั่นมืออาชีพ เขียนคำบรรยายสินค้าเป็นภาษาไทยที่กระชับ น่าสนใจ และชวนซื้อ เน้นจุดเด่นและการใช้งานจริง ความยาว 2-3 ประโยค ห้ามใส่ตัวเลขราคาในข้อความ ห้ามใช้ bullet point หรือ emoji ตอบกลับเฉพาะคำบรรยายเท่านั้น ไม่ต้องมีคำนำหรือหัวข้อ",
+        content: `บทบาท: นักเขียนคำโฆษณาสินค้าแฟชั่น
+ผลลัพธ์: คำบรรยายภาษาไทย 2 ประโยค เน้นจุดเด่นและอารมณ์ของสินค้า
+ห้าม: ราคา, bullet, emoji, เครื่องหมายคำพูดนำ, คำนำ, หัวข้อ`,
       },
       {
         role: "user",
@@ -195,8 +199,9 @@ export async function generateImageAltTextAction(input: {
     [
       {
         role: "system",
-        content:
-          "คุณเป็นผู้เชี่ยวชาญด้าน accessibility และ SEO เขียนข้อความ alt text สำหรับรูปสินค้าแฟชั่นเป็นภาษาไทย สั้นกระชับ ไม่เกิน 100 ตัวอักษร บรรยายลักษณะสินค้าที่น่าจะเห็นในภาพ ห้ามขึ้นต้นด้วยคำว่า 'รูป' หรือ 'ภาพ' ห้ามใส่ราคา ห้ามใช้ emoji ตอบกลับเฉพาะ alt text เท่านั้น",
+        content: `บทบาท: ผู้เชี่ยวชาญ SEO และ accessibility
+ผลลัพธ์: alt text ภาษาไทย 1 ประโยค ไม่เกิน 80 ตัวอักษร บรรยายลักษณะสินค้าในภาพ
+ห้าม: ขึ้นต้นด้วย "รูป" หรือ "ภาพ", ราคา, emoji`,
       },
       {
         role: "user",
@@ -264,8 +269,14 @@ export async function generateProductContentAction(input: {
     [
       {
         role: "system",
-        content:
-          "คุณเป็นนักเขียนคำโฆษณาสินค้าแฟชั่นมืออาชีพ เขียนเนื้อหาสินค้าเป็นภาษาไทยทั้งหมด โดยตอบในรูปแบบโครงสร้างดังนี้เท่านั้น:\nTAGLINE: ประโยคสั้นๆ ไม่เกิน 80 ตัวอักษร เน้นจุดเด่นหรืออารมณ์ของสินค้า\nDESCRIPTION: คำบรรยาย 2-3 ประโยค กระชับ น่าสนใจ ชวนซื้อ\nALT_TEXT: ข้อความอธิบายรูปสินค้าสั้นๆ ไม่เกิน 100 ตัวอักษร สำหรับ accessibility และ SEO\n\nกฎ: ห้ามใส่ตัวเลขราคาในข้อความ ห้ามใช้ bullet point ห้ามใช้ emoji ห้ามใส่เครื่องหมายคำพูดที่ขึ้นต้นข้อความ ไม่ต้องมีคำนำหรือหัวข้อนอกเหนือจากโครงสร้างที่กำหนด",
+        content: `บทบาท: นักเขียนคำโฆษณาสินค้าแฟชั่น
+ผลลัพธ์: ตอบในรูปแบบนี้เท่านั้น
+
+TAGLINE: [1 ประโยค ไม่เกิน 80 ตัวอักษร เน้นอารมณ์ของสินค้า]
+DESCRIPTION: [2 ประโยค กระชับ ชวนซื้อ เน้นจุดเด่น]
+ALT_TEXT: [1 ประโยค ไม่เกิน 80 ตัวอักษร บรรยายลักษณะในภาพ]
+
+ห้าม: ราคา, bullet, emoji, เครื่องหมายคำพูดนำ, หัวข้อเพิ่มเติม`,
       },
       {
         role: "user",
@@ -344,8 +355,9 @@ export async function generateProductTaglineAction(input: {
     [
       {
         role: "system",
-        content:
-          "คุณเป็นนักเขียนคำโฆษณาสินค้าแฟชั่นมืออาชีพ เขียน tagline สั้นๆ 1 ประโยคภาษาไทย ไม่เกิน 80 ตัวอักษร เน้นจุดเด่นหรืออารมณ์ของสินค้า ห้ามใส่ตัวเลขราคา ห้ามใช้ bullet point ห้ามใช้ emoji ห้ามใส่เครื่องหมายคำพูดที่ขึ้นต้นข้อความ ตอบกลับเฉพาะ tagline เท่านั้น ไม่ต้องมีคำนำหรือหัวข้อ",
+        content: `บทบาท: นักเขียนคำโฆษณาสินค้าแฟชั่น
+ผลลัพธ์: tagline ภาษาไทย 1 ประโยค ไม่เกิน 80 ตัวอักษร เน้นอารมณ์ของสินค้า
+ห้าม: ราคา, bullet, emoji, เครื่องหมายคำพูดนำ, คำนำ, หัวข้อ`,
       },
       {
         role: "user",
@@ -366,6 +378,8 @@ export async function generateProductTaglineAction(input: {
   );
 }
 
+const VALID_GENRES = new Set(["emo", "deathcore", "punk", "metal", "hardcore"]);
+
 function parseProductFormFields(formData: FormData) {
   const name = String(formData.get("name") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim();
@@ -373,10 +387,12 @@ function parseProductFormFields(formData: FormData) {
   const priceStr = String(formData.get("price") ?? "0");
   const currency = String(formData.get("priceCurrency") ?? "THB").trim() || "THB";
   const category = String(formData.get("category") ?? "basic").trim();
+  const genreRaw = String(formData.get("genre") ?? "").trim();
+  const genre = VALID_GENRES.has(genreRaw) ? genreRaw : undefined;
   const stock = parseStock(formData);
   const images = parseImages(formData);
   const price = Number.parseFloat(priceStr);
-  return { name, description, tagline, price, currency, category, stock, images };
+  return { name, description, tagline, price, currency, category, genre, stock, images };
 }
 
 function placeholderImages(name: string) {
@@ -386,7 +402,7 @@ function placeholderImages(name: string) {
 export async function createProductAction(formData: FormData) {
   await validateCsrfOrigin();
 
-  const { name, description, tagline, price, currency, category, stock, images } =
+  const { name, description, tagline, price, currency, category, genre, stock, images } =
     parseProductFormFields(formData);
 
   if (!name || price <= 0 || Number.isNaN(price)) {
@@ -408,6 +424,7 @@ export async function createProductAction(formData: FormData) {
     price,
     ...(currency !== "THB" ? { priceCurrency: currency } : {}),
     category,
+    ...(genre ? { genre } : {}),
     stock,
     images: images.length > 0 ? images : placeholderImages(name),
   });
@@ -421,24 +438,26 @@ export async function createProductAction(formData: FormData) {
   redirect("/merchant/products?success=Product+created");
 }
 
-export async function updateProductAction(productId: string, formData: FormData) {
-  await validateCsrfOrigin();
-
+function parseUpdateFormFields(formData: FormData) {
   const priceStr = formData.get("price");
-  const stock = parseStock(formData);
-  const images = parseImages(formData);
-
-  const payload = buildUpdatePayload({
+  const genreRaw = String(formData.get("genre") ?? "").trim();
+  return buildUpdatePayload({
     name: String(formData.get("name") ?? "").trim() || undefined,
     description: String(formData.get("description") ?? "").trim() || undefined,
     tagline: String(formData.get("tagline") ?? "").trim() || undefined,
     price: priceStr ? Number.parseFloat(String(priceStr)) : undefined,
     currency: String(formData.get("priceCurrency") ?? "").trim() || undefined,
     category: String(formData.get("category") ?? "").trim() || undefined,
+    genre: VALID_GENRES.has(genreRaw) ? genreRaw : undefined,
     status: String(formData.get("status") ?? "").trim() || undefined,
-    stock,
-    images,
+    stock: parseStock(formData),
+    images: parseImages(formData),
   });
+}
+
+export async function updateProductAction(productId: string, formData: FormData) {
+  await validateCsrfOrigin();
+  const payload = parseUpdateFormFields(formData);
 
   const maybeApi = await createMerchantApi();
   if (!isSome(maybeApi)) {
