@@ -3,6 +3,8 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { LoginForm, type SocialProvider } from "./_components";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Sign In — Fabric",
   description: "Sign in to your Fabric account to browse and purchase products.",
