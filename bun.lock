@@ -68,6 +68,22 @@
         "typescript": "^5.9.3",
       },
     },
+    "apps/cf-payment": {
+      "name": "cf-payment",
+      "version": "0.0.1",
+      "dependencies": {
+        "@fabric/types": "*",
+        "arktype": "^2.1.23",
+        "effect": "^3.17.13",
+        "firebase-functions": "^6.3.2",
+        "hono": "^4.7.0",
+      },
+      "devDependencies": {
+        "@biomejs/biome": "^1.9.4",
+        "@types/bun": "^1.3.1",
+        "typescript": "^5.9.3",
+      },
+    },
     "apps/web": {
       "name": "web",
       "version": "0.1.0",
@@ -1198,6 +1214,8 @@
     "cf-api": ["cf-api@workspace:apps/cf-api"],
 
     "cf-commerce": ["cf-commerce@workspace:apps/cf-commerce"],
+
+    "cf-payment": ["cf-payment@workspace:apps/cf-payment"],
 
     "chai": ["chai@5.3.3", "", { "dependencies": { "assertion-error": "^2.0.1", "check-error": "^2.1.1", "deep-eql": "^5.0.1", "loupe": "^3.1.0", "pathval": "^2.0.0" } }, "sha512-4zNhdJD/iOjSH0A05ea+Ke6MU5mmpQcbQsSOkgdaUMJ9zTlDTD/GYlwohmIE2u0gaxHYiVHEn1Fw9mZ/ktJWgw=="],
 

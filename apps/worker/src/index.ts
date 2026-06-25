@@ -3,14 +3,17 @@ import { type Result, isOk, tryCatchAsync } from "@fabric/types";
 export interface Env {
   CF_API_URL: string;
   CF_COMMERCE_URL: string;
+  CF_PAYMENT_URL: string;
   FIREBASE_HOSTING_URL: string;
 }
 
 const API_PATTERN = new URLPattern({ pathname: "/(api|auth|token)/*" });
 
 const COMMERCE_PATTERN = new URLPattern({
-  pathname: "/(checkout|pricing|inventory|voucher|events|sse|payment)/*",
+  pathname: "/(checkout|pricing|inventory|voucher|events|sse)/*",
 });
+
+const PAYMENT_PATTERN = new URLPattern({ pathname: "/payment/*" });
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
@@ -20,6 +23,8 @@ export default {
 
     if (API_PATTERN.test({ pathname })) {
       targetBase = env.CF_API_URL;
+    } else if (PAYMENT_PATTERN.test({ pathname })) {
+      targetBase = env.CF_PAYMENT_URL;
     } else if (COMMERCE_PATTERN.test({ pathname })) {
       targetBase = env.CF_COMMERCE_URL;
     } else {

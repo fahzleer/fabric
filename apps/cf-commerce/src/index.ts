@@ -18,11 +18,6 @@ import {
   setupGracefulShutdown,
 } from "./infrastructure/shutdown/graceful-shutdown";
 import { logError, requestLogger } from "./monitoring/logger";
-import { registerPaymentRoutes } from "./payment/Http/payment.handlers.ts";
-import { MockPaymentGateway } from "./payment/adapters/mock-payment-gateway.adapter.ts";
-import { MockPromptPayAdapter } from "./payment/adapters/mock-promptpay.adapter.ts";
-import { OmisePaymentGateway } from "./payment/adapters/omise-payment-gateway.adapter.ts";
-import { PromptPayAdapter } from "./payment/adapters/promptpay.adapter.ts";
 import { registerPricingRoutes } from "./pricing/Http/Router.ts";
 
 /**
@@ -71,16 +66,6 @@ async function startBoot() {
   const aggregator = createProductAgg(ctx);
   const router = createRouter({ aggregator, hub });
 
-  const gateway =
-    config.paymentGateway === "omise"
-      ? new OmisePaymentGateway(config.omiseSecretKey)
-      : new MockPaymentGateway();
-
-  const promptPay: PromptPayAdapter =
-    config.paymentGateway === "omise"
-      ? new PromptPayAdapter(config.omiseSecretKey)
-      : (new MockPromptPayAdapter() as unknown as PromptPayAdapter);
-
   registerCleanup("firebase", () => deleteApp(firebase.app));
   registerCleanup("sse-hub", () => hub.closeAll());
   setupGracefulShutdown();
@@ -90,7 +75,6 @@ async function startBoot() {
   app.use("*", requestLogger());
   registerPricingRoutes(app);
   registerEventsRoutes(app, { router, aggregator, hub });
-  registerPaymentRoutes(app, gateway, promptPay);
   app.onError((err, c) => {
     const status = "status" in err ? (err as { status: number }).status : 500;
     if (status >= 500) {
