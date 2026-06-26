@@ -5,6 +5,9 @@ const meta: Meta<typeof Input> = {
   title: "UI/Input",
   component: Input,
   tags: ["autodocs"],
+  // Isolated inputs have no surrounding <label>; give them an accessible name
+  // so axe (WCAG "label") passes. Individual stories inherit this.
+  args: { "aria-label": "Text input" },
 };
 export default meta;
 type Story = StoryObj<typeof meta>;

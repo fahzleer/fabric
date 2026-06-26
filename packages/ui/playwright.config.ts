@@ -30,18 +30,14 @@ export default defineConfig({
     navigationTimeout: 15_000,
   },
 
+  // Chromium-only: visual baselines are platform/engine-specific and are
+  // generated on CI (Linux). Cross-engine visual diffs are mostly font-rendering
+  // noise and triple the baseline-maintenance burden, so we standardise on one
+  // engine — matching what the CI workflow installs.
   projects: [
     {
       name: "chromium",
       use: { ...devices["Desktop Chrome"] },
-    },
-    {
-      name: "firefox",
-      use: { ...devices["Desktop Firefox"] },
-    },
-    {
-      name: "webkit",
-      use: { ...devices["Desktop Safari"] },
     },
   ],
 
