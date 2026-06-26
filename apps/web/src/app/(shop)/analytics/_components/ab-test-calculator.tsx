@@ -1,4 +1,5 @@
 "use client";
+import { Button } from "@fabric/ui";
 
 import { useState } from "react";
 import { type ABTestResult, runABTest } from "../_lib/ml-client";
@@ -192,14 +193,9 @@ export function ABTestCalculator() {
           </select>
         </div>
 
-        <button
-          type="button"
-          onClick={handleRun}
-          disabled={loading}
-          className="mt-4 rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60 transition-colors"
-        >
+        <Button type="button" onClick={handleRun} disabled={loading} className="mt-4">
           {loading ? "Calculating…" : "Run Statistical Test"}
-        </button>
+        </Button>
 
         {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
       </div>

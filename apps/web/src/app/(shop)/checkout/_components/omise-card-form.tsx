@@ -13,6 +13,7 @@ import { formatPrice } from "@/lib/price";
 import { syncCartToServer } from "@/lib/sync-cart";
 import { Atom, useAtom, useAtomSet, useAtomValue } from "@effect-atom/atom-react";
 import { Err, type Maybe, None, Ok, type Result, Some, isErr, isNone, isSome } from "@fabric/types";
+import { Button } from "@fabric/ui";
 import { Option } from "effect";
 import { useRouter } from "next/navigation";
 import Script from "next/script";
@@ -239,7 +240,7 @@ function MockModeCard({
     <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-5">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold text-gray-900">Pay by Card</h2>
-        <span className="rounded-full bg-yellow-100 px-2.5 py-0.5 text-xs font-medium text-yellow-800">
+        <span className="rounded-full bg-warning-subtle px-2.5 py-0.5 text-xs font-medium text-warning">
           Test mode
         </span>
       </div>
@@ -248,7 +249,7 @@ function MockModeCard({
         successful payment.
       </p>
       {status === "error" && isSome(error) && (
-        <div className="rounded-lg bg-red-50 border border-red-200 p-3 text-sm text-red-700">
+        <div className="rounded-lg bg-destructive-subtle border border-destructive p-3 text-sm text-destructive">
           {error.value}
         </div>
       )}
@@ -259,24 +260,27 @@ function MockModeCard({
         </div>
       </div>
       <div className="flex gap-3">
-        <button
+        <Button
           type="button"
+          variant="outline"
+          size="lg"
           onClick={onBack}
           disabled={status === "submitting"}
-          className="flex-1 rounded-lg border border-gray-300 px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+          className="flex-1"
         >
           ← Back
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
+          size="lg"
           onClick={onPay}
           disabled={status === "submitting"}
-          className="flex-1 rounded-lg bg-blue-600 px-4 py-3 text-white font-medium hover:bg-blue-700 disabled:opacity-50"
+          className="flex-1"
         >
           {status === "submitting"
             ? "Placing order…"
             : `Pay ${formatPrice({ amount: totalAmount, currency })}`}
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -426,7 +430,7 @@ export function OmiseCardForm({ cart, onBack }: OmiseCardFormProps) {
           <h2 className="text-lg font-semibold text-gray-900">Pay by Card</h2>
           <div className="flex items-center gap-1.5 text-xs text-gray-500">
             <svg
-              className="h-3.5 w-3.5 text-green-600"
+              className="h-3.5 w-3.5 text-success"
               fill="currentColor"
               viewBox="0 0 20 20"
               aria-hidden="true"
@@ -454,7 +458,7 @@ export function OmiseCardForm({ cart, onBack }: OmiseCardFormProps) {
               value={cardName}
               onChange={(e) => setCardName(e.target.value)}
               disabled={isLoading}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-50 disabled:text-gray-400"
+              className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-info disabled:bg-gray-50 disabled:text-gray-400"
             />
           </div>
 
@@ -476,7 +480,7 @@ export function OmiseCardForm({ cart, onBack }: OmiseCardFormProps) {
                 setCardNumber(formatted);
               }}
               disabled={isLoading}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-50 disabled:text-gray-400"
+              className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-info disabled:bg-gray-50 disabled:text-gray-400"
             />
           </div>
 
@@ -495,7 +499,7 @@ export function OmiseCardForm({ cart, onBack }: OmiseCardFormProps) {
                 value={expMonth}
                 onChange={(e) => setExpMonth(e.target.value.replace(/\D/g, ""))}
                 disabled={isLoading}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-center font-mono focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-50 disabled:text-gray-400"
+                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-center font-mono focus:outline-none focus:ring-2 focus:ring-info disabled:bg-gray-50 disabled:text-gray-400"
               />
             </div>
             <div>
@@ -512,7 +516,7 @@ export function OmiseCardForm({ cart, onBack }: OmiseCardFormProps) {
                 value={expYear}
                 onChange={(e) => setExpYear(e.target.value.replace(/\D/g, ""))}
                 disabled={isLoading}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-center font-mono focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-50 disabled:text-gray-400"
+                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-center font-mono focus:outline-none focus:ring-2 focus:ring-info disabled:bg-gray-50 disabled:text-gray-400"
               />
             </div>
             <div>
@@ -529,20 +533,20 @@ export function OmiseCardForm({ cart, onBack }: OmiseCardFormProps) {
                 value={cvv}
                 onChange={(e) => setCvv(e.target.value.replace(/\D/g, ""))}
                 disabled={isLoading}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-center font-mono focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-50 disabled:text-gray-400"
+                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-center font-mono focus:outline-none focus:ring-2 focus:ring-info disabled:bg-gray-50 disabled:text-gray-400"
               />
             </div>
           </div>
         </div>
 
         {status === "error" && isSome(error) && (
-          <div className="rounded-lg bg-red-50 border border-red-200 p-3 text-sm text-red-700">
+          <div className="rounded-lg bg-destructive-subtle border border-destructive p-3 text-sm text-destructive">
             {error.value}
           </div>
         )}
 
         {isLoading && (
-          <div className="rounded-lg bg-blue-50 border border-blue-200 p-3 text-sm text-blue-700 flex items-center gap-2">
+          <div className="rounded-lg bg-info-subtle border border-info p-3 text-sm text-info flex items-center gap-2">
             <svg
               className="h-4 w-4 animate-spin"
               fill="none"
@@ -575,22 +579,25 @@ export function OmiseCardForm({ cart, onBack }: OmiseCardFormProps) {
         </div>
 
         <div className="flex gap-3">
-          <button
+          <Button
             type="button"
+            variant="outline"
+            size="lg"
             onClick={onBack}
             disabled={isLoading}
-            className="flex-1 rounded-lg border border-gray-300 px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+            className="flex-1"
           >
             ← Back
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
+            size="lg"
             onClick={handlePay}
             disabled={isLoading || !omiseReady}
-            className="flex-1 rounded-lg bg-blue-600 px-4 py-3 text-white font-medium hover:bg-blue-700 disabled:opacity-50"
+            className="flex-1"
           >
             {isLoading ? "Processing…" : `Pay ${formatPrice({ amount: totalAmount, currency })}`}
-          </button>
+          </Button>
         </div>
 
         {!(omiseReady || error) && (

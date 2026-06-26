@@ -1,5 +1,6 @@
 "use client";
 import { Atom, useAtom } from "@effect-atom/atom-react";
+import { Button, Input } from "@fabric/ui";
 import { regex } from "arkregex";
 import { useQueryState } from "nuqs";
 import type React from "react";
@@ -107,7 +108,7 @@ function PasswordField({
   const [show, setShow] = useAtom(showAtom);
   return (
     <div className="relative mt-1">
-      <input
+      <Input
         id={id}
         name={name}
         type={show ? "text" : "password"}
@@ -117,14 +118,14 @@ function PasswordField({
         placeholder={placeholder}
         value={value}
         onChange={onChange}
-        className="block w-full rounded-lg border border-gray-300 py-2 pl-3 pr-10 text-sm text-gray-900 placeholder-gray-400 shadow-sm focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+        className="pr-10"
       />
       <button
         type="button"
         tabIndex={-1}
         onClick={() => setShow((v) => !v)}
         aria-label={show ? "Hide password" : "Show password"}
-        className="absolute inset-y-0 right-0 flex w-10 cursor-pointer items-center justify-center border-none bg-transparent text-gray-400 hover:text-gray-600"
+        className="absolute inset-y-0 right-0 flex w-10 cursor-pointer items-center justify-center border-none bg-transparent text-muted-foreground hover:text-foreground"
       >
         {show ? <EyeOn /> : <EyeOff />}
       </button>
@@ -140,10 +141,10 @@ function ValidationChecklist({ validation }: { validation: PasswordValidation })
         return (
           <li
             key={key}
-            className={`flex items-center gap-2 text-xs ${valid ? "text-green-600" : "text-gray-400"}`}
+            className={`flex items-center gap-2 text-xs ${valid ? "text-success" : "text-muted-foreground"}`}
           >
             <span
-              className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${valid ? "bg-green-100 text-green-600" : "bg-gray-100 text-gray-400"}`}
+              className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${valid ? "bg-success-subtle text-success" : "bg-muted text-muted-foreground"}`}
             >
               {valid ? "✓" : "·"}
             </span>
@@ -172,17 +173,17 @@ export function StoreRegisterForm() {
 
   return (
     <form action={registerStoreAction} className="space-y-5">
-      <h2 className="text-xl font-semibold text-gray-900">Open your store</h2>
+      <h2 className="text-xl font-semibold text-foreground">Open your store</h2>
       {errorMsg && errorMsg !== "" && (
-        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3">
-          <p className="text-sm text-red-700">{errorMsg}</p>
+        <div className="rounded-lg border border-destructive/30 bg-destructive-subtle px-4 py-3">
+          <p className="text-sm text-destructive">{errorMsg}</p>
         </div>
       )}
       <div>
-        <label htmlFor="storeName" className="block text-sm font-medium text-gray-700">
+        <label htmlFor="storeName" className="block text-sm font-medium text-foreground">
           Store name
         </label>
-        <input
+        <Input
           id="storeName"
           name="storeName"
           type="text"
@@ -190,39 +191,39 @@ export function StoreRegisterForm() {
           minLength={2}
           maxLength={80}
           placeholder="My Awesome Store"
-          className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 shadow-sm focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+          className="mt-1"
         />
       </div>
       <div>
-        <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+        <label htmlFor="name" className="block text-sm font-medium text-foreground">
           Your name
         </label>
-        <input
+        <Input
           id="name"
           name="name"
           type="text"
           autoComplete="name"
           required
           placeholder="Your name"
-          className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 shadow-sm focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+          className="mt-1"
         />
       </div>
       <div>
-        <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+        <label htmlFor="email" className="block text-sm font-medium text-foreground">
           Business email
         </label>
-        <input
+        <Input
           id="email"
           name="email"
           type="email"
           autoComplete="email"
           required
           placeholder="you@example.com"
-          className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 shadow-sm focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+          className="mt-1"
         />
       </div>
       <div>
-        <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+        <label htmlFor="password" className="block text-sm font-medium text-foreground">
           Password
         </label>
         <PasswordField
@@ -237,7 +238,7 @@ export function StoreRegisterForm() {
         {password.length > 0 && <ValidationChecklist validation={validation} />}
       </div>
       <div>
-        <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
+        <label htmlFor="confirmPassword" className="block text-sm font-medium text-foreground">
           Confirm password
         </label>
         <PasswordField
@@ -247,13 +248,9 @@ export function StoreRegisterForm() {
           showAtom={showStoreConfirmPasswordAtom}
         />
       </div>
-      <button
-        type="submit"
-        disabled={!allValid}
-        className="w-full rounded-lg bg-emerald-700 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-700 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40"
-      >
+      <Button type="submit" variant="success" disabled={!allValid} className="w-full">
         Create store account
-      </button>
+      </Button>
       <p className="text-center text-xs text-gray-500">
         Start free — upgrade your plan anytime from the merchant dashboard.
       </p>

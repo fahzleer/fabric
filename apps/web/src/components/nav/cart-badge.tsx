@@ -37,7 +37,7 @@ export function CartBadge() {
         />
       </svg>
       {count > 0 && (
-        <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">
+        <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-info text-xs font-bold text-white">
           {count > 99 ? "99+" : String(count)}
         </span>
       )}

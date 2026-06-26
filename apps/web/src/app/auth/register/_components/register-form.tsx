@@ -1,5 +1,6 @@
 "use client";
 import { Atom, useAtom } from "@effect-atom/atom-react";
+import { Button, Input } from "@fabric/ui";
 import { regex } from "arkregex";
 import { useQueryState } from "nuqs";
 import type React from "react";
@@ -109,7 +110,7 @@ function PasswordField({
   const [show, setShow] = useAtom(showAtom);
   return (
     <div className="relative mt-1">
-      <input
+      <Input
         id={id}
         name={name}
         type={show ? "text" : "password"}
@@ -119,14 +120,14 @@ function PasswordField({
         placeholder={placeholder}
         value={value}
         onChange={onChange}
-        className="block w-full rounded-lg border border-gray-300 py-2 pl-3 pr-10 text-sm text-gray-900 placeholder-gray-400 shadow-sm focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+        className="pr-10"
       />
       <button
         type="button"
         tabIndex={-1}
         onClick={() => setShow((v) => !v)}
         aria-label={show ? "Hide password" : "Show password"}
-        className="absolute inset-y-0 right-0 flex w-10 cursor-pointer items-center justify-center border-none bg-transparent text-gray-400 hover:text-gray-600"
+        className="absolute inset-y-0 right-0 flex w-10 cursor-pointer items-center justify-center border-none bg-transparent text-muted-foreground hover:text-foreground"
       >
         {show ? <IconEyeOn /> : <IconEyeOff />}
       </button>
@@ -142,10 +143,10 @@ function ValidationChecklist({ validation }: { validation: PasswordValidation })
         return (
           <li
             key={key}
-            className={`flex items-center gap-2 text-xs ${valid ? "text-green-600" : "text-gray-400"}`}
+            className={`flex items-center gap-2 text-xs ${valid ? "text-success" : "text-muted-foreground"}`}
           >
             <span
-              className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${valid ? "bg-green-100 text-green-600" : "bg-gray-100 text-gray-400"}`}
+              className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${valid ? "bg-success-subtle text-success" : "bg-muted text-muted-foreground"}`}
             >
               {valid ? "✓" : "·"}
             </span>
@@ -174,42 +175,42 @@ export function RegisterForm() {
 
   return (
     <form action={registerAction} className="space-y-5">
-      <h2 className="text-xl font-semibold text-gray-900">Create your account</h2>
+      <h2 className="text-xl font-semibold text-foreground">Create your account</h2>
       {errorMsg !== null && errorMsg !== "" && (
-        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3">
-          <p className="text-sm text-red-700">{errorMsg}</p>
+        <div className="rounded-lg border border-destructive/30 bg-destructive-subtle px-4 py-3">
+          <p className="text-sm text-destructive">{errorMsg}</p>
         </div>
       )}
       <div>
-        <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+        <label htmlFor="name" className="block text-sm font-medium text-foreground">
           Display name
         </label>
-        <input
+        <Input
           id="name"
           name="name"
           type="text"
           autoComplete="name"
           required
           placeholder="Your name"
-          className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 shadow-sm focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+          className="mt-1"
         />
       </div>
       <div>
-        <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+        <label htmlFor="email" className="block text-sm font-medium text-foreground">
           Email address
         </label>
-        <input
+        <Input
           id="email"
           name="email"
           type="email"
           autoComplete="email"
           required
           placeholder="you@example.com"
-          className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 shadow-sm focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+          className="mt-1"
         />
       </div>
       <div>
-        <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+        <label htmlFor="password" className="block text-sm font-medium text-foreground">
           Password
         </label>
         <PasswordField
@@ -224,7 +225,7 @@ export function RegisterForm() {
         {password.length > 0 && <ValidationChecklist validation={validation} />}
       </div>
       <div>
-        <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
+        <label htmlFor="confirmPassword" className="block text-sm font-medium text-foreground">
           Confirm password
         </label>
         <PasswordField
@@ -234,14 +235,10 @@ export function RegisterForm() {
           showAtom={showConfirmPasswordAtom}
         />
       </div>
-      <button
-        type="submit"
-        disabled={!allValid}
-        className="w-full rounded-lg bg-gray-900 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40"
-      >
+      <Button type="submit" disabled={!allValid} className="w-full">
         Create account
-      </button>
-      <p className="text-center text-xs text-gray-500">
+      </Button>
+      <p className="text-center text-xs text-muted-foreground">
         By creating an account, you agree to our <span className="underline">Terms of Service</span>{" "}
         and <span className="underline">Privacy Policy</span>.
       </p>

@@ -2,6 +2,7 @@
 
 import { Atom, useAtom } from "@effect-atom/atom-react";
 import { type Maybe, None, Some, isSome } from "@fabric/types";
+import { Button } from "@fabric/ui";
 import { useTransition } from "react";
 import { approvePayoutAction, rejectPayoutAction } from "./actions";
 
@@ -60,7 +61,7 @@ export function PayoutActionButtons({ requestId, ownerUserId }: Props) {
   if (isSome(feedback)) {
     return (
       <span
-        className={`text-xs font-medium ${feedback.value.type === "ok" ? "text-emerald-400" : "text-red-400"}`}
+        className={`text-xs font-medium ${feedback.value.type === "ok" ? "text-success" : "text-destructive"}`}
       >
         {feedback.value.msg}
       </span>
@@ -75,21 +76,23 @@ export function PayoutActionButtons({ requestId, ownerUserId }: Props) {
           value={reason}
           onChange={(e) => setReason(e.target.value)}
           placeholder="Rejection reason…"
-          className="rounded border border-white/10 bg-gray-800 px-2 py-1 text-xs text-white placeholder-gray-500 focus:border-red-400 focus:outline-none"
+          className="rounded border border-border bg-muted px-2 py-1 text-xs text-foreground placeholder-muted-foreground focus:border-destructive/80 focus:outline-none"
         />
         <div className="flex gap-1">
-          <button
+          <Button
             type="button"
+            variant="destructive"
+            size="sm"
             onClick={handleReject}
             disabled={isPending || !reason.trim()}
-            className="flex-1 rounded bg-red-600 px-2 py-1 text-xs font-medium text-white hover:bg-red-500 disabled:opacity-50 transition-colors"
+            className="h-7 flex-1 rounded px-2 text-xs"
           >
             {isPending ? "…" : "Confirm reject"}
-          </button>
+          </Button>
           <button
             type="button"
             onClick={closeRejectForm}
-            className="rounded border border-white/10 px-2 py-1 text-xs text-gray-400 hover:text-white transition-colors"
+            className="rounded border border-border px-2 py-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
           >
             Cancel
           </button>
@@ -100,19 +103,21 @@ export function PayoutActionButtons({ requestId, ownerUserId }: Props) {
 
   return (
     <div className="flex gap-2">
-      <button
+      <Button
         type="button"
+        variant="success"
+        size="sm"
         onClick={handleApprove}
         disabled={isPending}
-        className="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-emerald-500 disabled:opacity-50 transition-colors"
+        className="h-7 px-3 text-xs"
       >
         {isPending ? "…" : "Approve"}
-      </button>
+      </Button>
       <button
         type="button"
         onClick={openRejectForm}
         disabled={isPending}
-        className="rounded-lg border border-red-500/40 px-3 py-1.5 text-xs font-medium text-red-400 hover:bg-red-500/10 disabled:opacity-50 transition-colors"
+        className="rounded-lg border border-destructive/40 px-3 py-1.5 text-xs font-medium text-destructive hover:bg-destructive/10 disabled:opacity-50 transition-colors"
       >
         Reject
       </button>

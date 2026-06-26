@@ -31,7 +31,7 @@ export default function CartPage() {
           <p className="mt-4 text-gray-600">Add some products to get started.</p>
           <Link
             href="/products"
-            className="mt-6 inline-block rounded-lg bg-blue-600 px-6 py-3 text-white font-medium hover:bg-blue-700"
+            className="mt-6 inline-block rounded-lg bg-info px-6 py-3 text-white font-medium hover:bg-info/90"
           >
             Browse Products
           </Link>

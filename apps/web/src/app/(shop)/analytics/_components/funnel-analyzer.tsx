@@ -1,4 +1,5 @@
 "use client";
+import { Button } from "@fabric/ui";
 
 import { useMemo, useState } from "react";
 import { DEMO_FUNNEL } from "../_lib/demo-data";
@@ -52,29 +53,17 @@ export function FunnelAnalyzer() {
       <div className="flex justify-end">
         {editMode ? (
           <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={() => setEditMode(false)}
-              className="rounded-lg border border-gray-300 px-4 py-1.5 text-sm text-gray-600 hover:bg-gray-50"
-            >
+            <Button type="button" variant="outline" size="sm" onClick={() => setEditMode(false)}>
               Cancel
-            </button>
-            <button
-              type="button"
-              onClick={applyEdit}
-              className="rounded-lg bg-blue-600 px-4 py-1.5 text-sm text-white hover:bg-blue-700"
-            >
+            </Button>
+            <Button type="button" size="sm" onClick={applyEdit}>
               Apply
-            </button>
+            </Button>
           </div>
         ) : (
-          <button
-            type="button"
-            onClick={() => setEditMode(true)}
-            className="rounded-lg border border-gray-300 px-4 py-1.5 text-sm text-gray-600 hover:bg-gray-50"
-          >
+          <Button type="button" variant="outline" size="sm" onClick={() => setEditMode(true)}>
             Edit Stages
-          </button>
+          </Button>
         )}
       </div>
 

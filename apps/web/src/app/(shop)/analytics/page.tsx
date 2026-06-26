@@ -70,13 +70,13 @@ export default async function AnalyticsPage({
               </p>
             </div>
             <div className="hidden sm:flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2">
-              <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+              <span className="h-2 w-2 rounded-full bg-success animate-pulse" />
               <span className="text-xs text-gray-500">Live</span>
             </div>
           </div>
 
           {/* Description of active tab */}
-          <p className="mt-3 text-sm text-blue-700 bg-blue-50 border border-blue-100 rounded-lg px-4 py-2">
+          <p className="mt-3 text-sm text-info bg-info-subtle border border-info rounded-lg px-4 py-2">
             {TAB_DESCRIPTIONS[activeTab]}
           </p>
 
@@ -93,7 +93,7 @@ export default async function AnalyticsPage({
                     href={`/analytics?tab=${id}`}
                     className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
                       activeTab === id
-                        ? "bg-blue-600 text-white shadow-sm"
+                        ? "bg-info text-white shadow-sm"
                         : "text-gray-500 hover:bg-gray-100 hover:text-gray-700"
                     }`}
                   >

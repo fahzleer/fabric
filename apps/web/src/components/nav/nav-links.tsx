@@ -65,8 +65,8 @@ export function NavLinks({ isLoggedIn, isAdmin }: NavLinksProps) {
       {isAdmin && (
         <NavLink
           href="/admin"
-          className="text-amber-600 hover:text-amber-700"
-          activeClassName="text-amber-700 font-bold"
+          className="text-warning hover:text-warning/80"
+          activeClassName="text-warning font-bold"
         >
           Admin Panel
         </NavLink>
@@ -74,8 +74,8 @@ export function NavLinks({ isLoggedIn, isAdmin }: NavLinksProps) {
       {isAdmin && (
         <NavLink
           href="/analytics"
-          className="text-purple-600 hover:text-purple-700"
-          activeClassName="text-purple-700 font-bold"
+          className="text-info hover:text-info/80"
+          activeClassName="text-info font-bold"
         >
           Analytics
         </NavLink>

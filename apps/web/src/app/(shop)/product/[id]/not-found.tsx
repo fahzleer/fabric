@@ -1,15 +1,16 @@
 "use client";
 
+import { Button } from "@fabric/ui";
 import Link from "next/link";
 
 export default function ProductNotFound() {
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-muted flex items-center justify-center px-4">
       <div className="max-w-md w-full">
         {/* Back link */}
         <Link
           href="/products"
-          className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 mb-8 transition-colors"
+          className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-8 transition-colors"
         >
           <svg
             className="w-4 h-4 mr-1"
@@ -30,9 +31,9 @@ export default function ProductNotFound() {
 
         <div className="text-center">
           {/* Icon */}
-          <div className="mx-auto mb-6 w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center">
+          <div className="mx-auto mb-6 w-20 h-20 bg-secondary rounded-full flex items-center justify-center">
             <svg
-              className="w-10 h-10 text-gray-400"
+              className="w-10 h-10 text-muted-foreground"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -48,29 +49,28 @@ export default function ProductNotFound() {
           </div>
 
           {/* Title */}
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Product Not Found</h1>
+          <h1 className="text-2xl font-bold text-foreground mb-2">Product Not Found</h1>
 
           {/* Description */}
-          <p className="text-gray-600 mb-6">
+          <p className="text-muted-foreground mb-6">
             The product you&apos;re looking for doesn&apos;t exist or has been removed.
           </p>
 
           {/* Actions */}
           <div className="space-y-2">
-            <Link
-              href="/products"
-              className="block w-full rounded-lg bg-gray-900 px-6 py-2.5 text-white font-medium hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-colors"
-            >
-              Browse All Products
-            </Link>
+            <Button asChild size="lg" className="w-full">
+              <Link href="/products">Browse All Products</Link>
+            </Button>
 
-            <button
+            <Button
               type="button"
+              variant="outline"
+              size="lg"
               onClick={() => window.location.reload()}
-              className="block w-full rounded-lg border border-gray-300 px-6 py-2.5 text-gray-700 font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-colors"
+              className="w-full"
             >
               Try Again
-            </button>
+            </Button>
           </div>
         </div>
       </div>

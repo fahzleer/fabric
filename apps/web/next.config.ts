@@ -6,6 +6,8 @@ const require = createRequire(import.meta.url);
 
 const nextConfig: NextConfig = {
   outputFileTracingRoot: path.join(__dirname, "../../"),
+  // @fabric/ui ships raw TSX (main: ./src/index.ts) — Next must transpile it.
+  transpilePackages: ["@fabric/ui"],
   images: {
     dangerouslyAllowSVG: true,
     remotePatterns: [

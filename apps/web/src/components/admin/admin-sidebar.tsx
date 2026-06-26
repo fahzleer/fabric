@@ -18,7 +18,7 @@ export function AdminSidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="w-52 shrink-0 border-r border-white/10 bg-gray-900/50">
+    <aside className="w-52 shrink-0 border-r border-border bg-card/50">
       <nav className="flex flex-col gap-1 px-3 py-4">
         {navItems.map((item) => {
           const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
@@ -28,8 +28,8 @@ export function AdminSidebar() {
               href={item.href}
               className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
                 isActive
-                  ? "bg-amber-500/20 text-amber-300"
-                  : "text-gray-400 hover:bg-white/5 hover:text-white"
+                  ? "bg-warning/20 text-warning"
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
               }`}
             >
               {item.label}

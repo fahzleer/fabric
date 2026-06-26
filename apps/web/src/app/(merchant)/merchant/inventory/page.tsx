@@ -6,9 +6,9 @@ import { connection } from "next/server";
 export const metadata: Metadata = { title: "Inventory — Merchant Portal" };
 
 const STATUS_STYLES: Record<string, string> = {
-  active: "bg-emerald-500/20 text-emerald-300",
-  draft: "bg-gray-500/20 text-gray-400",
-  archived: "bg-red-500/20 text-red-300",
+  active: "bg-success/20 text-success",
+  draft: "bg-muted text-muted-foreground",
+  archived: "bg-destructive/20 text-destructive",
 };
 
 type MerchantProduct = {
@@ -23,9 +23,9 @@ type MerchantProduct = {
 };
 
 function stockBadgeClass(qty: number): string {
-  if (qty === 0) return "bg-red-500/20 text-red-400";
-  if (qty <= 5) return "bg-amber-500/20 text-amber-400";
-  return "bg-white/10 text-gray-300";
+  if (qty === 0) return "bg-destructive/20 text-destructive";
+  if (qty <= 5) return "bg-warning/20 text-warning";
+  return "bg-muted text-foreground";
 }
 
 function MerchantProductRow({ p }: { p: MerchantProduct }) {
@@ -33,25 +33,25 @@ function MerchantProductRow({ p }: { p: MerchantProduct }) {
   const isOut = p.totalStock === 0 && p.status === "active";
   return (
     <tr
-      className={`transition-colors ${isOut ? "bg-red-950/20" : isLow ? "bg-amber-950/20" : "hover:bg-white/2"}`}
+      className={`transition-colors ${isOut ? "bg-destructive/20" : isLow ? "bg-warning/20" : "hover:bg-muted/2"}`}
     >
       <td className="px-4 py-3">
-        <p className="font-medium text-white">{p.name}</p>
-        <p className="text-xs text-gray-500 capitalize">{p.category}</p>
+        <p className="font-medium text-foreground">{p.name}</p>
+        <p className="text-xs text-muted-foreground capitalize">{p.category}</p>
       </td>
       <td className="px-4 py-3">
         <span
-          className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${STATUS_STYLES[p.status] ?? "bg-gray-500/20 text-gray-400"}`}
+          className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${STATUS_STYLES[p.status] ?? "bg-muted text-muted-foreground"}`}
         >
           {p.status}
         </span>
       </td>
-      <td className="px-4 py-3 text-gray-300 whitespace-nowrap">
+      <td className="px-4 py-3 text-foreground whitespace-nowrap">
         {formatThb(p.priceCents, p.currency)}
       </td>
       <td className="px-4 py-3">
         {Object.keys(p.stock).length === 0 ? (
-          <span className="text-gray-600 text-xs">—</span>
+          <span className="text-muted-foreground text-xs">—</span>
         ) : (
           <div className="flex flex-wrap gap-1">
             {Object.entries(p.stock).map(([size, qty]) => (
@@ -67,7 +67,7 @@ function MerchantProductRow({ p }: { p: MerchantProduct }) {
       </td>
       <td className="px-4 py-3 text-center">
         <span
-          className={`text-sm font-bold ${isOut ? "text-red-400" : isLow ? "text-amber-400" : "text-white"}`}
+          className={`text-sm font-bold ${isOut ? "text-destructive" : isLow ? "text-warning" : "text-foreground"}`}
         >
           {p.totalStock}
         </span>
@@ -89,15 +89,15 @@ export default async function MerchantInventoryPage() {
 
   const maybeApi = await createMerchantApi();
   if (!isSome(maybeApi)) {
-    return <p className="text-gray-400">Unable to load data. Please refresh.</p>;
+    return <p className="text-muted-foreground">Unable to load data. Please refresh.</p>;
   }
 
   const result = await maybeApi.value.getMerchantInventory();
   if (isErr(result)) {
     return (
       <div className="space-y-4">
-        <h1 className="text-2xl font-bold text-white">Inventory</h1>
-        <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-red-300 text-sm">
+        <h1 className="text-2xl font-bold text-foreground">Inventory</h1>
+        <div className="rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-destructive text-sm">
           {result.error}
         </div>
       </div>
@@ -113,8 +113,8 @@ export default async function MerchantInventoryPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-white">Inventory</h1>
-        <p className="mt-1 text-sm text-gray-400">Live stock levels for your products</p>
+        <h1 className="text-2xl font-bold text-foreground">Inventory</h1>
+        <p className="mt-1 text-sm text-muted-foreground">Live stock levels for your products</p>
       </div>
 
       {/* Summary cards */}
@@ -124,22 +124,20 @@ export default async function MerchantInventoryPage() {
             label: "Products",
             value: products.length.toString(),
             note: `${activeCount} active`,
-            accent: "border-violet-500/30 bg-violet-500/5",
+            accent: "border-info/30 bg-info/5",
           },
           {
             label: "Total Stock",
             value: `${totalStock}`,
             note: "units across all products",
-            accent: "border-emerald-500/30 bg-emerald-500/5",
+            accent: "border-success/30 bg-success/5",
           },
           {
             label: "Low Stock",
             value: lowStock.length.toString(),
             note: "≤ 5 units",
             accent:
-              lowStock.length > 0
-                ? "border-amber-500/30 bg-amber-500/10"
-                : "border-white/10 bg-gray-800/50",
+              lowStock.length > 0 ? "border-warning/30 bg-warning/10" : "border-border bg-muted/50",
             danger: lowStock.length > 0,
           },
           {
@@ -148,58 +146,60 @@ export default async function MerchantInventoryPage() {
             note: "active + 0 units",
             accent:
               outOfStock.length > 0
-                ? "border-red-500/30 bg-red-500/10"
-                : "border-white/10 bg-gray-800/50",
+                ? "border-destructive/30 bg-destructive/10"
+                : "border-border bg-muted/50",
             danger: outOfStock.length > 0,
           },
         ].map((card) => (
           <div key={card.label} className={`rounded-xl border px-5 py-4 ${card.accent}`}>
-            <p className="text-xs font-medium uppercase tracking-wider text-gray-400">
+            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
               {card.label}
             </p>
             <p
-              className={`mt-1.5 text-2xl font-bold ${card.danger ? "text-red-400" : "text-white"}`}
+              className={`mt-1.5 text-2xl font-bold ${card.danger ? "text-destructive" : "text-foreground"}`}
             >
               {card.value}
             </p>
-            <p className="mt-0.5 text-xs text-gray-500">{card.note}</p>
+            <p className="mt-0.5 text-xs text-muted-foreground">{card.note}</p>
           </div>
         ))}
       </div>
 
       {products.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-white/10 py-14 text-center">
+        <div className="rounded-xl border border-dashed border-border py-14 text-center">
           <p className="text-3xl mb-3">📦</p>
-          <p className="text-sm font-medium text-gray-300">No products yet</p>
-          <p className="mt-1 text-xs text-gray-500">Add products to see your inventory here</p>
+          <p className="text-sm font-medium text-foreground">No products yet</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Add products to see your inventory here
+          </p>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-xl border border-white/10">
+        <div className="overflow-hidden rounded-xl border border-border">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-white/10 bg-gray-800/60">
+              <tr className="border-b border-border bg-muted/60">
                 {["Product", "Status", "Price", "Stock by Size", "Total"].map((h) => (
                   <th
                     key={h}
-                    className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-400"
+                    className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground"
                   >
                     {h}
                   </th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5 bg-gray-900/30">
+            <tbody className="divide-y divide-border bg-card/30">
               {products.map((p) => (
                 <MerchantProductRow key={p.id} p={p} />
               ))}
             </tbody>
           </table>
-          <div className="border-t border-white/10 bg-gray-800/40 px-4 py-3 flex items-center justify-between">
-            <span className="text-xs text-gray-500">
+          <div className="border-t border-border bg-muted/40 px-4 py-3 flex items-center justify-between">
+            <span className="text-xs text-muted-foreground">
               {products.length} product{products.length !== 1 ? "s" : ""}
             </span>
-            <span className="text-xs text-gray-400">
-              Total: <span className="font-semibold text-white">{totalStock} units</span>
+            <span className="text-xs text-muted-foreground">
+              Total: <span className="font-semibold text-foreground">{totalStock} units</span>
             </span>
           </div>
         </div>

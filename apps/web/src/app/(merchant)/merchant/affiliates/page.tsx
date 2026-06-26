@@ -15,11 +15,11 @@ const PIPELINE_LABELS: Record<PipelineStatus, string> = {
   published: "Published",
 };
 const PIPELINE_STYLES: Record<PipelineStatus, string> = {
-  draft: "border-gray-700 bg-gray-900/40 text-gray-400",
-  creating: "border-blue-700/40 bg-blue-950/30 text-blue-400",
-  editing: "border-violet-700/40 bg-violet-950/30 text-violet-400",
-  ready_to_post: "border-amber-700/40 bg-amber-950/30 text-amber-400",
-  published: "border-emerald-700/40 bg-emerald-950/30 text-emerald-400",
+  draft: "border-border bg-card/40 text-muted-foreground",
+  creating: "border-info/40 bg-info/30 text-info",
+  editing: "border-info/40 bg-info/30 text-info",
+  ready_to_post: "border-warning/40 bg-warning/30 text-warning",
+  published: "border-success/40 bg-success/30 text-success",
 };
 const PLATFORM_ICONS: Record<string, string> = {
   tiktok: "🎵",
@@ -30,10 +30,10 @@ const PLATFORM_ICONS: Record<string, string> = {
   linkedin: "in",
 };
 const CONTACT_STATUS_STYLES: Record<string, string> = {
-  pending: "bg-gray-500/20 text-gray-400",
-  contacted: "bg-blue-500/20 text-blue-300",
-  responded: "bg-amber-500/20 text-amber-300",
-  converted: "bg-emerald-500/20 text-emerald-300",
+  pending: "bg-muted text-muted-foreground",
+  contacted: "bg-info/20 text-info",
+  responded: "bg-warning/20 text-warning",
+  converted: "bg-success/20 text-success",
 };
 
 function formatThb(cents: number) {
@@ -45,15 +45,15 @@ export default async function MerchantAffiliatesPage() {
 
   const maybeApi = await createMerchantApi();
   if (!isSome(maybeApi)) {
-    return <p className="text-gray-400">Unable to load data. Please refresh.</p>;
+    return <p className="text-muted-foreground">Unable to load data. Please refresh.</p>;
   }
 
   const result = await maybeApi.value.getMerchantAffiliates();
   if (isErr(result)) {
     return (
       <div className="space-y-4">
-        <h1 className="text-2xl font-bold text-white">Affiliate Marketing</h1>
-        <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-red-300 text-sm">
+        <h1 className="text-2xl font-bold text-foreground">Affiliate Marketing</h1>
+        <div className="rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-destructive text-sm">
           {result.error}
         </div>
       </div>
@@ -77,13 +77,15 @@ export default async function MerchantAffiliatesPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-white">Affiliate Marketing</h1>
-        <p className="mt-1 text-sm text-gray-400">Earnings · Links · Content pipeline · Contacts</p>
+        <h1 className="text-2xl font-bold text-foreground">Affiliate Marketing</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Earnings · Links · Content pipeline · Contacts
+        </p>
       </div>
 
       {/* Summary */}
       <section>
-        <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-400">
+        <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           Summary
         </h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -92,27 +94,27 @@ export default async function MerchantAffiliatesPage() {
               label: "All Time Revenue",
               value: formatThb(data.summary.allTimeRevenueCents),
               note: "all programs combined",
-              accent: "border-violet-500/30 bg-violet-500/5",
+              accent: "border-info/30 bg-info/5",
             },
             {
               label: `This Year (${new Date().getFullYear()})`,
               value: formatThb(data.summary.thisYearRevenueCents),
               note: `Jan–Dec ${new Date().getFullYear()}`,
-              accent: "border-emerald-500/30 bg-emerald-500/5",
+              accent: "border-success/30 bg-success/5",
             },
             {
               label: "This Month",
               value: formatThb(data.summary.thisMonthRevenueCents),
               note: new Date().toLocaleString("en-US", { month: "long", year: "numeric" }),
-              accent: "border-amber-500/30 bg-amber-500/5",
+              accent: "border-warning/30 bg-warning/5",
             },
           ].map((card) => (
             <div key={card.label} className={`rounded-xl border px-5 py-4 ${card.accent}`}>
-              <p className="text-xs font-medium uppercase tracking-wider text-gray-400">
+              <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
                 {card.label}
               </p>
-              <p className="mt-2 text-2xl font-bold text-white">{card.value}</p>
-              <p className="mt-1 text-xs text-gray-500">{card.note}</p>
+              <p className="mt-2 text-2xl font-bold text-foreground">{card.value}</p>
+              <p className="mt-1 text-xs text-muted-foreground">{card.note}</p>
             </div>
           ))}
         </div>
@@ -120,45 +122,45 @@ export default async function MerchantAffiliatesPage() {
 
       {/* Earnings per affiliate */}
       <section>
-        <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-400">
+        <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           Earnings per Program
         </h2>
-        <div className="overflow-hidden rounded-xl border border-white/10">
+        <div className="overflow-hidden rounded-xl border border-border">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-white/10 bg-gray-800/50">
+              <tr className="border-b border-border bg-muted/50">
                 {["Program", "Commission", "Total Earnings", "Description"].map((h) => (
                   <th
                     key={h}
-                    className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-400"
+                    className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground"
                   >
                     {h}
                   </th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5">
+            <tbody className="divide-y divide-border">
               {data.earningsByAffiliate.map((row) => {
                 const aff = data.affiliates.find((a) => a.id === row.affiliateId);
                 return (
                   <tr
                     key={row.affiliateId}
-                    className="bg-gray-900/30 hover:bg-gray-800/30 transition-colors"
+                    className="bg-card/30 hover:bg-muted/30 transition-colors"
                   >
-                    <td className="px-4 py-3 font-medium text-white">{row.affiliateName}</td>
+                    <td className="px-4 py-3 font-medium text-foreground">{row.affiliateName}</td>
                     <td className="px-4 py-3">
-                      <span className="rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-xs font-semibold text-emerald-300">
+                      <span className="rounded-full bg-success/20 px-2.5 py-0.5 text-xs font-semibold text-success">
                         {row.commissionRatePct}%
                       </span>
                     </td>
-                    <td className="px-4 py-3 font-semibold text-white">
+                    <td className="px-4 py-3 font-semibold text-foreground">
                       {row.totalEarningsCents > 0 ? (
                         formatThb(row.totalEarningsCents)
                       ) : (
-                        <span className="text-gray-600 text-xs">—</span>
+                        <span className="text-muted-foreground text-xs">—</span>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-gray-400 text-xs max-w-xs">
+                    <td className="px-4 py-3 text-muted-foreground text-xs max-w-xs">
                       {aff?.description ?? "—"}
                     </td>
                   </tr>
@@ -171,7 +173,7 @@ export default async function MerchantAffiliatesPage() {
 
       {/* Links */}
       <section>
-        <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-400">
+        <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           Affiliate Links
         </h2>
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
@@ -180,14 +182,14 @@ export default async function MerchantAffiliatesPage() {
             return (
               <div
                 key={link.id}
-                className="flex items-center gap-3 rounded-lg border border-white/10 bg-gray-900/40 px-4 py-3"
+                className="flex items-center gap-3 rounded-lg border border-border bg-card/40 px-4 py-3"
               >
                 <span className="text-lg">{PLATFORM_ICONS[link.platform] ?? "🔗"}</span>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium text-white">
+                  <p className="truncate text-sm font-medium text-foreground">
                     {aff?.name ?? link.affiliateId}
                   </p>
-                  <p className="truncate text-xs text-gray-500">{link.url}</p>
+                  <p className="truncate text-xs text-muted-foreground">{link.url}</p>
                 </div>
               </div>
             );
@@ -197,7 +199,7 @@ export default async function MerchantAffiliatesPage() {
 
       {/* Payouts */}
       <section>
-        <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-400">
+        <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           Payout Tracking
         </h2>
         <div className="space-y-3">
@@ -206,26 +208,24 @@ export default async function MerchantAffiliatesPage() {
             .map(([month, payouts]) => {
               const monthTotal = payouts.reduce((s, p) => s + p.amountCents, 0);
               return (
-                <div key={month} className="overflow-hidden rounded-xl border border-white/10">
-                  <div className="flex items-center justify-between border-b border-white/10 bg-gray-800/50 px-4 py-2">
-                    <span className="text-sm font-semibold text-white">
+                <div key={month} className="overflow-hidden rounded-xl border border-border">
+                  <div className="flex items-center justify-between border-b border-border bg-muted/50 px-4 py-2">
+                    <span className="text-sm font-semibold text-foreground">
                       {new Date(`${month}-01`).toLocaleDateString("en-US", {
                         month: "long",
                         year: "numeric",
                       })}
                     </span>
-                    <span className="text-sm font-bold text-emerald-400">
-                      {formatThb(monthTotal)}
-                    </span>
+                    <span className="text-sm font-bold text-success">{formatThb(monthTotal)}</span>
                   </div>
-                  <div className="divide-y divide-white/5">
+                  <div className="divide-y divide-border">
                     {payouts.map((p) => (
                       <div
                         key={p.id}
-                        className="flex items-center justify-between bg-gray-900/30 px-4 py-2"
+                        className="flex items-center justify-between bg-card/30 px-4 py-2"
                       >
-                        <span className="text-sm text-gray-300">{p.affiliateName}</span>
-                        <span className="text-sm font-medium text-white">
+                        <span className="text-sm text-foreground">{p.affiliateName}</span>
+                        <span className="text-sm font-medium text-foreground">
                           {formatThb(p.amountCents)}
                         </span>
                       </div>
@@ -236,15 +236,16 @@ export default async function MerchantAffiliatesPage() {
             })}
         </div>
         {allTimeTotal > 0 && (
-          <p className="mt-3 text-right text-sm text-gray-400">
-            Total paid out: <span className="font-bold text-white">{formatThb(allTimeTotal)}</span>
+          <p className="mt-3 text-right text-sm text-muted-foreground">
+            Total paid out:{" "}
+            <span className="font-bold text-foreground">{formatThb(allTimeTotal)}</span>
           </p>
         )}
       </section>
 
       {/* Content Pipeline */}
       <section>
-        <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-400">
+        <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           Content Pipeline
         </h2>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 lg:grid-cols-5">
@@ -257,7 +258,7 @@ export default async function MerchantAffiliatesPage() {
                   <h3 className="text-xs font-semibold uppercase tracking-wider">
                     {PIPELINE_LABELS[col]}
                   </h3>
-                  <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs text-gray-400">
+                  <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
                     {items.length}
                   </span>
                 </div>
@@ -269,13 +270,15 @@ export default async function MerchantAffiliatesPage() {
                     return (
                       <div
                         key={item.id}
-                        className="rounded-lg border border-white/10 bg-gray-800/60 px-3 py-2"
+                        className="rounded-lg border border-border bg-muted/60 px-3 py-2"
                       >
-                        <p className="text-xs font-medium text-white leading-snug">{item.title}</p>
+                        <p className="text-xs font-medium text-foreground leading-snug">
+                          {item.title}
+                        </p>
                         <div className="mt-1 flex items-center gap-1">
                           <span className="text-xs">{PLATFORM_ICONS[item.platform] ?? "🔗"}</span>
                           {aff && (
-                            <span className="truncate rounded bg-white/5 px-1 text-xs text-gray-500">
+                            <span className="truncate rounded bg-muted px-1 text-xs text-muted-foreground">
                               {aff.name}
                             </span>
                           )}
@@ -284,7 +287,7 @@ export default async function MerchantAffiliatesPage() {
                     );
                   })}
                   {items.length === 0 && (
-                    <p className="py-3 text-center text-xs text-gray-600">empty</p>
+                    <p className="py-3 text-center text-xs text-muted-foreground">empty</p>
                   )}
                 </div>
               </div>
@@ -295,44 +298,44 @@ export default async function MerchantAffiliatesPage() {
 
       {/* Contacts */}
       <section>
-        <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-400">
+        <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           Contacts
         </h2>
-        <div className="overflow-hidden rounded-xl border border-white/10">
+        <div className="overflow-hidden rounded-xl border border-border">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-white/10 bg-gray-800/50">
+              <tr className="border-b border-border bg-muted/50">
                 {["Name", "Email", "Program", "Status", "Notes"].map((h) => (
                   <th
                     key={h}
-                    className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-400"
+                    className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground"
                   >
                     {h}
                   </th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5">
+            <tbody className="divide-y divide-border">
               {data.contacts.map((c) => {
                 const aff = c.affiliateId
                   ? data.affiliates.find((a) => a.id === c.affiliateId)
                   : null;
                 return (
-                  <tr key={c.id} className="bg-gray-900/30 hover:bg-gray-800/30 transition-colors">
-                    <td className="px-4 py-3 font-medium text-white">{c.name}</td>
-                    <td className="px-4 py-3 text-gray-400 text-xs">{c.email ?? "—"}</td>
-                    <td className="px-4 py-3 text-gray-300">
-                      {aff?.name ?? <span className="text-gray-600 text-xs">—</span>}
+                  <tr key={c.id} className="bg-card/30 hover:bg-muted/30 transition-colors">
+                    <td className="px-4 py-3 font-medium text-foreground">{c.name}</td>
+                    <td className="px-4 py-3 text-muted-foreground text-xs">{c.email ?? "—"}</td>
+                    <td className="px-4 py-3 text-foreground">
+                      {aff?.name ?? <span className="text-muted-foreground text-xs">—</span>}
                     </td>
                     <td className="px-4 py-3">
                       <span
-                        className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${CONTACT_STATUS_STYLES[c.status] ?? "bg-gray-500/20 text-gray-400"}`}
+                        className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${CONTACT_STATUS_STYLES[c.status] ?? "bg-muted text-muted-foreground"}`}
                       >
                         {c.status}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-gray-400 text-xs max-w-xs truncate">
-                      {c.notes ?? <span className="text-gray-600">—</span>}
+                    <td className="px-4 py-3 text-muted-foreground text-xs max-w-xs truncate">
+                      {c.notes ?? <span className="text-muted-foreground">—</span>}
                     </td>
                   </tr>
                 );

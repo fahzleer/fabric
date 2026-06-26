@@ -29,10 +29,10 @@ export function MerchantSidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="w-56 shrink-0 border-r border-white/10 bg-gray-900/50">
+    <aside className="w-56 shrink-0 border-r border-border bg-card/50">
       {/* Store badge */}
-      <div className="border-b border-white/10 px-4 py-4">
-        <p className="text-xs font-semibold uppercase tracking-widest text-emerald-400">
+      <div className="border-b border-border px-4 py-4">
+        <p className="text-xs font-semibold uppercase tracking-widest text-success">
           Merchant Portal
         </p>
       </div>
@@ -46,8 +46,8 @@ export function MerchantSidebar() {
               href={item.href}
               className={`flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
                 isActive
-                  ? "bg-emerald-500/20 text-emerald-300"
-                  : "text-gray-400 hover:bg-white/5 hover:text-white"
+                  ? "bg-success/20 text-success"
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
               }`}
             >
               <span aria-hidden className="text-base leading-none">

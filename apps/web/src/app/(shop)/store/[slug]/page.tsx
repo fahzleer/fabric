@@ -68,7 +68,7 @@ function StoreProductCard({
         {product.tagline && (
           <p className="mt-1 text-xs text-gray-400 line-clamp-1">{product.tagline}</p>
         )}
-        <p className="mt-2 text-base font-bold text-emerald-400">{price}</p>
+        <p className="mt-2 text-base font-bold text-success">{price}</p>
       </div>
     </Link>
   );
@@ -114,13 +114,13 @@ export default async function StorefrontPage({
         <div className="mb-10 rounded-2xl border border-white/10 bg-gray-800/50 p-6 sm:p-8">
           <div className="flex flex-wrap items-center gap-4">
             {/* Store avatar placeholder */}
-            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-emerald-500/20 text-2xl ring-2 ring-emerald-500/30">
+            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-success/20 text-2xl ring-2 ring-success/30">
               🏪
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex flex-wrap items-center gap-2">
                 <h1 className="text-2xl font-bold text-white">{store.storeName}</h1>
-                <span className="rounded-full bg-emerald-500/15 px-2.5 py-0.5 text-xs font-medium text-emerald-400 ring-1 ring-emerald-500/30">
+                <span className="rounded-full bg-success/15 px-2.5 py-0.5 text-xs font-medium text-success ring-1 ring-success/30">
                   Official Store
                 </span>
               </div>

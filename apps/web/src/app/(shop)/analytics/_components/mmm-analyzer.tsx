@@ -1,4 +1,5 @@
 "use client";
+import { Button } from "@fabric/ui";
 
 import { useState } from "react";
 import { type MMMResult, type MMMSpend, runMMM } from "../_lib/ml-client";
@@ -144,14 +145,9 @@ export function MMMAnalyzer() {
           ))}
         </div>
 
-        <button
-          type="button"
-          onClick={handleRun}
-          disabled={loading}
-          className="mt-4 rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60 transition-colors"
-        >
+        <Button type="button" onClick={handleRun} disabled={loading} className="mt-4">
           {loading ? "Running model via Celery…" : "Run Marketing Mix Model"}
-        </button>
+        </Button>
 
         {error && (
           <div className="mt-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3">

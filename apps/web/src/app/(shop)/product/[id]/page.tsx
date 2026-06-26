@@ -252,15 +252,15 @@ export default async function ProductPage({ params: paramsPromise }: PageProps) 
               {isSome(storeInfo) && (
                 <Link
                   href={`/store/${storeInfo.value.slug}`}
-                  className="mt-1.5 inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800"
+                  className="mt-1.5 inline-flex items-center gap-1 text-sm text-info hover:text-info/80"
                 >
                   🏪 Sold by {storeInfo.value.storeName} →
                 </Link>
               )}
               {product.tagline.length > 0 && (
-                <p className="mt-2 text-lg text-gray-600">{product.tagline}</p>
+                <p className="mt-2 text-lg text-muted-foreground">{product.tagline}</p>
               )}
-              <p className="mt-4 text-3xl font-bold text-gray-900">{formattedPrice}</p>
+              <p className="mt-4 font-price text-3xl font-bold text-foreground">{formattedPrice}</p>
             </div>
 
             <div className="mt-6">
@@ -272,11 +272,11 @@ export default async function ProductPage({ params: paramsPromise }: PageProps) 
 
             <div className="mt-6">
               {isMerchant ? (
-                <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                <div className="rounded-lg border border-warning bg-warning-subtle px-4 py-3 text-sm text-warning">
                   คุณกำลังดูในฐานะ merchant —{" "}
                   <Link
                     href="/merchant/dashboard"
-                    className="font-medium underline hover:text-amber-900"
+                    className="font-medium underline hover:text-warning/80"
                   >
                     ไปที่ร้านค้าของคุณ →
                   </Link>

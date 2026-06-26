@@ -6,8 +6,8 @@ import { toast } from "sonner";
 import { generateProductTaglineAction } from "../_lib/actions";
 
 const inputClass =
-  "block w-full rounded-lg border border-white/10 bg-gray-800 px-3 py-2.5 text-sm text-white placeholder-gray-500 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500";
-const labelClass = "block text-sm font-medium text-gray-300";
+  "block w-full rounded-lg border border-border bg-muted px-3 py-2.5 text-sm text-foreground placeholder-muted-foreground focus:border-success focus:outline-none focus:ring-1 focus:ring-success";
+const labelClass = "block text-sm font-medium text-foreground";
 const MAX_TAGLINE_CHARS = 80;
 
 export const TaglineField = forwardRef<HTMLInputElement, { defaultValue?: string | undefined }>(
@@ -55,11 +55,11 @@ export const TaglineField = forwardRef<HTMLInputElement, { defaultValue?: string
             type="button"
             onClick={handleGenerate}
             disabled={pending}
-            className="inline-flex items-center gap-1.5 rounded-md border border-emerald-500/40 bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-300 transition-colors hover:bg-emerald-500/20 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 rounded-md border border-success/40 bg-success/10 px-2.5 py-1 text-xs font-medium text-success transition-colors hover:bg-success/20 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {pending ? (
               <>
-                <span className="h-3 w-3 animate-spin rounded-full border-2 border-emerald-300/30 border-t-emerald-300" />
+                <span className="h-3 w-3 animate-spin rounded-full border-2 border-success/30 border-t-emerald-300" />
                 กำลังเขียน…
               </>
             ) : (
@@ -84,9 +84,9 @@ export const TaglineField = forwardRef<HTMLInputElement, { defaultValue?: string
           placeholder="ประโยคสั้นๆ ที่โชว์จุดเด่นของสินค้า"
           className={inputClass}
         />
-        <p className="mt-1 flex items-center justify-between text-xs text-gray-500">
+        <p className="mt-1 flex items-center justify-between text-xs text-muted-foreground">
           <span>แสดงใต้ชื่อสินค้าบนหน้าร้าน กด ✨ เขียนด้วย AI เพื่อให้ Typhoon ช่วยร่าง</span>
-          <span className="text-gray-600">
+          <span className="text-muted-foreground">
             {currentLength}/{charLimit}
           </span>
         </p>

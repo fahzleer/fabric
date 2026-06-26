@@ -133,7 +133,7 @@ export default function ReturnsPage() {
         <ul className="space-y-2">
           {CONDITIONS.map((c) => (
             <li key={c} className="flex items-start gap-2 text-sm text-gray-700">
-              <span className="mt-0.5 flex-shrink-0 text-green-600 font-bold">✓</span>
+              <span className="mt-0.5 flex-shrink-0 text-success font-bold">✓</span>
               {c}
             </li>
           ))}

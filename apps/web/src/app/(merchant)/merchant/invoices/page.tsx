@@ -8,9 +8,9 @@ export const metadata: Metadata = { title: "Invoices — Merchant Portal" };
 type InvoiceStatus = "paid" | "pending" | "overdue";
 
 const STATUS_STYLES: Record<InvoiceStatus, string> = {
-  paid: "bg-emerald-500/20 text-emerald-300",
-  pending: "bg-amber-500/20 text-amber-300",
-  overdue: "bg-red-500/20 text-red-300",
+  paid: "bg-success/20 text-success",
+  pending: "bg-warning/20 text-warning",
+  overdue: "bg-destructive/20 text-destructive",
 };
 
 function orderStatusToInvoice(status: string): InvoiceStatus {
@@ -38,15 +38,15 @@ export default async function MerchantInvoicesPage() {
 
   const maybeApi = await createMerchantApi();
   if (!isSome(maybeApi)) {
-    return <p className="text-gray-400">Unable to load data. Please refresh.</p>;
+    return <p className="text-muted-foreground">Unable to load data. Please refresh.</p>;
   }
 
   const result = await maybeApi.value.getMerchantOrders(1, 100);
   if (isErr(result)) {
     return (
       <div className="space-y-4">
-        <h1 className="text-2xl font-bold text-white">Invoices</h1>
-        <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-red-300 text-sm">
+        <h1 className="text-2xl font-bold text-foreground">Invoices</h1>
+        <div className="rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-destructive text-sm">
           {result.error}
         </div>
       </div>
@@ -69,8 +69,10 @@ export default async function MerchantInvoicesPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-white">Invoices</h1>
-        <p className="mt-1 text-sm text-gray-400">{orders.length} invoices from confirmed orders</p>
+        <h1 className="text-2xl font-bold text-foreground">Invoices</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {orders.length} invoices from confirmed orders
+        </p>
       </div>
 
       {/* Summary */}
@@ -79,26 +81,28 @@ export default async function MerchantInvoicesPage() {
           {
             label: "Paid Revenue",
             value: formatThb(totalRevenue, "THB"),
-            accent: "border-emerald-500/30 bg-emerald-500/5 text-emerald-400",
+            accent: "border-success/30 bg-success/5 text-success",
           },
           {
             label: "Paid",
             value: byStatus.paid.toString(),
-            accent: "border-emerald-500/20 bg-gray-800/50 text-white",
+            accent: "border-success/20 bg-muted/50 text-foreground",
           },
           {
             label: "Pending",
             value: byStatus.pending.toString(),
-            accent: "border-amber-500/20 bg-gray-800/50 text-white",
+            accent: "border-warning/20 bg-muted/50 text-foreground",
           },
           {
             label: "Overdue",
             value: byStatus.overdue.toString(),
-            accent: "border-red-500/20 bg-gray-800/50 text-white",
+            accent: "border-destructive/20 bg-muted/50 text-foreground",
           },
         ].map((c) => (
           <div key={c.label} className={`rounded-xl border px-5 py-4 ${c.accent}`}>
-            <p className="text-xs font-medium uppercase tracking-wider text-gray-400">{c.label}</p>
+            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+              {c.label}
+            </p>
             <p className="mt-1.5 text-xl font-bold">{c.value}</p>
           </div>
         ))}
@@ -117,40 +121,40 @@ export default async function MerchantInvoicesPage() {
       </div>
 
       {orders.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-white/10 py-14 text-center">
+        <div className="rounded-xl border border-dashed border-border py-14 text-center">
           <p className="text-3xl mb-3">🧾</p>
-          <p className="text-sm font-medium text-gray-300">No invoices yet</p>
-          <p className="mt-1 text-xs text-gray-500">
+          <p className="text-sm font-medium text-foreground">No invoices yet</p>
+          <p className="mt-1 text-xs text-muted-foreground">
             Invoices appear here once orders are confirmed
           </p>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-xl border border-white/10">
+        <div className="overflow-hidden rounded-xl border border-border">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-white/10 bg-gray-800/60">
+              <tr className="border-b border-border bg-muted/60">
                 {["Invoice ID", "Customer", "Amount", "Status", "Due Date"].map((h) => (
                   <th
                     key={h}
-                    className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-400"
+                    className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground"
                   >
                     {h}
                   </th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5 bg-gray-900/30">
+            <tbody className="divide-y divide-border bg-card/30">
               {orders.map((o) => {
                 const status = orderStatusToInvoice(o.status);
                 return (
-                  <tr key={o.id} className="hover:bg-white/2 transition-colors">
-                    <td className="px-4 py-3 font-mono text-xs text-gray-400">
+                  <tr key={o.id} className="hover:bg-muted/2 transition-colors">
+                    <td className="px-4 py-3 font-mono text-xs text-muted-foreground">
                       {o.id.slice(0, 8)}…
                     </td>
-                    <td className="px-4 py-3 text-gray-400 text-xs">
+                    <td className="px-4 py-3 text-muted-foreground text-xs">
                       {`${o.customerId.slice(0, 8)}…`}
                     </td>
-                    <td className="px-4 py-3 font-medium text-white">
+                    <td className="px-4 py-3 font-medium text-foreground">
                       {formatThb(o.totalAmountInCents, o.currency)}
                     </td>
                     <td className="px-4 py-3">
@@ -160,21 +164,21 @@ export default async function MerchantInvoicesPage() {
                         {status}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-gray-400 text-xs">{dueDate(o.placedAt)}</td>
+                    <td className="px-4 py-3 text-muted-foreground text-xs">
+                      {dueDate(o.placedAt)}
+                    </td>
                   </tr>
                 );
               })}
             </tbody>
           </table>
-          <div className="border-t border-white/10 bg-gray-800/40 px-4 py-3 flex items-center justify-between">
-            <span className="text-xs text-gray-500">
+          <div className="border-t border-border bg-muted/40 px-4 py-3 flex items-center justify-between">
+            <span className="text-xs text-muted-foreground">
               {orders.length} invoice{orders.length !== 1 ? "s" : ""}
             </span>
-            <span className="text-xs text-gray-400">
+            <span className="text-xs text-muted-foreground">
               Paid revenue:{" "}
-              <span className="font-semibold text-emerald-400">
-                {formatThb(totalRevenue, "THB")}
-              </span>
+              <span className="font-semibold text-success">{formatThb(totalRevenue, "THB")}</span>
             </span>
           </div>
         </div>

@@ -47,7 +47,7 @@ export function CartSummary({ cart }: CartSummaryProps) {
 
       <Link
         href="/checkout"
-        className="block w-full text-center rounded-lg bg-blue-600 px-4 py-3 text-white font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="block w-full text-center rounded-lg bg-info px-4 py-3 text-white font-medium hover:bg-info/90 focus:outline-none focus:ring-2 focus:ring-info"
       >
         Proceed to Checkout
       </Link>

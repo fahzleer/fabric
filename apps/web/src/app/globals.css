@@ -1,5 +1,11 @@
 @import "tailwindcss";
 
+/* @fabric/ui is a workspace package (resolved via node_modules, which Tailwind v4
+   ignores by default). Without this, utilities used ONLY inside the component
+   library — Button's h-9/h-11 sizes, variant bg colors, etc. — never get
+   generated into apps/web's CSS and the components render unstyled. */
+@source "../../../../packages/ui/src";
+
 :root {
   --background: 0 0% 100%;
   --foreground: 0 0% 4%;
@@ -22,14 +28,34 @@
   --accent: 0 0% 94%;
   --accent-foreground: 0 0% 4%;
 
-  --destructive: 0 72% 51%;
+  --destructive: 0 84% 60%;
   --destructive-foreground: 0 0% 100%;
+  --destructive-subtle: 0 86% 97%;
+
+  /* Functional colors — the ONLY accents allowed (see DESIGN.md §7.2).
+     Each consolidates a sprawl of ad-hoc Tailwind families. */
+  --success: 160 84% 39%; /* emerald + green */
+  --success-foreground: 0 0% 100%;
+  --success-subtle: 152 76% 95%;
+
+  --warning: 38 92% 50%; /* amber + yellow + orange */
+  --warning-foreground: 0 0% 4%;
+  --warning-subtle: 48 96% 95%;
+
+  --info: 221 83% 53%; /* blue + indigo + violet + cyan */
+  --info-foreground: 0 0% 100%;
+  --info-subtle: 214 95% 96%;
+
+  --brand: 36 38% 64%; /* fabric-thread editorial gold */
+  --brand-foreground: 0 0% 4%;
 
   --border: 0 0% 91%;
+  --border-strong: 0 0% 84%;
   --input: 0 0% 91%;
   --ring: 0 0% 6%;
 
-  --radius: 0.25rem;
+  /* Card radius matches reality (rounded-lg, 8px) — was 4px and unused. */
+  --radius: 0.5rem;
 
   /* Geist loaded via next/font; --font-geist-sans injected on <body> by layout.tsx */
   --font-sans: var(--font-geist-sans, "Inter Variable", ui-sans-serif), "Noto Sans Thai", "Sarabun",
@@ -71,8 +97,25 @@
 
   --destructive: 0 63% 55%;
   --destructive-foreground: 40 30% 96%;
+  --destructive-subtle: 0 40% 14%;
+
+  --success: 160 60% 45%;
+  --success-foreground: 0 0% 4%;
+  --success-subtle: 158 40% 12%;
+
+  --warning: 38 80% 55%;
+  --warning-foreground: 0 0% 4%;
+  --warning-subtle: 36 40% 12%;
+
+  --info: 217 80% 62%;
+  --info-foreground: 0 0% 4%;
+  --info-subtle: 220 40% 14%;
+
+  --brand: 33 30% 65%;
+  --brand-foreground: 0 0% 4%;
 
   --border: 0 0% 15%;
+  --border-strong: 0 0% 22%;
   --input: 0 0% 15%;
   --ring: 33 30% 65%;
 
@@ -80,10 +123,62 @@
   --fabric-cream: #0a0a0a;
 }
 
+/* Expose every semantic token as a utility-generating color so BOTH apps/web
+   and packages/ui resolve against the same source. Previously only
+   background/foreground were exposed, so packages/ui's bg-primary / bg-destructive
+   / text-muted-foreground silently fell back — adopting it would have looked broken. */
 @theme inline {
   --color-background: hsl(var(--background));
   --color-foreground: hsl(var(--foreground));
+
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-destructive-subtle: hsl(var(--destructive-subtle));
+
+  --color-success: hsl(var(--success));
+  --color-success-foreground: hsl(var(--success-foreground));
+  --color-success-subtle: hsl(var(--success-subtle));
+
+  --color-warning: hsl(var(--warning));
+  --color-warning-foreground: hsl(var(--warning-foreground));
+  --color-warning-subtle: hsl(var(--warning-subtle));
+
+  --color-info: hsl(var(--info));
+  --color-info-foreground: hsl(var(--info-foreground));
+  --color-info-subtle: hsl(var(--info-subtle));
+
+  --color-brand: hsl(var(--brand));
+  --color-brand-foreground: hsl(var(--brand-foreground));
+
+  --color-border: hsl(var(--border));
+  --color-border-strong: hsl(var(--border-strong));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+
   --font-sans: var(--font-sans);
+  --font-serif: var(--font-serif);
   --font-mono: var(--font-mono);
 }
 

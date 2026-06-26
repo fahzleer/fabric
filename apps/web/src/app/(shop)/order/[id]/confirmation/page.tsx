@@ -45,12 +45,15 @@ type PriceBreakdown = {
 };
 
 const STATUS_LABELS: Record<string, { label: string; colour: string }> = {
-  pending: { label: "Payment Pending", colour: "text-yellow-700 bg-yellow-50 border-yellow-200" },
-  confirmed: { label: "Confirmed", colour: "text-green-700  bg-green-50  border-green-200" },
-  processing: { label: "Processing", colour: "text-blue-700   bg-blue-50   border-blue-200" },
-  shipped: { label: "Shipped", colour: "text-blue-700   bg-blue-50   border-blue-200" },
-  delivered: { label: "Delivered", colour: "text-green-700  bg-green-50  border-green-200" },
-  cancelled: { label: "Cancelled", colour: "text-red-700    bg-red-50    border-red-200" },
+  pending: { label: "Payment Pending", colour: "text-warning bg-warning-subtle border-warning" },
+  confirmed: { label: "Confirmed", colour: "text-success  bg-success-subtle  border-success" },
+  processing: { label: "Processing", colour: "text-info   bg-info-subtle   border-info" },
+  shipped: { label: "Shipped", colour: "text-info   bg-info-subtle   border-info" },
+  delivered: { label: "Delivered", colour: "text-success  bg-success-subtle  border-success" },
+  cancelled: {
+    label: "Cancelled",
+    colour: "text-destructive    bg-destructive-subtle    border-destructive",
+  },
 };
 
 async function getAuthToken(): Promise<Maybe<string>> {
@@ -173,7 +176,7 @@ function OrderPriceBreakdown({ breakdown }: { breakdown: PriceBreakdown }) {
         <span>{formatPrice({ amount: subtotalCents / 100, currency })}</span>
       </div>
       {discountCents > 0 && (
-        <div className="flex justify-between text-sm text-green-600">
+        <div className="flex justify-between text-sm text-success">
           <span>Discount</span>
           <span>−{formatPrice({ amount: discountCents / 100, currency })}</span>
         </div>
@@ -237,9 +240,9 @@ export default async function OrderConfirmationPage({ params }: PageProps) {
       <div className="mx-auto max-w-2xl px-4 py-16 sm:px-6 lg:px-8">
         {/* Success icon */}
         <div className="text-center mb-8">
-          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
+          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-success-subtle">
             <svg
-              className="h-8 w-8 text-green-600"
+              className="h-8 w-8 text-success"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -255,7 +258,7 @@ export default async function OrderConfirmationPage({ params }: PageProps) {
           </div>
           <h1 className="text-3xl font-bold text-gray-900">Order Placed!</h1>
           <p className="mt-2 text-gray-600">Thank you for your order. Your order ID is:</p>
-          <p className="mt-1 text-lg font-mono font-semibold text-blue-600">#{id}</p>
+          <p className="mt-1 text-lg font-mono font-semibold text-info">#{id}</p>
         </div>
 
         {/* Order detail card */}
@@ -273,7 +276,7 @@ export default async function OrderConfirmationPage({ params }: PageProps) {
           )}
 
           {isSome(fetchError) && (
-            <div className="px-6 py-4 text-sm text-red-600">{fetchError.value}</div>
+            <div className="px-6 py-4 text-sm text-destructive">{fetchError.value}</div>
           )}
 
           {/* Line items */}
@@ -301,7 +304,7 @@ export default async function OrderConfirmationPage({ params }: PageProps) {
         <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
           <Link
             href="/products"
-            className="rounded-lg bg-blue-600 px-6 py-3 text-white font-medium hover:bg-blue-700 text-center"
+            className="rounded-lg bg-info px-6 py-3 text-white font-medium hover:bg-info/90 text-center"
           >
             Continue Shopping
           </Link>

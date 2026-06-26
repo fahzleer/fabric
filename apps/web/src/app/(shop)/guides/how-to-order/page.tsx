@@ -149,7 +149,7 @@ export default function HowToOrderPage() {
         <div className="flex flex-wrap gap-2">
           <Link
             href="/payment/promptpay"
-            className="rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-800 hover:bg-blue-200"
+            className="rounded-full bg-info-subtle px-3 py-1 text-xs font-medium text-info hover:bg-info/90"
           >
             PromptPay QR
           </Link>
@@ -161,7 +161,7 @@ export default function HowToOrderPage() {
           </Link>
           <Link
             href="/payment/crypto"
-            className="rounded-full bg-indigo-100 px-3 py-1 text-xs font-medium text-indigo-800 hover:bg-indigo-200"
+            className="rounded-full bg-info-subtle px-3 py-1 text-xs font-medium text-info hover:bg-info/90"
           >
             USDC Crypto
           </Link>

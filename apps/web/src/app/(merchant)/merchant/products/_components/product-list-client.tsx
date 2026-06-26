@@ -15,9 +15,9 @@ import Link from "next/link";
 import { useLayoutEffect, useMemo } from "react";
 
 const STATUS_BADGE: Record<string, string> = {
-  active: "bg-emerald-500/20 text-emerald-300 border-emerald-500/40",
-  draft: "bg-gray-700/50 text-gray-400 border-gray-600",
-  archived: "bg-red-500/20 text-red-400 border-red-500/40",
+  active: "bg-success/20 text-success border-success/40",
+  draft: "bg-muted/50 text-muted-foreground border-border",
+  archived: "bg-destructive/20 text-destructive border-destructive/40",
 };
 
 export function ProductListClient({ initialProducts }: { initialProducts: MerchantProduct[] }) {
@@ -52,7 +52,7 @@ function FilterView() {
   );
 
   const inputCls =
-    "rounded-lg border border-white/10 bg-gray-800 px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500";
+    "rounded-lg border border-border bg-muted px-3 py-2 text-sm text-foreground placeholder-muted-foreground focus:border-success focus:outline-none focus:ring-1 focus:ring-success";
 
   return (
     <div className="space-y-4">
@@ -82,15 +82,15 @@ function FilterView() {
 
       <div className="space-y-3">
         <div className="flex items-center gap-2">
-          <span className="text-xs text-gray-500">
+          <span className="text-xs text-muted-foreground">
             {results.length} result{results.length !== 1 ? "s" : ""}
             {debouncedQuery !== rawQuery && (
-              <span className="ml-2 italic text-gray-600">…typing</span>
+              <span className="ml-2 italic text-muted-foreground">…typing</span>
             )}
           </span>
         </div>
         {results.length === 0 ? (
-          <p className="py-10 text-center text-sm text-gray-500">No products match</p>
+          <p className="py-10 text-center text-sm text-muted-foreground">No products match</p>
         ) : (
           <ProductTable products={results} />
         )}
@@ -103,31 +103,31 @@ function ProductTable({ products }: { products: MerchantProduct[] }) {
   if (products.length === 0) return null;
 
   return (
-    <div className="overflow-hidden rounded-xl border border-white/10 bg-gray-800/50">
+    <div className="overflow-hidden rounded-xl border border-border bg-muted/50">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-white/10 text-left">
-            <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-400">
+          <tr className="border-b border-border text-left">
+            <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Product
             </th>
-            <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-400">
+            <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Category
             </th>
-            <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-400">
+            <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Price
             </th>
-            <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-400">
+            <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Status
             </th>
-            <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-400" />
+            <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground" />
           </tr>
         </thead>
-        <tbody className="divide-y divide-white/5">
+        <tbody className="divide-y divide-border">
           {products.map((p) => {
             const imgs = p.images ?? [];
             const img = imgs.find((i) => i.isPrimary) ?? imgs[0];
             return (
-              <tr key={p.id} className="transition-colors hover:bg-white/5">
+              <tr key={p.id} className="transition-colors hover:bg-muted">
                 <td className="px-5 py-4">
                   <div className="flex items-center gap-3">
                     {img && (
@@ -140,15 +140,15 @@ function ProductTable({ products }: { products: MerchantProduct[] }) {
                       />
                     )}
                     <div>
-                      <p className="font-medium text-white">{p.name}</p>
-                      <p className="font-mono text-xs text-gray-500">{p.id.slice(0, 8)}…</p>
+                      <p className="font-medium text-foreground">{p.name}</p>
+                      <p className="font-mono text-xs text-muted-foreground">{p.id.slice(0, 8)}…</p>
                     </div>
                   </div>
                 </td>
-                <td className="px-5 py-4 capitalize text-gray-300">
+                <td className="px-5 py-4 capitalize text-foreground">
                   {p.category.replace(/_/g, " ")}
                 </td>
-                <td className="px-5 py-4 font-medium text-white">
+                <td className="px-5 py-4 font-medium text-foreground">
                   {formatPrice({ amount: p.price, currency: p.priceCurrency })}
                 </td>
                 <td className="px-5 py-4">
@@ -161,7 +161,7 @@ function ProductTable({ products }: { products: MerchantProduct[] }) {
                 <td className="px-5 py-4">
                   <Link
                     href={`/merchant/products/${p.id}/edit`}
-                    className="text-xs font-medium text-emerald-400 hover:text-emerald-300"
+                    className="text-xs font-medium text-success hover:text-success"
                   >
                     Edit →
                   </Link>

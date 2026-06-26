@@ -116,7 +116,7 @@ export default function PromptPayPage() {
 
       <header className="mb-8">
         <div className="flex items-center gap-3 mb-3">
-          <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-blue-100 text-blue-700 font-bold text-lg">
+          <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-info-subtle text-info font-bold text-lg">
             QR
           </span>
           <h1 className="text-3xl font-bold text-gray-900">ชำระเงินผ่าน PromptPay</h1>
@@ -148,8 +148,8 @@ export default function PromptPayPage() {
         </ol>
       </section>
 
-      <div className="mt-8 p-4 rounded-lg bg-blue-50 border border-blue-200">
-        <p className="text-sm text-blue-800 font-medium">
+      <div className="mt-8 p-4 rounded-lg bg-info-subtle border border-info">
+        <p className="text-sm text-info font-medium">
           ระบบยืนยันการชำระเงินอัตโนมัติ — ไม่ต้องส่งสลิปให้ร้านค้า
         </p>
       </div>
@@ -166,7 +166,7 @@ export default function PromptPayPage() {
         <div className="flex gap-3">
           <Link
             href="/auth/register"
-            className="rounded-lg bg-blue-600 px-6 py-3 text-sm font-medium text-white hover:bg-blue-700"
+            className="rounded-lg bg-info px-6 py-3 text-sm font-medium text-white hover:bg-info/90"
           >
             สมัครบัญชีและชำระเงิน
           </Link>

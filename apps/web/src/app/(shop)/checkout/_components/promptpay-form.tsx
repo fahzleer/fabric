@@ -12,6 +12,7 @@ import { formatPrice } from "@/lib/price";
 import { syncCartToServer } from "@/lib/sync-cart";
 import { Atom, useAtom, useAtomSet, useAtomValue } from "@effect-atom/atom-react";
 import { Err, type Maybe, None, Ok, type Result, Some, isErr, isNone, isSome } from "@fabric/types";
+import { Button } from "@fabric/ui";
 import { Option } from "effect";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef } from "react";
@@ -255,19 +256,19 @@ function WaitingSection({ phase, timeLeft }: { phase: Phase; timeLeft: number })
       <div className="flex items-center justify-between text-sm">
         <span className="text-gray-600">QR expires in</span>
         <span
-          className={`font-mono font-semibold text-lg ${timeLeft < 60_000 ? "text-red-600" : "text-gray-900"}`}
+          className={`font-mono font-semibold text-lg ${timeLeft < 60_000 ? "text-destructive" : "text-gray-900"}`}
         >
           {formatCountdown(timeLeft)}
         </span>
       </div>
       <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
         <div
-          className={`h-full rounded-full transition-all duration-1000 ${timeLeft < 60_000 ? "bg-red-500" : "bg-emerald-500"}`}
+          className={`h-full rounded-full transition-all duration-1000 ${timeLeft < 60_000 ? "bg-destructive" : "bg-success"}`}
           style={{ width: `${Math.max(0, (timeLeft / QR_DURATION_MS) * 100)}%` }}
         />
       </div>
       <div className="flex flex-col items-center gap-3 py-4">
-        <div className="rounded-xl border-2 border-emerald-200 p-4 bg-white shadow-sm">
+        <div className="rounded-xl border-2 border-success p-4 bg-white shadow-sm">
           <img
             src={phase.qrImageUrl}
             alt="PromptPay QR code"
@@ -282,7 +283,7 @@ function WaitingSection({ phase, timeLeft }: { phase: Phase; timeLeft: number })
         </p>
       </div>
       <div className="flex items-center justify-center gap-2 text-xs text-gray-400">
-        <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+        <span className="h-2 w-2 rounded-full bg-success animate-pulse" />
         Waiting for payment confirmation…
       </div>
     </div>
@@ -380,7 +381,7 @@ export function PromptPayForm({ cart, onBack }: PromptPayFormProps) {
     <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-5">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold text-gray-900">Pay via PromptPay</h2>
-        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 border border-emerald-200 px-2.5 py-1 text-xs font-medium text-emerald-700">
+        <span className="inline-flex items-center gap-1 rounded-full bg-success-subtle border border-success px-2.5 py-1 text-xs font-medium text-success">
           PromptPay QR
         </span>
       </div>
@@ -393,12 +394,12 @@ export function PromptPayForm({ cart, onBack }: PromptPayFormProps) {
       {isIdlePhase(phase) && (
         <>
           {phase._tag === "error" && (
-            <div className="rounded-lg bg-red-50 border border-red-200 p-3 text-sm text-red-700">
+            <div className="rounded-lg bg-destructive-subtle border border-destructive p-3 text-sm text-destructive">
               {phase.message}
             </div>
           )}
           {phase._tag === "expired" && (
-            <div className="rounded-lg bg-amber-50 border border-amber-200 p-3 text-sm text-amber-700">
+            <div className="rounded-lg bg-warning-subtle border border-warning p-3 text-sm text-warning">
               QR code has expired. Click below to generate a new one.
             </div>
           )}
@@ -410,7 +411,7 @@ export function PromptPayForm({ cart, onBack }: PromptPayFormProps) {
       )}
 
       {isLoading && (
-        <div className="rounded-lg bg-blue-50 border border-blue-200 p-4 flex items-center gap-3 text-sm text-blue-700">
+        <div className="rounded-lg bg-info-subtle border border-info p-4 flex items-center gap-3 text-sm text-info">
           <svg
             className="h-5 w-5 animate-spin shrink-0"
             fill="none"
@@ -438,23 +439,27 @@ export function PromptPayForm({ cart, onBack }: PromptPayFormProps) {
       <WaitingSection phase={phase} timeLeft={timeLeft} />
 
       <div className="flex gap-3">
-        <button
+        <Button
           type="button"
+          variant="outline"
+          size="lg"
           onClick={onBack}
           disabled={isLoading || phase._tag === "paid"}
-          className="flex-1 rounded-lg border border-gray-300 px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+          className="flex-1"
         >
           ← Back
-        </button>
+        </Button>
         {showStartButton(phase) && (
-          <button
+          <Button
             type="button"
+            variant="success"
+            size="lg"
             onClick={handleStart}
             disabled={isLoading}
-            className="flex-1 rounded-lg bg-emerald-600 px-4 py-3 text-white font-medium hover:bg-emerald-700 disabled:opacity-50"
+            className="flex-1"
           >
             {getStartButtonLabel(phase, isLoading)}
-          </button>
+          </Button>
         )}
       </div>
     </div>

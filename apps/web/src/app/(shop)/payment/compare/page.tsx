@@ -28,7 +28,7 @@ const METHODS = [
     name: "PromptPay",
     href: "/payment/promptpay",
     badge: "แนะนำสำหรับคนไทย",
-    badgeColor: "bg-blue-100 text-blue-800",
+    badgeColor: "bg-info-subtle text-info",
     fee: "ฟรี",
     speed: "< 30 วินาที",
     security: "ยืนยัน OTP ผ่านแอปธนาคาร",
@@ -56,7 +56,7 @@ const METHODS = [
     name: "USDC (Crypto)",
     href: "/payment/crypto",
     badge: "Web3",
-    badgeColor: "bg-indigo-100 text-indigo-800",
+    badgeColor: "bg-info-subtle text-info",
     fee: "< $0.01 Gas",
     speed: "~2 วินาที",
     security: "Blockchain — immutable, trustless",
@@ -164,7 +164,7 @@ export default function PaymentComparePage() {
             <ul className="space-y-1">
               {m.pros.map((p) => (
                 <li key={p} className="flex items-start gap-1.5 text-sm text-gray-700">
-                  <span className="text-green-500 font-bold mt-0.5">+</span> {p}
+                  <span className="text-success font-bold mt-0.5">+</span> {p}
                 </li>
               ))}
               {m.cons.map((c) => (

@@ -13,6 +13,13 @@ const badgeVariants = cva(
         destructive:
           "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
         outline: "text-foreground",
+        // Soft status tones — the canonical home for status pills. Use these
+        // instead of ad-hoc bg-{green,amber,blue,red}-{50,100} (see DESIGN.md §7.2).
+        success: "border-success/30 bg-success-subtle text-success",
+        warning: "border-warning/40 bg-warning-subtle text-warning",
+        info: "border-info/30 bg-info-subtle text-info",
+        danger: "border-destructive/30 bg-destructive-subtle text-destructive",
+        neutral: "border-border bg-muted text-muted-foreground",
       },
     },
     defaultVariants: {

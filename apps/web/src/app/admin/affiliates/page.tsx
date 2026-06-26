@@ -88,26 +88,26 @@ const platformIcons: Record<Platform, string> = {
 };
 
 const contactStatusStyles: Record<ContactStatus, string> = {
-  pending: "bg-gray-500/20 text-gray-400",
-  contacted: "bg-blue-500/20 text-blue-300",
-  responded: "bg-amber-500/20 text-amber-300",
-  converted: "bg-emerald-500/20 text-emerald-300",
+  pending: "bg-muted text-muted-foreground",
+  contacted: "bg-info/20 text-info",
+  responded: "bg-warning/20 text-warning",
+  converted: "bg-success/20 text-success",
 };
 
 const pipelineColumnStyles: Record<ContentPipelineStatus, string> = {
-  draft: "border-gray-700 bg-gray-900/40",
-  creating: "border-blue-700/40 bg-blue-950/30",
-  editing: "border-violet-700/40 bg-violet-950/30",
-  ready_to_post: "border-amber-700/40 bg-amber-950/30",
-  published: "border-emerald-700/40 bg-emerald-950/30",
+  draft: "border-border bg-card/40",
+  creating: "border-info/40 bg-info/30",
+  editing: "border-info/40 bg-info/30",
+  ready_to_post: "border-warning/40 bg-warning/30",
+  published: "border-success/40 bg-success/30",
 };
 
 const pipelineHeaderStyles: Record<ContentPipelineStatus, string> = {
-  draft: "text-gray-400",
-  creating: "text-blue-400",
-  editing: "text-violet-400",
-  ready_to_post: "text-amber-400",
-  published: "text-emerald-400",
+  draft: "text-muted-foreground",
+  creating: "text-info",
+  editing: "text-info",
+  ready_to_post: "text-warning",
+  published: "text-success",
 };
 
 export default async function AffiliatesPage() {
@@ -118,10 +118,10 @@ export default async function AffiliatesPage() {
 
   const user = session.user as { id: string; email: string };
   const token = await issueAdminToken(user.id, user.email);
-  if (!token) return <p className="text-gray-400">Failed to authenticate</p>;
+  if (!token) return <p className="text-muted-foreground">Failed to authenticate</p>;
 
   const data = await getAffiliateData(token);
-  if (!data) return <p className="text-gray-400">Failed to load affiliate data</p>;
+  if (!data) return <p className="text-muted-foreground">Failed to load affiliate data</p>;
 
   const allTimeTotal = data.payouts.reduce((s, p) => s + p.amountCents, 0);
 
@@ -139,13 +139,15 @@ export default async function AffiliatesPage() {
   return (
     <div className="space-y-10 max-w-6xl">
       <div>
-        <h1 className="text-2xl font-bold text-white">Affiliate Marketing</h1>
-        <p className="mt-1 text-sm text-gray-400">Earnings · Links · Content pipeline · Contacts</p>
+        <h1 className="text-2xl font-bold text-foreground">Affiliate Marketing</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Earnings · Links · Content pipeline · Contacts
+        </p>
       </div>
 
       {/* Summary */}
       <section>
-        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-gray-400">
+        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
           Summary Report
         </h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -154,27 +156,27 @@ export default async function AffiliatesPage() {
               label: "All Time Revenue",
               value: formatThb(data.summary.allTimeRevenueCents),
               note: "all programs combined",
-              accent: "border-violet-500/30 bg-violet-500/5",
+              accent: "border-info/30 bg-info/5",
             },
             {
               label: `This Year (${new Date().getFullYear()})`,
               value: formatThb(data.summary.thisYearRevenueCents),
               note: `Jan–Dec ${new Date().getFullYear()}`,
-              accent: "border-emerald-500/30 bg-emerald-500/5",
+              accent: "border-success/30 bg-success/5",
             },
             {
               label: "This Month",
               value: formatThb(data.summary.thisMonthRevenueCents),
               note: new Date().toLocaleString("en-US", { month: "long", year: "numeric" }),
-              accent: "border-amber-500/30 bg-amber-500/5",
+              accent: "border-warning/30 bg-warning/5",
             },
           ].map((card) => (
             <div key={card.label} className={`rounded-xl border px-6 py-5 ${card.accent}`}>
-              <p className="text-xs font-medium uppercase tracking-wider text-gray-400">
+              <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
                 {card.label}
               </p>
-              <p className="mt-2 text-3xl font-bold text-white">{card.value}</p>
-              <p className="mt-1 text-xs text-gray-500">{card.note}</p>
+              <p className="mt-2 text-3xl font-bold text-foreground">{card.value}</p>
+              <p className="mt-1 text-xs text-muted-foreground">{card.note}</p>
             </div>
           ))}
         </div>
@@ -182,45 +184,45 @@ export default async function AffiliatesPage() {
 
       {/* Earnings per affiliate */}
       <section>
-        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-gray-400">
+        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
           Earnings per Affiliate
         </h2>
-        <div className="overflow-hidden rounded-xl border border-white/10">
+        <div className="overflow-hidden rounded-xl border border-border">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-white/10 bg-gray-800/50">
+              <tr className="border-b border-border bg-muted/50">
                 {["Program", "Commission", "Total Earnings", "Description"].map((h) => (
                   <th
                     key={h}
-                    className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-400"
+                    className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground"
                   >
                     {h}
                   </th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5">
+            <tbody className="divide-y divide-border">
               {data.earningsByAffiliate.map((row) => {
                 const aff = data.affiliates.find((a) => a.id === row.affiliateId);
                 return (
                   <tr
                     key={row.affiliateId}
-                    className="bg-gray-900/30 hover:bg-gray-800/30 transition-colors"
+                    className="bg-card/30 hover:bg-muted/30 transition-colors"
                   >
-                    <td className="px-4 py-3 font-medium text-white">{row.affiliateName}</td>
+                    <td className="px-4 py-3 font-medium text-foreground">{row.affiliateName}</td>
                     <td className="px-4 py-3">
-                      <span className="rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-xs font-semibold text-emerald-300">
+                      <span className="rounded-full bg-success/20 px-2.5 py-0.5 text-xs font-semibold text-success">
                         {row.commissionRatePct}%
                       </span>
                     </td>
-                    <td className="px-4 py-3 font-semibold text-white">
+                    <td className="px-4 py-3 font-semibold text-foreground">
                       {row.totalEarningsCents > 0 ? (
                         formatThb(row.totalEarningsCents)
                       ) : (
-                        <span className="text-gray-600 text-xs">—</span>
+                        <span className="text-muted-foreground text-xs">—</span>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-gray-400 text-xs max-w-xs">
+                    <td className="px-4 py-3 text-muted-foreground text-xs max-w-xs">
                       {aff?.description ?? "—"}
                     </td>
                   </tr>
@@ -233,7 +235,7 @@ export default async function AffiliatesPage() {
 
       {/* Affiliate links */}
       <section>
-        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-gray-400">
+        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
           Affiliate Links
         </h2>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -242,16 +244,16 @@ export default async function AffiliatesPage() {
             return (
               <div
                 key={link.id}
-                className="flex items-center gap-3 rounded-lg border border-white/10 bg-gray-900/40 px-4 py-3"
+                className="flex items-center gap-3 rounded-lg border border-border bg-card/40 px-4 py-3"
               >
                 <span className="text-lg" title={link.platform}>
                   {platformIcons[link.platform]}
                 </span>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium text-white">
+                  <p className="truncate text-sm font-medium text-foreground">
                     {aff?.name ?? link.affiliateId}
                   </p>
-                  <p className="truncate text-xs text-gray-500">{link.url}</p>
+                  <p className="truncate text-xs text-muted-foreground">{link.url}</p>
                 </div>
               </div>
             );
@@ -261,7 +263,7 @@ export default async function AffiliatesPage() {
 
       {/* Payout tracking */}
       <section>
-        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-gray-400">
+        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
           Payout Tracking
         </h2>
         <div className="space-y-4">
@@ -270,26 +272,24 @@ export default async function AffiliatesPage() {
             .map(([month, payouts]) => {
               const monthTotal = payouts.reduce((s, p) => s + p.amountCents, 0);
               return (
-                <div key={month} className="overflow-hidden rounded-xl border border-white/10">
-                  <div className="flex items-center justify-between border-b border-white/10 bg-gray-800/50 px-4 py-2">
-                    <span className="text-sm font-semibold text-white">
+                <div key={month} className="overflow-hidden rounded-xl border border-border">
+                  <div className="flex items-center justify-between border-b border-border bg-muted/50 px-4 py-2">
+                    <span className="text-sm font-semibold text-foreground">
                       {new Date(`${month}-01`).toLocaleDateString("en-US", {
                         month: "long",
                         year: "numeric",
                       })}
                     </span>
-                    <span className="text-sm font-bold text-emerald-400">
-                      {formatThb(monthTotal)}
-                    </span>
+                    <span className="text-sm font-bold text-success">{formatThb(monthTotal)}</span>
                   </div>
-                  <div className="divide-y divide-white/5">
+                  <div className="divide-y divide-border">
                     {payouts.map((p) => (
                       <div
                         key={p.id}
-                        className="flex items-center justify-between bg-gray-900/30 px-4 py-2"
+                        className="flex items-center justify-between bg-card/30 px-4 py-2"
                       >
-                        <span className="text-sm text-gray-300">{p.affiliateName}</span>
-                        <span className="text-sm font-medium text-white">
+                        <span className="text-sm text-foreground">{p.affiliateName}</span>
+                        <span className="text-sm font-medium text-foreground">
                           {formatThb(p.amountCents)}
                         </span>
                       </div>
@@ -301,9 +301,9 @@ export default async function AffiliatesPage() {
         </div>
         {allTimeTotal > 0 && (
           <div className="mt-3 flex justify-end">
-            <p className="text-sm text-gray-400">
+            <p className="text-sm text-muted-foreground">
               Total paid out:{" "}
-              <span className="font-bold text-white">{formatThb(allTimeTotal)}</span>
+              <span className="font-bold text-foreground">{formatThb(allTimeTotal)}</span>
             </p>
           </div>
         )}
@@ -311,7 +311,7 @@ export default async function AffiliatesPage() {
 
       {/* Content pipeline */}
       <section>
-        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-gray-400">
+        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
           Content Pipeline
         </h2>
         <div className="grid grid-cols-1 gap-4 overflow-x-auto sm:grid-cols-2 lg:grid-cols-5">
@@ -325,7 +325,7 @@ export default async function AffiliatesPage() {
                   >
                     {PIPELINE_COLUMN_LABELS[col]}
                   </h3>
-                  <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs text-gray-400">
+                  <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
                     {items.length}
                   </span>
                 </div>
@@ -337,15 +337,17 @@ export default async function AffiliatesPage() {
                     return (
                       <div
                         key={item.id}
-                        className="rounded-lg border border-white/10 bg-gray-800/60 px-3 py-2"
+                        className="rounded-lg border border-border bg-muted/60 px-3 py-2"
                       >
-                        <p className="text-xs font-medium text-white leading-snug">{item.title}</p>
+                        <p className="text-xs font-medium text-foreground leading-snug">
+                          {item.title}
+                        </p>
                         <div className="mt-1.5 flex items-center gap-1.5">
                           <span className="text-xs" title={item.platform}>
                             {platformIcons[item.platform]}
                           </span>
                           {aff && (
-                            <span className="truncate rounded-sm bg-white/5 px-1 text-xs text-gray-500">
+                            <span className="truncate rounded-sm bg-muted px-1 text-xs text-muted-foreground">
                               {aff.name}
                             </span>
                           )}
@@ -354,7 +356,7 @@ export default async function AffiliatesPage() {
                     );
                   })}
                   {items.length === 0 && (
-                    <p className="py-4 text-center text-xs text-gray-600">empty</p>
+                    <p className="py-4 text-center text-xs text-muted-foreground">empty</p>
                   )}
                 </div>
               </div>
@@ -365,7 +367,7 @@ export default async function AffiliatesPage() {
 
       {/* Platform breakdown */}
       <section>
-        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-gray-400">
+        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
           Platform Breakdown
         </h2>
         <div className="flex flex-wrap gap-3">
@@ -375,15 +377,15 @@ export default async function AffiliatesPage() {
               return (
                 <div
                   key={platform}
-                  className="flex items-center gap-2 rounded-lg border border-white/10 bg-gray-900/40 px-4 py-2"
+                  className="flex items-center gap-2 rounded-lg border border-border bg-card/40 px-4 py-2"
                 >
                   <span className="text-base">{platformIcons[platform]}</span>
-                  <span className="text-sm font-medium capitalize text-white">
+                  <span className="text-sm font-medium capitalize text-foreground">
                     {platform === "x"
                       ? "X (Twitter)"
                       : platform.charAt(0).toUpperCase() + platform.slice(1)}
                   </span>
-                  <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs text-gray-400">
+                  <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
                     {count}
                   </span>
                 </div>
@@ -395,37 +397,36 @@ export default async function AffiliatesPage() {
 
       {/* Contacts */}
       <section>
-        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-gray-400">
+        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
           Contacts Management
         </h2>
-        <div className="overflow-hidden rounded-xl border border-white/10">
+        <div className="overflow-hidden rounded-xl border border-border">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-white/10 bg-gray-800/50">
+              <tr className="border-b border-border bg-muted/50">
                 {["Name", "Email", "Program", "Status", "Notes"].map((h) => (
                   <th
                     key={h}
-                    className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-400"
+                    className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground"
                   >
                     {h}
                   </th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5">
+            <tbody className="divide-y divide-border">
               {data.contacts.map((contact) => {
                 const aff = contact.affiliateId
                   ? data.affiliates.find((a) => a.id === contact.affiliateId)
                   : null;
                 return (
-                  <tr
-                    key={contact.id}
-                    className="bg-gray-900/30 hover:bg-gray-800/30 transition-colors"
-                  >
-                    <td className="px-4 py-3 font-medium text-white">{contact.name}</td>
-                    <td className="px-4 py-3 text-gray-400 text-xs">{contact.email ?? "—"}</td>
-                    <td className="px-4 py-3 text-gray-300">
-                      {aff?.name ?? <span className="text-gray-600 text-xs">—</span>}
+                  <tr key={contact.id} className="bg-card/30 hover:bg-muted/30 transition-colors">
+                    <td className="px-4 py-3 font-medium text-foreground">{contact.name}</td>
+                    <td className="px-4 py-3 text-muted-foreground text-xs">
+                      {contact.email ?? "—"}
+                    </td>
+                    <td className="px-4 py-3 text-foreground">
+                      {aff?.name ?? <span className="text-muted-foreground text-xs">—</span>}
                     </td>
                     <td className="px-4 py-3">
                       <span
@@ -434,8 +435,8 @@ export default async function AffiliatesPage() {
                         {contact.status}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-gray-400 text-xs max-w-xs truncate">
-                      {contact.notes ?? <span className="text-gray-600">—</span>}
+                    <td className="px-4 py-3 text-muted-foreground text-xs max-w-xs truncate">
+                      {contact.notes ?? <span className="text-muted-foreground">—</span>}
                     </td>
                   </tr>
                 );

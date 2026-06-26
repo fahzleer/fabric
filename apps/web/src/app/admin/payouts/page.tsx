@@ -25,9 +25,9 @@ function formatDate(iso: string): string {
 
 function StatusBadge({ status }: { status: PayoutRequest["status"] }) {
   const styles: Record<PayoutRequest["status"], string> = {
-    pending: "bg-amber-500/15 text-amber-400 border-amber-500/30",
-    approved: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
-    rejected: "bg-red-500/15 text-red-400 border-red-500/30",
+    pending: "bg-warning/15 text-warning border-warning/30",
+    approved: "bg-success/15 text-success border-success/30",
+    rejected: "bg-destructive/15 text-destructive border-destructive/30",
   };
   return (
     <span
@@ -45,7 +45,7 @@ export default async function AdminPayoutsPage() {
   if (!isSome(maybeApi)) {
     return (
       <div className="flex h-full items-center justify-center">
-        <p className="text-gray-400">Unable to load payouts. Please refresh.</p>
+        <p className="text-muted-foreground">Unable to load payouts. Please refresh.</p>
       </div>
     );
   }
@@ -59,32 +59,32 @@ export default async function AdminPayoutsPage() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Payout requests</h1>
-          <p className="mt-1 text-sm text-gray-400">
+          <h1 className="text-2xl font-bold text-foreground">Payout requests</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
             Pending withdrawal requests from merchants. Review and process manually.
           </p>
         </div>
         {payouts.length > 0 && (
-          <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-2 text-center">
-            <p className="text-2xl font-bold text-amber-400">{payouts.length}</p>
-            <p className="text-xs text-amber-400/70">pending</p>
+          <div className="rounded-xl border border-warning/30 bg-warning/10 px-4 py-2 text-center">
+            <p className="text-2xl font-bold text-warning">{payouts.length}</p>
+            <p className="text-xs text-warning/70">pending</p>
           </div>
         )}
       </div>
 
       {/* Error */}
       {isErr(result) && (
-        <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+        <div className="rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
           Failed to load payout requests: {result.error}
         </div>
       )}
 
       {/* Empty state */}
       {isOk(result) && payouts.length === 0 && (
-        <div className="rounded-xl border border-white/10 bg-gray-800/30 px-5 py-12 text-center">
+        <div className="rounded-xl border border-border bg-muted/30 px-5 py-12 text-center">
           <p className="text-2xl mb-2">💸</p>
-          <p className="text-sm font-medium text-gray-300">No pending payout requests</p>
-          <p className="mt-1 text-xs text-gray-500">
+          <p className="text-sm font-medium text-foreground">No pending payout requests</p>
+          <p className="mt-1 text-xs text-muted-foreground">
             All caught up! Merchant withdrawals will appear here.
           </p>
         </div>
@@ -92,45 +92,45 @@ export default async function AdminPayoutsPage() {
 
       {/* Payout table */}
       {payouts.length > 0 && (
-        <div className="overflow-hidden rounded-xl border border-white/10">
+        <div className="overflow-hidden rounded-xl border border-border">
           <table className="w-full text-sm">
-            <thead className="border-b border-white/10 bg-gray-800/60">
+            <thead className="border-b border-border bg-muted/60">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-400">
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                   Submitted
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-400">
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                   Merchant ID
                 </th>
-                <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-400">
+                <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                   Amount
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-400">
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                   Bank details
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-400">
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                   Status
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-400">
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5 bg-gray-900/30">
+            <tbody className="divide-y divide-border bg-card/30">
               {payouts.map((p) => (
-                <tr key={p.id} className="hover:bg-white/2 transition-colors">
-                  <td className="px-4 py-4 text-gray-300 whitespace-nowrap text-xs">
+                <tr key={p.id} className="hover:bg-muted/2 transition-colors">
+                  <td className="px-4 py-4 text-foreground whitespace-nowrap text-xs">
                     {formatDate(p.requestedAt)}
                   </td>
                   <td className="px-4 py-4">
-                    <code className="rounded bg-gray-800 px-1.5 py-0.5 text-xs text-gray-400">
+                    <code className="rounded bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">
                       {p.userId.slice(0, 12)}…
                     </code>
                   </td>
-                  <td className="px-4 py-4 text-right font-semibold text-white whitespace-nowrap">
+                  <td className="px-4 py-4 text-right font-semibold text-foreground whitespace-nowrap">
                     {formatBaht(p.amountCents)}
                   </td>
-                  <td className="px-4 py-4 text-gray-400 text-xs max-w-xs">
+                  <td className="px-4 py-4 text-muted-foreground text-xs max-w-xs">
                     <span className="block truncate" title={p.bankInfo}>
                       {p.bankInfo}
                     </span>
@@ -147,11 +147,11 @@ export default async function AdminPayoutsPage() {
           </table>
 
           {/* Summary footer */}
-          <div className="border-t border-white/10 bg-gray-800/40 px-4 py-3 flex items-center justify-between">
-            <span className="text-xs text-gray-500">
+          <div className="border-t border-border bg-muted/40 px-4 py-3 flex items-center justify-between">
+            <span className="text-xs text-muted-foreground">
               {payouts.length} pending request{payouts.length !== 1 ? "s" : ""}
             </span>
-            <span className="text-xs font-medium text-gray-300">
+            <span className="text-xs font-medium text-foreground">
               Total: {formatBaht(payouts.reduce((sum, p) => sum + p.amountCents, 0))}
             </span>
           </div>
@@ -159,23 +159,26 @@ export default async function AdminPayoutsPage() {
       )}
 
       {/* Instructions */}
-      <div className="rounded-xl border border-white/10 bg-gray-800/20 p-4">
-        <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">
+      <div className="rounded-xl border border-border bg-muted/20 p-4">
+        <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
           Process checklist
         </h3>
-        <ol className="space-y-1 text-xs text-gray-500 list-decimal list-inside">
+        <ol className="space-y-1 text-xs text-muted-foreground list-decimal list-inside">
           <li>
             Verify merchant balance in Firebase console (
-            <code className="text-gray-400">merchants/&#123;userId&#125;/totalRevenueCents</code>)
+            <code className="text-muted-foreground">
+              merchants/&#123;userId&#125;/totalRevenueCents
+            </code>
+            )
           </li>
           <li>Transfer the amount to the merchant's bank account manually</li>
           <li>
-            Click <strong className="text-gray-400">Approve</strong> — this atomically increments{" "}
-            <code className="text-gray-400">paidOutCents</code>
+            Click <strong className="text-muted-foreground">Approve</strong> — this atomically
+            increments <code className="text-muted-foreground">paidOutCents</code>
           </li>
           <li>
             If transfer fails or details are wrong, click{" "}
-            <strong className="text-gray-400">Reject</strong> with a reason
+            <strong className="text-muted-foreground">Reject</strong> with a reason
           </li>
         </ol>
       </div>

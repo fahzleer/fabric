@@ -79,9 +79,9 @@ async function getOrders(token: string): Promise<AdminOrderItem[]> {
 }
 
 function stockBadgeClass(qty: number): string {
-  if (qty === 0) return "bg-red-500/20 text-red-400";
-  if (qty <= 5) return "bg-amber-500/20 text-amber-400";
-  return "bg-white/10 text-gray-300";
+  if (qty === 0) return "bg-destructive/20 text-destructive";
+  if (qty <= 5) return "bg-warning/20 text-warning";
+  return "bg-muted text-foreground";
 }
 
 function AdminProductRow({
@@ -95,32 +95,32 @@ function AdminProductRow({
   const isOut = p.totalStock === 0 && p.status === "active";
   return (
     <tr
-      className={`transition-colors ${isOut ? "bg-red-950/20" : isLow ? "bg-amber-950/20" : "hover:bg-white/2"}`}
+      className={`transition-colors ${isOut ? "bg-destructive/20" : isLow ? "bg-warning/20" : "hover:bg-muted/2"}`}
     >
       <td className="px-4 py-3">
-        <p className="font-medium text-white">{p.name}</p>
-        <p className="text-xs text-gray-500 font-mono">{p.id.slice(0, 8)}…</p>
+        <p className="font-medium text-foreground">{p.name}</p>
+        <p className="text-xs text-muted-foreground font-mono">{p.id.slice(0, 8)}…</p>
       </td>
       <td className="px-4 py-3">
         <span
-          className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${CATEGORY_STYLES[p.category] ?? "bg-gray-500/20 text-gray-400"}`}
+          className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${CATEGORY_STYLES[p.category] ?? "bg-muted text-muted-foreground"}`}
         >
           {p.category}
         </span>
       </td>
       <td className="px-4 py-3">
         <span
-          className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${STATUS_STYLES[p.status] ?? "bg-gray-500/20 text-gray-400"}`}
+          className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${STATUS_STYLES[p.status] ?? "bg-muted text-muted-foreground"}`}
         >
           {p.status}
         </span>
       </td>
-      <td className="px-4 py-3 text-gray-300 whitespace-nowrap">
+      <td className="px-4 py-3 text-foreground whitespace-nowrap">
         {formatPrice({ amount: p.priceCents / 100, currency: p.currency })}
       </td>
       <td className="px-4 py-3">
         {Object.keys(p.stock).length === 0 ? (
-          <span className="text-gray-600 text-xs">—</span>
+          <span className="text-muted-foreground text-xs">—</span>
         ) : (
           <div className="flex flex-wrap gap-1">
             {Object.entries(p.stock).map(([size, qty]) => (
@@ -136,16 +136,16 @@ function AdminProductRow({
       </td>
       <td className="px-4 py-3 text-center">
         <span
-          className={`text-sm font-bold ${isOut ? "text-red-400" : isLow ? "text-amber-400" : "text-white"}`}
+          className={`text-sm font-bold ${isOut ? "text-destructive" : isLow ? "text-warning" : "text-foreground"}`}
         >
           {p.totalStock}
         </span>
       </td>
-      <td className="px-4 py-3 text-center text-gray-400 text-sm">
+      <td className="px-4 py-3 text-center text-muted-foreground text-sm">
         {sold > 0 ? (
-          <span className="font-medium text-emerald-400">{sold}</span>
+          <span className="font-medium text-success">{sold}</span>
         ) : (
-          <span className="text-gray-600">0</span>
+          <span className="text-muted-foreground">0</span>
         )}
       </td>
     </tr>
@@ -174,17 +174,17 @@ function groupByStatus(products: AdminProduct[]): Record<string, number> {
 }
 
 const STATUS_STYLES: Record<string, string> = {
-  active: "bg-emerald-500/20 text-emerald-300",
-  draft: "bg-gray-500/20 text-gray-400",
-  archived: "bg-red-500/20 text-red-300",
+  active: "bg-success/20 text-success",
+  draft: "bg-muted text-muted-foreground",
+  archived: "bg-destructive/20 text-destructive",
 };
 
 const CATEGORY_STYLES: Record<string, string> = {
-  clothing: "bg-violet-500/20 text-violet-300",
-  electronics: "bg-blue-500/20 text-blue-300",
-  food: "bg-amber-500/20 text-amber-300",
-  books: "bg-emerald-500/20 text-emerald-300",
-  accessories: "bg-pink-500/20 text-pink-300",
+  clothing: "bg-info/20 text-info",
+  electronics: "bg-info/20 text-info",
+  food: "bg-warning/20 text-warning",
+  books: "bg-success/20 text-success",
+  accessories: "bg-destructive/20 text-destructive",
 };
 
 export default async function InventoryPage() {
@@ -195,7 +195,7 @@ export default async function InventoryPage() {
 
   const user = session.user as { id: string; email: string };
   const token = await issueAdminToken(user.id, user.email);
-  if (!token) return <p className="text-gray-400">Failed to authenticate</p>;
+  if (!token) return <p className="text-muted-foreground">Failed to authenticate</p>;
 
   const [products, orders] = await Promise.all([getProducts(token), getOrders(token)]);
 
@@ -210,8 +210,8 @@ export default async function InventoryPage() {
   return (
     <div className="space-y-8 max-w-6xl">
       <div>
-        <h1 className="text-2xl font-bold text-white">Inventory Control</h1>
-        <p className="mt-1 text-sm text-gray-400">
+        <h1 className="text-2xl font-bold text-foreground">Inventory Control</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
           Live stock levels from Firebase · {products.length} products tracked
         </p>
       </div>
@@ -223,13 +223,13 @@ export default async function InventoryPage() {
             label: "Total Products",
             value: products.length.toLocaleString(),
             note: `${activeProducts.length} active`,
-            accent: "border-violet-500/30 bg-violet-500/5",
+            accent: "border-info/30 bg-info/5",
           },
           {
             label: "Total Stock",
             value: `${totalStock.toLocaleString()} units`,
             note: "across all active products",
-            accent: "border-emerald-500/30 bg-emerald-500/5",
+            accent: "border-success/30 bg-success/5",
           },
           {
             label: "Low Stock",
@@ -237,8 +237,8 @@ export default async function InventoryPage() {
             note: "≤ 5 units remaining",
             accent:
               lowStockProducts.length > 0
-                ? "border-amber-500/30 bg-amber-500/10"
-                : "border-white/10 bg-gray-800/50",
+                ? "border-warning/30 bg-warning/10"
+                : "border-border bg-muted/50",
             danger: lowStockProducts.length > 0,
           },
           {
@@ -247,19 +247,21 @@ export default async function InventoryPage() {
             note: "active products with 0 stock",
             accent:
               outOfStockProducts.length > 0
-                ? "border-red-500/30 bg-red-500/10"
-                : "border-white/10 bg-gray-800/50",
+                ? "border-destructive/30 bg-destructive/10"
+                : "border-border bg-muted/50",
             danger: outOfStockProducts.length > 0,
           },
         ].map((card) => (
           <div key={card.label} className={`rounded-xl border px-6 py-5 ${card.accent}`}>
-            <p className="text-xs font-medium uppercase tracking-wider text-gray-400">
+            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
               {card.label}
             </p>
-            <p className={`mt-2 text-2xl font-bold ${card.danger ? "text-red-400" : "text-white"}`}>
+            <p
+              className={`mt-2 text-2xl font-bold ${card.danger ? "text-destructive" : "text-foreground"}`}
+            >
               {card.value}
             </p>
-            <p className="mt-1 text-xs text-gray-500">{card.note}</p>
+            <p className="mt-1 text-xs text-muted-foreground">{card.note}</p>
           </div>
         ))}
       </div>
@@ -269,7 +271,7 @@ export default async function InventoryPage() {
         {Object.entries(productsByStatus).map(([status, count]) => (
           <span
             key={status}
-            className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${STATUS_STYLES[status] ?? "bg-gray-500/20 text-gray-400"}`}
+            className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${STATUS_STYLES[status] ?? "bg-muted text-muted-foreground"}`}
           >
             {count} {status}
           </span>
@@ -278,23 +280,23 @@ export default async function InventoryPage() {
 
       {/* Product table */}
       {products.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-white/10 py-16 text-center">
+        <div className="rounded-xl border border-dashed border-border py-16 text-center">
           <p className="text-3xl mb-3">📦</p>
-          <p className="text-sm font-medium text-gray-300">No products yet</p>
-          <p className="mt-1 text-xs text-gray-500">
+          <p className="text-sm font-medium text-foreground">No products yet</p>
+          <p className="mt-1 text-xs text-muted-foreground">
             Products will appear here once merchants add them
           </p>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-xl border border-white/10">
+        <div className="overflow-hidden rounded-xl border border-border">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-white/10 bg-gray-800/60">
+              <tr className="border-b border-border bg-muted/60">
                 {["Product", "Category", "Status", "Price", "Stock by Size", "Total", "Sold"].map(
                   (h) => (
                     <th
                       key={h}
-                      className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-400"
+                      className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground"
                     >
                       {h}
                     </th>
@@ -302,21 +304,23 @@ export default async function InventoryPage() {
                 )}
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5 bg-gray-900/30">
+            <tbody className="divide-y divide-border bg-card/30">
               {products.map((p) => (
                 <AdminProductRow key={p.id} p={p} sold={soldByProduct.get(p.id) ?? 0} />
               ))}
             </tbody>
           </table>
-          <div className="border-t border-white/10 bg-gray-800/40 px-4 py-3 flex items-center justify-between">
-            <span className="text-xs text-gray-500">
+          <div className="border-t border-border bg-muted/40 px-4 py-3 flex items-center justify-between">
+            <span className="text-xs text-muted-foreground">
               {products.length} product{products.length !== 1 ? "s" : ""}
               {" · "}
               {activeProducts.length} active
             </span>
-            <span className="text-xs text-gray-400">
+            <span className="text-xs text-muted-foreground">
               Total stock:{" "}
-              <span className="font-semibold text-white">{totalStock.toLocaleString()} units</span>
+              <span className="font-semibold text-foreground">
+                {totalStock.toLocaleString()} units
+              </span>
             </span>
           </div>
         </div>

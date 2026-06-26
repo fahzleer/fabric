@@ -16,9 +16,9 @@ function formatBaht(cents: number): string {
 
 function StatusBadge({ status }: { status: PayoutRequest["status"] }) {
   const styles: Record<PayoutRequest["status"], string> = {
-    pending: "bg-amber-500/15 text-amber-400  border border-amber-500/30",
-    approved: "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30",
-    rejected: "bg-red-500/15 text-red-400  border border-red-500/30",
+    pending: "bg-warning/15 text-warning  border border-warning/30",
+    approved: "bg-success/15 text-success border border-success/30",
+    rejected: "bg-destructive/15 text-destructive  border border-destructive/30",
   };
   const labels: Record<PayoutRequest["status"], string> = {
     pending: "Pending",
@@ -49,7 +49,7 @@ export default async function MerchantPayoutsPage() {
   if (!isSome(maybeApi)) {
     return (
       <div className="flex h-full items-center justify-center">
-        <p className="text-gray-400">Unable to load payouts. Please refresh.</p>
+        <p className="text-muted-foreground">Unable to load payouts. Please refresh.</p>
       </div>
     );
   }
@@ -75,89 +75,97 @@ export default async function MerchantPayoutsPage() {
     <div className="space-y-8 max-w-3xl">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-white">Payouts</h1>
-        <p className="mt-1 text-sm text-gray-400">
+        <h1 className="text-2xl font-bold text-foreground">Payouts</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
           Withdraw your earnings. We review requests within 2 business days.
         </p>
       </div>
 
       {/* Balance card */}
-      <div className="rounded-xl border border-white/10 bg-gray-800/50 p-6">
-        <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">
+      <div className="rounded-xl border border-border bg-muted/50 p-6">
+        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           Available to withdraw
         </p>
-        <p className="mt-1 text-4xl font-bold text-emerald-400">
+        <p className="mt-1 text-4xl font-bold text-success">
           {formatBaht(Math.max(0, availableCents))}
         </p>
-        <div className="mt-4 flex flex-wrap gap-x-6 gap-y-1 text-sm text-gray-400">
+        <div className="mt-4 flex flex-wrap gap-x-6 gap-y-1 text-sm text-muted-foreground">
           <span>
             Total revenue:{" "}
-            <strong className="text-gray-300">{formatBaht(totalRevenueCents)}</strong>
+            <strong className="text-foreground">{formatBaht(totalRevenueCents)}</strong>
           </span>
           <span>
-            Platform fee: <strong className="text-gray-300">{(feePct * 100).toFixed(0)}%</strong>
+            Platform fee: <strong className="text-foreground">{(feePct * 100).toFixed(0)}%</strong>
           </span>
           <span>
-            Already paid out: <strong className="text-gray-300">{formatBaht(paidOutCents)}</strong>
+            Already paid out:{" "}
+            <strong className="text-foreground">{formatBaht(paidOutCents)}</strong>
           </span>
         </div>
         {isErr(balanceResult) && (
-          <p className="mt-2 text-xs text-red-400">Could not load balance: {balanceResult.error}</p>
+          <p className="mt-2 text-xs text-destructive">
+            Could not load balance: {balanceResult.error}
+          </p>
         )}
       </div>
 
       {/* Request withdrawal */}
-      <div className="rounded-xl border border-white/10 bg-gray-800/50 p-6">
-        <h2 className="text-base font-semibold text-white mb-4">Request withdrawal</h2>
+      <div className="rounded-xl border border-border bg-muted/50 p-6">
+        <h2 className="text-base font-semibold text-foreground mb-4">Request withdrawal</h2>
         <RequestPayoutForm availableBalanceCents={Math.max(0, availableCents)} />
       </div>
 
       {/* Payout history */}
       <div>
-        <h2 className="text-base font-semibold text-white mb-3">Withdrawal history</h2>
+        <h2 className="text-base font-semibold text-foreground mb-3">Withdrawal history</h2>
 
         {payouts.length === 0 ? (
-          <div className="rounded-xl border border-white/10 bg-gray-800/30 px-5 py-8 text-center text-sm text-gray-500">
+          <div className="rounded-xl border border-border bg-muted/30 px-5 py-8 text-center text-sm text-muted-foreground">
             No withdrawal requests yet.
           </div>
         ) : (
-          <div className="overflow-hidden rounded-xl border border-white/10">
+          <div className="overflow-hidden rounded-xl border border-border">
             <table className="w-full text-sm">
-              <thead className="border-b border-white/10 bg-gray-800/60">
+              <thead className="border-b border-border bg-muted/60">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-400">
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                     Date
                   </th>
-                  <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-400">
+                  <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                     Amount
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-400">
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                     Bank
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-400">
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                     Status
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-400">
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                     Note
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5 bg-gray-900/30">
+              <tbody className="divide-y divide-border bg-card/30">
                 {payouts.map((p) => (
-                  <tr key={p.id} className="hover:bg-white/2 transition-colors">
-                    <td className="px-4 py-3 text-gray-300 whitespace-nowrap">
+                  <tr key={p.id} className="hover:bg-muted/2 transition-colors">
+                    <td className="px-4 py-3 text-foreground whitespace-nowrap">
                       {formatDate(p.requestedAt)}
                     </td>
-                    <td className="px-4 py-3 text-right font-medium text-white whitespace-nowrap">
+                    <td className="px-4 py-3 text-right font-medium text-foreground whitespace-nowrap">
                       {formatBaht(p.amountCents)}
                     </td>
-                    <td className="px-4 py-3 text-gray-400 max-w-xs truncate" title={p.bankInfo}>
+                    <td
+                      className="px-4 py-3 text-muted-foreground max-w-xs truncate"
+                      title={p.bankInfo}
+                    >
                       {p.bankInfo}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
                       <StatusBadge status={p.status} />
                     </td>
-                    <td className="px-4 py-3 text-gray-500 text-xs">{p.adminNote ?? "—"}</td>
+                    <td className="px-4 py-3 text-muted-foreground text-xs">
+                      {p.adminNote ?? "—"}
+                    </td>
                   </tr>
                 ))}
               </tbody>

@@ -14,11 +14,11 @@ type ProductCardProps = {
 function badgeStyle(badge: BadgeType): string {
   switch (badge) {
     case "bestseller":
-      return "bg-amber-100 text-amber-800";
+      return "bg-warning-subtle text-warning-foreground";
     case "premium":
-      return "bg-purple-100 text-purple-800";
+      return "bg-info-subtle text-info";
     case "limited":
-      return "bg-rose-100 text-rose-800";
+      return "bg-destructive-subtle text-destructive";
   }
 }
 
@@ -40,9 +40,9 @@ export function ProductCard({ product, badge }: ProductCardProps) {
   return (
     <Link
       href={`/product/${product.id.value}`}
-      className="group block overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md"
+      className="group block overflow-hidden rounded-lg border border-border bg-card shadow-sm transition-shadow hover:shadow-md"
     >
-      <div className="aspect-square overflow-hidden bg-gray-100 relative">
+      <div className="aspect-square overflow-hidden bg-muted relative">
         {badge && (
           <span
             className={`absolute left-2 top-2 z-10 rounded-full px-2 py-0.5 text-xs font-semibold ${badgeStyle(badge)}`}
@@ -62,16 +62,16 @@ export function ProductCard({ product, badge }: ProductCardProps) {
 
       <div className="p-4">
         <div className="flex items-start justify-between gap-2">
-          <h3 className="text-lg font-semibold text-gray-900">{product.name.value}</h3>
-          <span className="shrink-0 rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600">
+          <h3 className="text-lg font-semibold text-foreground">{product.name.value}</h3>
+          <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
             {categoryLabel}
           </span>
         </div>
-        <p className="mt-1 text-sm text-gray-600">{product.tagline}</p>
+        <p className="mt-1 text-sm text-muted-foreground">{product.tagline}</p>
         <div className="mt-2 flex items-center justify-between">
-          <p className="text-xl font-bold text-gray-900">{formattedPrice}</p>
+          <p className="font-price text-xl font-bold text-foreground">{formattedPrice}</p>
           {!product.inStock && (
-            <span className="text-sm font-medium text-red-500">Out of stock</span>
+            <span className="text-sm font-medium text-destructive">Out of stock</span>
           )}
         </div>
       </div>

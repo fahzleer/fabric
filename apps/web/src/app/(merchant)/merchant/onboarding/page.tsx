@@ -32,12 +32,12 @@ function Step({
   return (
     <div
       className={`flex items-start gap-4 rounded-xl border p-5 transition-colors ${
-        done ? "border-emerald-500/30 bg-emerald-500/5" : "border-white/10 bg-gray-800/50"
+        done ? "border-success/30 bg-success/5" : "border-border bg-muted/50"
       }`}
     >
       <div
         className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold ${
-          done ? "bg-emerald-500 text-white" : "bg-gray-700 text-gray-400"
+          done ? "bg-success text-foreground" : "bg-muted text-muted-foreground"
         }`}
       >
         {done ? (
@@ -57,21 +57,21 @@ function Step({
       </div>
       <div className="flex-1">
         <div className="flex items-center gap-2">
-          <h3 className={`text-sm font-semibold ${done ? "text-emerald-300" : "text-white"}`}>
+          <h3 className={`text-sm font-semibold ${done ? "text-success" : "text-foreground"}`}>
             {title}
           </h3>
           {optional && (
-            <span className="rounded-full bg-gray-700/60 px-2 py-0.5 text-xs text-gray-400">
+            <span className="rounded-full bg-muted/60 px-2 py-0.5 text-xs text-muted-foreground">
               optional
             </span>
           )}
-          {done && <span className="text-xs font-medium text-emerald-400">Done</span>}
+          {done && <span className="text-xs font-medium text-success">Done</span>}
         </div>
-        <p className="mt-1 text-xs text-gray-400">{description}</p>
+        <p className="mt-1 text-xs text-muted-foreground">{description}</p>
         {!done && cta && ctaHref && (
           <Link
             href={ctaHref}
-            className="mt-3 inline-block rounded-lg bg-emerald-600 px-4 py-1.5 text-xs font-medium text-white hover:bg-emerald-500"
+            className="mt-3 inline-block rounded-lg bg-success px-4 py-1.5 text-xs font-medium text-foreground hover:bg-success"
           >
             {cta} →
           </Link>
@@ -94,7 +94,7 @@ export default async function MerchantOnboardingPage({
   if (!isSome(maybeApi)) {
     return (
       <div className="flex h-full items-center justify-center">
-        <p className="text-gray-400">Unable to load onboarding. Please refresh.</p>
+        <p className="text-muted-foreground">Unable to load onboarding. Please refresh.</p>
       </div>
     );
   }
@@ -111,21 +111,21 @@ export default async function MerchantOnboardingPage({
     return (
       <div className="max-w-lg space-y-6">
         <div>
-          <h1 className="text-2xl font-bold text-white">Create your store</h1>
-          <p className="mt-1 text-sm text-gray-400">
+          <h1 className="text-2xl font-bold text-foreground">Create your store</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
             Set up your merchant profile to start selling on Fabric.
           </p>
         </div>
 
         {error && (
-          <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3">
-            <p className="text-sm text-red-400">{error}</p>
+          <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3">
+            <p className="text-sm text-destructive">{error}</p>
           </div>
         )}
 
         <form action={onboardMerchantAction} className="space-y-5">
           <div>
-            <label htmlFor="storeName" className="block text-sm font-medium text-gray-300">
+            <label htmlFor="storeName" className="block text-sm font-medium text-foreground">
               Store name
             </label>
             <input
@@ -136,9 +136,9 @@ export default async function MerchantOnboardingPage({
               minLength={2}
               maxLength={80}
               placeholder="e.g. Bangkok Threads"
-              className="mt-1.5 w-full rounded-lg border border-white/10 bg-gray-800 px-3 py-2.5 text-sm text-white placeholder-gray-500 outline-none focus:border-emerald-500/60 focus:ring-1 focus:ring-emerald-500/30"
+              className="mt-1.5 w-full rounded-lg border border-border bg-muted px-3 py-2.5 text-sm text-foreground placeholder-muted-foreground outline-none focus:border-success/60 focus:ring-1 focus:ring-success/30"
             />
-            <p className="mt-1 text-xs text-gray-500">
+            <p className="mt-1 text-xs text-muted-foreground">
               This will be displayed to customers and used in your store URL.
             </p>
           </div>
@@ -156,15 +156,15 @@ export default async function MerchantOnboardingPage({
   return (
     <div className="space-y-8 max-w-2xl">
       <div>
-        <h1 className="text-2xl font-bold text-white">Store setup</h1>
-        <p className="mt-1 text-sm text-gray-400">
+        <h1 className="text-2xl font-bold text-foreground">Store setup</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
           Complete these steps to get your store ready for customers.
         </p>
       </div>
 
       {success && (
-        <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3">
-          <p className="text-sm font-medium text-emerald-300">
+        <div className="rounded-xl border border-success/30 bg-success/10 px-4 py-3">
+          <p className="text-sm font-medium text-success">
             Store created! Complete the steps below to start selling.
           </p>
         </div>
@@ -172,21 +172,21 @@ export default async function MerchantOnboardingPage({
 
       {/* All-done banner */}
       {hasProduct && (
-        <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-5">
-          <p className="text-base font-semibold text-emerald-300">Your store is ready to sell!</p>
-          <p className="mt-1 text-sm text-gray-400">
+        <div className="rounded-xl border border-success/30 bg-success/10 p-5">
+          <p className="text-base font-semibold text-success">Your store is ready to sell!</p>
+          <p className="mt-1 text-sm text-muted-foreground">
             All required steps are complete. Head to your dashboard to manage your store.
           </p>
           <div className="mt-4 flex flex-wrap gap-3">
             <Link
               href="/merchant/dashboard"
-              className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-500"
+              className="rounded-lg bg-success px-4 py-2 text-sm font-medium text-foreground hover:bg-success"
             >
               Go to dashboard
             </Link>
             <Link
               href="/merchant/products"
-              className="rounded-lg border border-white/10 px-4 py-2 text-sm font-medium text-gray-300 hover:bg-white/5"
+              className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-muted"
             >
               Manage products
             </Link>
@@ -224,14 +224,14 @@ export default async function MerchantOnboardingPage({
       </div>
 
       {/* Progress */}
-      <div className="rounded-xl border border-white/10 bg-gray-800/30 p-4">
-        <div className="flex items-center justify-between text-xs text-gray-400">
+      <div className="rounded-xl border border-border bg-muted/30 p-4">
+        <div className="flex items-center justify-between text-xs text-muted-foreground">
           <span>Setup progress</span>
           <span>{[true, hasProduct].filter(Boolean).length} / 2 required steps done</span>
         </div>
-        <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-gray-700">
+        <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-muted">
           <div
-            className="h-full rounded-full bg-emerald-500 transition-all"
+            className="h-full rounded-full bg-success transition-all"
             style={{ width: `${([true, hasProduct].filter(Boolean).length / 2) * 100}%` }}
           />
         </div>
@@ -239,19 +239,19 @@ export default async function MerchantOnboardingPage({
 
       {/* Store URL */}
       {isSome(billing.storeSlug) && (
-        <div className="rounded-xl border border-white/10 bg-gray-800/30 p-4">
-          <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">
+        <div className="rounded-xl border border-border bg-muted/30 p-4">
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             Your store URL
           </p>
           <div className="mt-2 flex flex-wrap items-center gap-2">
-            <code className="rounded bg-gray-900 px-2.5 py-1 text-sm text-emerald-300">
+            <code className="rounded bg-card px-2.5 py-1 text-sm text-success">
               {APP_URL}/store/{billing.storeSlug.value}
             </code>
             <Link
               href={`/store/${billing.storeSlug.value}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-xs text-gray-400 hover:text-gray-300"
+              className="text-xs text-muted-foreground hover:text-foreground"
             >
               Open ↗
             </Link>
@@ -261,7 +261,7 @@ export default async function MerchantOnboardingPage({
 
       <Link
         href="/merchant/dashboard"
-        className="inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-300"
+        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
       >
         ← Back to dashboard
       </Link>

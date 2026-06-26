@@ -13,6 +13,7 @@ import { formatPrice } from "@/lib/price";
 import { syncCartToServer } from "@/lib/sync-cart";
 import { Atom, Result, useAtom, useAtomSet, useAtomValue } from "@effect-atom/atom-react";
 import { type Maybe, None, Some, isNone, isSome } from "@fabric/types";
+import { Button } from "@fabric/ui";
 import { Effect, Option } from "effect";
 import { useRouter } from "next/navigation";
 import { getAddress } from "viem";
@@ -381,7 +382,7 @@ export function X402PaymentForm({ cart, onBack }: X402PaymentFormProps) {
     <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold text-gray-900">Pay with USDC</h2>
-        <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 border border-blue-200 px-2.5 py-1 text-xs font-medium text-blue-700">
+        <span className="inline-flex items-center gap-1 rounded-full bg-info-subtle border border-info px-2.5 py-1 text-xs font-medium text-info">
           <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
             <circle cx="10" cy="10" r="9" />
           </svg>
@@ -403,13 +404,13 @@ export function X402PaymentForm({ cart, onBack }: X402PaymentFormProps) {
       </p>
 
       {isConnected && address ? (
-        <div className="rounded-lg bg-green-50 border border-green-200 p-3 text-sm text-green-800">
+        <div className="rounded-lg bg-success-subtle border border-success p-3 text-sm text-success">
           <span className="font-medium">Wallet connected: </span>
           <span className="font-mono">
             {address.slice(0, 6)}…{address.slice(-4)}
           </span>
           {!isOnCorrectChain && (
-            <span className="ml-2 text-amber-600 font-medium">
+            <span className="ml-2 text-warning font-medium">
               (wrong network — will switch to {TARGET_CHAIN.name})
             </span>
           )}
@@ -421,13 +422,13 @@ export function X402PaymentForm({ cart, onBack }: X402PaymentFormProps) {
       )}
 
       {status === "error" && isSome(error) && (
-        <div className="rounded-lg bg-red-50 border border-red-200 p-3 text-xs text-red-700">
+        <div className="rounded-lg bg-destructive-subtle border border-destructive p-3 text-xs text-destructive">
           {error.value}
         </div>
       )}
 
       {isLoading && loadingLabel[status] && (
-        <div className="rounded-lg bg-blue-50 border border-blue-200 p-3 text-xs text-blue-700 flex items-center gap-2">
+        <div className="rounded-lg bg-info-subtle border border-info p-3 text-xs text-info flex items-center gap-2">
           <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true">
             <circle
               className="opacity-25"
@@ -461,32 +462,36 @@ export function X402PaymentForm({ cart, onBack }: X402PaymentFormProps) {
       </div>
 
       <div className="flex gap-3">
-        <button
+        <Button
           type="button"
+          variant="outline"
+          size="lg"
           onClick={onBack}
           disabled={isLoading}
-          className="flex-1 rounded-lg border border-gray-300 px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+          className="flex-1"
         >
           ← Back
-        </button>
+        </Button>
         {!isConnected ? (
-          <button
+          <Button
             type="button"
+            size="lg"
             onClick={handleConnect}
             disabled={isLoading}
-            className="flex-1 rounded-lg bg-blue-600 px-4 py-3 text-white font-medium hover:bg-blue-700 disabled:opacity-50"
+            className="flex-1"
           >
             {resolveConnectButtonLabel(status)}
-          </button>
+          </Button>
         ) : (
-          <button
+          <Button
             type="button"
+            size="lg"
             onClick={handlePay}
             disabled={isLoading}
-            className="flex-1 rounded-lg bg-blue-600 px-4 py-3 text-white font-medium hover:bg-blue-700 disabled:opacity-50"
+            className="flex-1"
           >
             {resolvePayButtonLabel(isLoading, estimatedUsdc)}
-          </button>
+          </Button>
         )}
       </div>
     </div>

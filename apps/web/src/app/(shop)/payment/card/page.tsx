@@ -157,8 +157,8 @@ export default function CardPaymentPage() {
         </ol>
       </section>
 
-      <div className="mt-8 p-4 rounded-lg bg-green-50 border border-green-200">
-        <p className="text-sm text-green-800 font-medium">
+      <div className="mt-8 p-4 rounded-lg bg-success-subtle border border-success">
+        <p className="text-sm text-success font-medium">
           ข้อมูลบัตรถูกเข้ารหัสด้วย TLS 1.3 — Fabric ไม่เก็บข้อมูลบัตรของคุณ
         </p>
       </div>

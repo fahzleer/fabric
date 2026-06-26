@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@fabric/ui";
 import Link from "next/link";
 import { useEffect } from "react";
 
@@ -28,12 +29,12 @@ export default function ProductError({ error, reset }: ErrorProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
-      <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8 text-center">
+    <div className="min-h-screen bg-muted flex items-center justify-center px-4">
+      <div className="max-w-md w-full bg-card rounded-lg shadow-lg p-8 text-center">
         {/* Error icon */}
-        <div className="mx-auto w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
+        <div className="mx-auto w-16 h-16 bg-destructive-subtle rounded-full flex items-center justify-center">
           <svg
-            className="w-8 h-8 text-red-600"
+            className="w-8 h-8 text-destructive"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -49,37 +50,30 @@ export default function ProductError({ error, reset }: ErrorProps) {
         </div>
 
         {/* Error message */}
-        <h1 className="mt-4 text-2xl font-bold text-gray-900">{errorTitle}</h1>
-        <p className="mt-2 text-gray-600">{errorMessage}</p>
+        <h1 className="mt-4 text-2xl font-bold text-foreground">{errorTitle}</h1>
+        <p className="mt-2 text-muted-foreground">{errorMessage}</p>
 
         {/* Error details (development only) */}
         {process.env.NODE_ENV === "development" && (
-          <div className="mt-4 p-4 bg-gray-100 rounded text-left">
-            <p className="text-sm text-gray-700 font-mono">{error.message}</p>
+          <div className="mt-4 p-4 bg-muted rounded text-left">
+            <p className="text-sm text-foreground font-mono">{error.message}</p>
             {error.digest !== undefined && (
-              <p className="mt-2 text-xs text-gray-500">Error ID: {error.digest}</p>
+              <p className="mt-2 text-xs text-muted-foreground">Error ID: {error.digest}</p>
             )}
           </div>
         )}
 
         {/* Actions */}
         <div className="mt-6 space-y-3">
-          <button
-            type="button"
-            onClick={reset}
-            className="w-full rounded-lg bg-blue-600 px-4 py-2 text-white font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-          >
+          <Button type="button" onClick={reset} className="w-full">
             Try Again
-          </button>
+          </Button>
 
-          <Link
-            href="/products"
-            className="block w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-700 font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-          >
-            Back to Products
-          </Link>
+          <Button asChild variant="outline" className="w-full">
+            <Link href="/products">Back to Products</Link>
+          </Button>
 
-          <Link href="/" className="block w-full text-sm text-blue-600 hover:text-blue-800">
+          <Link href="/" className="block w-full text-sm text-info hover:text-info/80">
             Go to Homepage
           </Link>
         </div>

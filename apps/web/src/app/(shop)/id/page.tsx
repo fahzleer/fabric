@@ -132,7 +132,7 @@ export default function IndonesiaPage() {
           </h2>
           <ul className="space-y-3">
             <li className="flex items-start gap-3 rounded-lg border border-gray-200 p-4">
-              <span className="text-green-600 font-bold mt-0.5">✓</span>
+              <span className="text-success font-bold mt-0.5">✓</span>
               <div>
                 <p className="font-medium text-gray-900">Kartu Kredit / Debit (Visa, Mastercard)</p>
                 <p className="text-sm text-gray-500">
@@ -141,7 +141,7 @@ export default function IndonesiaPage() {
               </div>
             </li>
             <li className="flex items-start gap-3 rounded-lg border border-gray-200 p-4">
-              <span className="text-green-600 font-bold mt-0.5">✓</span>
+              <span className="text-success font-bold mt-0.5">✓</span>
               <div>
                 <p className="font-medium text-gray-900">USDC di Base Network</p>
                 <p className="text-sm text-gray-500">
@@ -165,7 +165,7 @@ export default function IndonesiaPage() {
               "Konfirmasi pesanan otomatis via email setelah pembayaran berhasil",
             ].map((item) => (
               <li key={item} className="flex items-start gap-2 text-sm text-gray-700">
-                <span className="text-green-600 font-bold mt-0.5 flex-shrink-0">✓</span>
+                <span className="text-success font-bold mt-0.5 flex-shrink-0">✓</span>
                 {item}
               </li>
             ))}

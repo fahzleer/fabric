@@ -5,6 +5,7 @@ import type { CartItem } from "@/domain/cart/types";
 import { dexieCartAdapter } from "@/infrastructure/dexie/dexie-cart.adapter";
 import { formatPrice } from "@/lib/price";
 import { useAtomSet } from "@effect-atom/atom-react";
+import { Button } from "@fabric/ui";
 import BigNumber from "bignumber.js";
 import { Effect } from "effect";
 import { Option } from "effect";
@@ -38,9 +39,9 @@ export function CartItemRow({ item }: CartItemRowProps) {
   };
 
   return (
-    <div className="flex gap-4 bg-white rounded-lg border border-gray-200 p-4">
+    <div className="flex gap-4 bg-card rounded-lg border border-border p-4">
       {/* Image */}
-      <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-md bg-gray-100">
+      <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-md bg-muted">
         <Image
           src={item.productSnapshot.image.url}
           alt={item.productSnapshot.name.value}
@@ -54,37 +55,43 @@ export function CartItemRow({ item }: CartItemRowProps) {
       <div className="flex flex-1 flex-col">
         <div className="flex justify-between">
           <div>
-            <h3 className="text-sm font-medium text-gray-900">{item.productSnapshot.name.value}</h3>
-            <p className="mt-1 text-xs text-gray-500">Size: {item.size}</p>
+            <h3 className="text-sm font-medium text-foreground">
+              {item.productSnapshot.name.value}
+            </h3>
+            <p className="mt-1 text-xs text-muted-foreground">Size: {item.size}</p>
           </div>
-          <p className="text-sm font-medium text-gray-900">{formattedLineTotal}</p>
+          <p className="text-sm font-medium text-foreground">{formattedLineTotal}</p>
         </div>
 
         <div className="mt-auto flex items-center justify-between">
           {/* Quantity stepper */}
           <div className="flex items-center gap-2">
-            <button
+            <Button
               type="button"
+              variant="outline"
+              size="icon"
               onClick={() => handleQuantityChange(-1)}
-              className="h-7 w-7 rounded border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-40"
+              className="h-7 w-7"
               disabled={item.quantity <= 1}
             >
               −
-            </button>
+            </Button>
             <span className="w-8 text-center text-sm">{item.quantity}</span>
-            <button
+            <Button
               type="button"
+              variant="outline"
+              size="icon"
               onClick={() => handleQuantityChange(1)}
-              className="h-7 w-7 rounded border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              className="h-7 w-7"
             >
               +
-            </button>
+            </Button>
           </div>
 
           <button
             type="button"
             onClick={handleRemove}
-            className="text-xs text-red-500 hover:text-red-700"
+            className="text-xs text-destructive hover:text-destructive/80"
           >
             Remove
           </button>

@@ -59,8 +59,8 @@ export interface ProductFormProps {
 }
 
 const inputClass =
-  "block w-full rounded-lg border border-white/10 bg-gray-800 px-3 py-2.5 text-sm text-white placeholder-gray-500 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500";
-const labelClass = "block text-sm font-medium text-gray-300 mb-1";
+  "block w-full rounded-lg border border-border bg-muted px-3 py-2.5 text-sm text-foreground placeholder-muted-foreground focus:border-success focus:outline-none focus:ring-1 focus:ring-success";
+const labelClass = "block text-sm font-medium text-foreground mb-1";
 
 export const ProductForm = memo(function ProductForm({
   mode,
@@ -117,19 +117,19 @@ export const ProductForm = memo(function ProductForm({
     <form
       ref={formRef}
       action={action}
-      className="space-y-6 rounded-xl border border-white/10 bg-gray-800/50 p-8"
+      className="space-y-6 rounded-xl border border-border bg-muted/50 p-8"
     >
       {errorMsg && errorMsg !== "" && (
-        <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3">
-          <p className="text-sm text-red-400">{errorMsg}</p>
+        <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3">
+          <p className="text-sm text-destructive">{errorMsg}</p>
         </div>
       )}
 
       {/* AI bundle generator */}
-      <div className="flex items-center justify-between rounded-lg border border-emerald-500/20 bg-emerald-500/5 px-4 py-3">
+      <div className="flex items-center justify-between rounded-lg border border-success/20 bg-success/5 px-4 py-3">
         <div>
-          <p className="text-sm font-medium text-emerald-300">✨ AI Draft</p>
-          <p className="text-xs text-emerald-300/70">
+          <p className="text-sm font-medium text-success">✨ AI Draft</p>
+          <p className="text-xs text-success/70">
             Generate tagline, description, and alt text in one click
           </p>
         </div>
@@ -137,7 +137,7 @@ export const ProductForm = memo(function ProductForm({
           type="button"
           onClick={handleGenerateAll}
           disabled={pendingAll}
-          className="rounded-md bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded-md bg-success px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-success disabled:cursor-not-allowed disabled:opacity-50"
         >
           {pendingAll ? "กำลังเขียน…" : "Generate all"}
         </button>
@@ -182,7 +182,9 @@ export const ProductForm = memo(function ProductForm({
             placeholder="599.00"
             className={inputClass}
           />
-          <p className="mt-1 text-xs text-gray-500">Enter price in baht (e.g., 599 = ฿599.00)</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Enter price in baht (e.g., 599 = ฿599.00)
+          </p>
         </div>
         <div>
           <label htmlFor="priceCurrency" className={labelClass}>
@@ -259,11 +261,11 @@ export const ProductForm = memo(function ProductForm({
 
       {/* Stock by size */}
       <fieldset>
-        <legend className="text-sm font-medium text-gray-300 mb-3">Stock per size</legend>
+        <legend className="text-sm font-medium text-foreground mb-3">Stock per size</legend>
         <div className="grid grid-cols-3 gap-3">
           {SIZES.map((size) => (
             <div key={size}>
-              <label htmlFor={`stock-${size}`} className="block text-xs text-gray-400 mb-1">
+              <label htmlFor={`stock-${size}`} className="block text-xs text-muted-foreground mb-1">
                 {size}
               </label>
               <input
@@ -286,7 +288,7 @@ export const ProductForm = memo(function ProductForm({
       <div className="flex gap-3 pt-2">
         <Link
           href={cancelHref}
-          className="flex-1 rounded-lg border border-white/10 px-4 py-2.5 text-center text-sm font-medium text-gray-300 hover:bg-white/5"
+          className="flex-1 rounded-lg border border-border px-4 py-2.5 text-center text-sm font-medium text-foreground hover:bg-muted"
         >
           Cancel
         </Link>

@@ -53,15 +53,15 @@ export function Modal({ children }: ModalProps) {
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 animate-in fade-in duration-200"
       aria-label="Modal dialog"
     >
-      <div className="relative max-w-2xl w-full bg-white rounded-lg shadow-xl overflow-hidden animate-in zoom-in-95 duration-200">
+      <div className="relative max-w-2xl w-full bg-card rounded-lg shadow-xl overflow-hidden animate-in zoom-in-95 duration-200">
         <button
           onClick={closeModal}
-          className="absolute top-4 right-4 z-10 rounded-full bg-white/80 p-2 hover:bg-white transition-colors focus:outline-none focus:ring-2 focus:ring-gray-900"
+          className="absolute top-4 right-4 z-10 rounded-full bg-background/80 p-2 hover:bg-background transition-colors focus:outline-none focus:ring-2 focus:ring-ring"
           aria-label="Close modal"
           type="button"
         >
           <svg
-            className="h-6 w-6 text-gray-600"
+            className="h-6 w-6 text-muted-foreground"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"

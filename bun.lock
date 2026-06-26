@@ -75,6 +75,7 @@
         "@effect-atom/atom-react": "^0.5.0",
         "@effect-rx/rx-react": "^0.42.4",
         "@fabric/types": "*",
+        "@fabric/ui": "*",
         "@js-temporal/polyfill": "^0.5.1",
         "@orpc/client": "^1.13.5",
         "@orpc/react-query": "^1.13.5",

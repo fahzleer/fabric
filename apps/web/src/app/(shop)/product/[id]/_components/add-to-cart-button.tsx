@@ -6,6 +6,7 @@ import { dexieCartAdapter } from "@/infrastructure/dexie/dexie-cart.adapter";
 import { trackEvent } from "@/lib/analytics";
 import { Atom, useAtom, useAtomSet } from "@effect-atom/atom-react";
 import { type Maybe, None, Some, isNone, isSome } from "@fabric/types";
+import { Button } from "@fabric/ui";
 import { Effect, Option } from "effect";
 
 const selectedSizeAtom = Atom.make<Maybe<ProductSize>>(None());
@@ -63,19 +64,19 @@ export function AddToCartButton({
 
   return (
     <div className="space-y-4">
-      {/* Size selector */}
+      {/* Size selector — segmented toggle, kept as custom buttons (tokenized) */}
       <div>
-        <h3 className="text-sm font-medium text-gray-900">Size</h3>
+        <h3 className="text-sm font-medium text-foreground">Size</h3>
         <div className="mt-2 flex gap-2 flex-wrap">
           {availableSizes.map((size) => (
             <button
               key={size}
               type="button"
               onClick={() => setSelectedSize(Some(size))}
-              className={`border rounded px-4 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+              className={`border rounded px-4 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring ${
                 isSome(selectedSize) && selectedSize.value === size
-                  ? "border-blue-600 bg-blue-50 text-blue-600"
-                  : "border-gray-300 text-gray-900 hover:border-gray-400"
+                  ? "border-foreground bg-secondary text-foreground"
+                  : "border-input text-foreground hover:border-border-strong"
               }`}
             >
               {size}
@@ -83,29 +84,33 @@ export function AddToCartButton({
           ))}
         </div>
         {status === "error" && isNone(selectedSize) && (
-          <p className="mt-1 text-xs text-red-500">Please select a size first.</p>
+          <p className="mt-1 text-xs text-destructive">Please select a size first.</p>
         )}
       </div>
 
       {/* Quantity */}
       <div className="flex items-center gap-3">
-        <span className="text-sm font-medium text-gray-900">Quantity</span>
+        <span className="text-sm font-medium text-foreground">Quantity</span>
         <div className="flex items-center gap-2">
-          <button
+          <Button
             type="button"
+            variant="outline"
+            size="icon"
             onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-            className="h-8 w-8 rounded border border-gray-300 text-sm font-medium hover:bg-gray-50"
+            className="h-8 w-8"
           >
             −
-          </button>
+          </Button>
           <span className="w-8 text-center text-sm font-medium">{quantity}</span>
-          <button
+          <Button
             type="button"
+            variant="outline"
+            size="icon"
             onClick={() => setQuantity((q) => q + 1)}
-            className="h-8 w-8 rounded border border-gray-300 text-sm font-medium hover:bg-gray-50"
+            className="h-8 w-8"
           >
             +
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -113,8 +118,9 @@ export function AddToCartButton({
       <div aria-live="polite" aria-atomic="true" className="sr-only">
         {status === "added" ? "Added to cart" : ""}
       </div>
-      <button
+      <Button
         type="button"
+        size="lg"
         onClick={handleAddToCart}
         aria-disabled={status === "adding"}
         aria-label={
@@ -124,12 +130,12 @@ export function AddToCartButton({
               ? "Added to cart"
               : "Add to cart"
         }
-        className={`w-full rounded-lg px-6 py-3 text-white font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors [min-block-size:3rem] ${
+        className={`w-full [min-block-size:3rem] ${
           status === "added"
-            ? "bg-green-600 hover:bg-green-700"
+            ? "bg-success text-success-foreground hover:bg-success/90"
             : status === "adding"
-              ? "bg-blue-400 pointer-events-none"
-              : "bg-blue-600 hover:bg-blue-700"
+              ? "pointer-events-none opacity-70"
+              : ""
         }`}
       >
         <span className="inline-block w-full text-center">
@@ -139,7 +145,7 @@ export function AddToCartButton({
               ? "✓ Added to Cart"
               : "Add to Cart"}
         </span>
-      </button>
+      </Button>
     </div>
   );
 }

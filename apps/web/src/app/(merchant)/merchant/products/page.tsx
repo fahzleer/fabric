@@ -17,7 +17,7 @@ export default async function MerchantProductsPage() {
   if (!isSome(maybeApi)) {
     return (
       <div className="flex h-full items-center justify-center">
-        <p className="text-gray-400">Unable to load products. Please refresh.</p>
+        <p className="text-muted-foreground">Unable to load products. Please refresh.</p>
       </div>
     );
   }
@@ -30,12 +30,12 @@ export default async function MerchantProductsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Products</h1>
-          <p className="mt-1 text-sm text-gray-400">Manage your store catalogue</p>
+          <h1 className="text-2xl font-bold text-foreground">Products</h1>
+          <p className="mt-1 text-sm text-muted-foreground">Manage your store catalogue</p>
         </div>
         <Link
           href="/merchant/products/new"
-          className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-500"
+          className="rounded-lg bg-success px-4 py-2 text-sm font-medium text-foreground hover:bg-success"
         >
           + New product
         </Link>
@@ -43,12 +43,12 @@ export default async function MerchantProductsPage() {
 
       {/* Error state */}
       {isErr(result) ? (
-        <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-6">
-          <p className="text-sm text-red-400">{result.error}</p>
+        <div className="rounded-xl border border-destructive/30 bg-destructive/10 p-6">
+          <p className="text-sm text-destructive">{result.error}</p>
           {result.error.startsWith("[SubscriptionInactive]") && (
             <Link
               href="/merchant/billing"
-              className="mt-3 inline-block text-sm text-emerald-400 hover:text-emerald-300"
+              className="mt-3 inline-block text-sm text-success hover:text-success"
             >
               Activate your plan →
             </Link>
@@ -56,12 +56,14 @@ export default async function MerchantProductsPage() {
         </div>
       ) : result.value.items.length === 0 ? (
         /* Empty state */
-        <div className="rounded-xl border border-dashed border-white/10 bg-gray-800/30 p-12 text-center">
-          <p className="text-lg font-medium text-gray-300">No products yet</p>
-          <p className="mt-2 text-sm text-gray-500">Create your first product to start selling</p>
+        <div className="rounded-xl border border-dashed border-border bg-muted/30 p-12 text-center">
+          <p className="text-lg font-medium text-foreground">No products yet</p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Create your first product to start selling
+          </p>
           <Link
             href="/merchant/products/new"
-            className="mt-5 inline-block rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-emerald-500"
+            className="mt-5 inline-block rounded-lg bg-success px-5 py-2.5 text-sm font-medium text-foreground hover:bg-success"
           >
             Create product
           </Link>

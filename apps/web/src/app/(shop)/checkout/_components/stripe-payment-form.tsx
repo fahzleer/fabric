@@ -11,6 +11,7 @@ import type { ShoppingCart } from "@/domain/cart/types";
 import { formatPrice } from "@/lib/price";
 import { Atom, useAtom, useAtomSet, useAtomValue } from "@effect-atom/atom-react";
 import { type Maybe, None, Some, isNone, isSome } from "@fabric/types";
+import { Button } from "@fabric/ui";
 import { Option } from "effect";
 import { useRouter } from "next/navigation";
 import Script from "next/script";
@@ -357,26 +358,29 @@ export function StripePaymentForm({ cart, onBack }: StripePaymentFormProps) {
         </div>
 
         <div className="flex gap-3">
-          <button
+          <Button
             type="button"
+            variant="outline"
+            size="lg"
             onClick={onBack}
             disabled={isLoading}
-            className="flex-1 rounded-sm border border-border px-4 py-3 text-sm font-medium text-foreground hover:bg-secondary disabled:opacity-50"
+            className="flex-1"
           >
             ← Back
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
+            size="lg"
             onClick={handlePay}
             disabled={isLoading || !stripeReady}
-            className="flex-1 rounded-sm bg-primary px-4 py-3 text-primary-foreground font-medium hover:opacity-90 disabled:opacity-50"
+            className="flex-1"
           >
             {status === "tokenizing"
               ? "Verifying card..."
               : status === "processing"
                 ? "Processing..."
                 : `Pay ${formatPrice({ amount: totalCents / 100, currency })}`}
-          </button>
+          </Button>
         </div>
       </div>
     </>

@@ -12,9 +12,9 @@ export default function Forbidden() {
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
       <div className="max-w-md w-full text-center">
         {/* 403 Icon */}
-        <div className="mx-auto mb-8 w-24 h-24 bg-orange-100 rounded-full flex items-center justify-center">
+        <div className="mx-auto mb-8 w-24 h-24 bg-warning-subtle rounded-full flex items-center justify-center">
           <svg
-            className="w-12 h-12 text-orange-600"
+            className="w-12 h-12 text-warning"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"

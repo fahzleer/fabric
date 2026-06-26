@@ -124,7 +124,7 @@ export default function CryptoPaymentPage() {
 
       <header className="mb-8">
         <div className="flex items-center gap-3 mb-3">
-          <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-indigo-100 text-indigo-700 font-bold text-sm">
+          <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-info-subtle text-info font-bold text-sm">
             USDC
           </span>
           <h1 className="text-3xl font-bold text-gray-900">ชำระด้วย Crypto (USDC)</h1>
@@ -133,9 +133,9 @@ export default function CryptoPaymentPage() {
         <p className="mt-3 text-gray-600 max-w-xl">
           ชำระด้วย USDC บน Base network — ยืนยันใน 2 วินาที ค่า Gas ต่ำ ไม่ต้องผ่านธนาคาร
         </p>
-        <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-indigo-50 px-3 py-1">
-          <span className="text-xs font-medium text-indigo-700">Base Network</span>
-          <span className="text-xs text-indigo-500">EIP-3009 x402</span>
+        <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-info-subtle px-3 py-1">
+          <span className="text-xs font-medium text-info">Base Network</span>
+          <span className="text-xs text-info">EIP-3009 x402</span>
         </div>
       </header>
 
@@ -148,7 +148,7 @@ export default function CryptoPaymentPage() {
         <ol className="space-y-5">
           {STEPS.map((step, i) => (
             <li key={step.name} className="flex gap-4">
-              <span className="flex-shrink-0 w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center text-sm font-semibold">
+              <span className="flex-shrink-0 w-8 h-8 rounded-full bg-info text-white flex items-center justify-center text-sm font-semibold">
                 {i + 1}
               </span>
               <div>
@@ -160,8 +160,8 @@ export default function CryptoPaymentPage() {
         </ol>
       </section>
 
-      <div className="mt-8 p-4 rounded-lg bg-indigo-50 border border-indigo-200">
-        <p className="text-sm text-indigo-800 font-medium">
+      <div className="mt-8 p-4 rounded-lg bg-info-subtle border border-info">
+        <p className="text-sm text-info font-medium">
           ใช้ EIP-3009 Transfer Authorization — ไม่ต้อง approve แยก ลงนามครั้งเดียวจบ
         </p>
       </div>
@@ -178,7 +178,7 @@ export default function CryptoPaymentPage() {
         <div className="flex gap-3">
           <Link
             href="/auth/register"
-            className="rounded-lg bg-indigo-600 px-6 py-3 text-sm font-medium text-white hover:bg-indigo-700"
+            className="rounded-lg bg-info px-6 py-3 text-sm font-medium text-white hover:bg-info/90"
           >
             สมัครบัญชีและชำระเงิน
           </Link>

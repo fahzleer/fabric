@@ -22,11 +22,11 @@ type AdminOrder = {
 };
 
 const STATUS_STYLES: Record<string, string> = {
-  pending: "bg-amber-500/20 text-amber-300 border-amber-500/40",
-  confirmed: "bg-emerald-500/20 text-emerald-300 border-emerald-500/40",
-  shipped: "bg-blue-500/20 text-blue-300 border-blue-500/40",
-  delivered: "bg-green-500/20 text-green-300 border-green-500/40",
-  cancelled: "bg-red-500/20 text-red-300 border-red-500/40",
+  pending: "bg-warning/20 text-warning border-warning/40",
+  confirmed: "bg-success/20 text-success border-success/40",
+  shipped: "bg-info/20 text-info border-info/40",
+  delivered: "bg-success/20 text-success border-success/40",
+  cancelled: "bg-destructive/20 text-destructive border-destructive/40",
 };
 
 async function getAdminOrders(token: string, page: number) {
@@ -79,28 +79,30 @@ export default async function AdminOrdersPage({
   if (!session?.user) redirect("/auth/login");
   const user = session.user as { id: string; email: string };
   const token = await issueAdminToken(user.id, user.email);
-  if (!token) return <p className="text-gray-400">Failed to authenticate</p>;
+  if (!token) return <p className="text-muted-foreground">Failed to authenticate</p>;
 
   const data = await getAdminOrders(token, page);
-  if (!data) return <p className="text-gray-400">Failed to load orders</p>;
+  if (!data) return <p className="text-muted-foreground">Failed to load orders</p>;
 
   const totalPages = Math.ceil(data.total / data.perPage);
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-white">All Orders</h1>
-        <p className="mt-1 text-sm text-gray-400">{data.total} orders across all merchants</p>
+        <h1 className="text-2xl font-bold text-foreground">All Orders</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {data.total} orders across all merchants
+        </p>
       </div>
 
-      <div className="rounded-xl border border-white/10 bg-gray-800/50 overflow-hidden">
+      <div className="rounded-xl border border-border bg-muted/50 overflow-hidden">
         <table className="w-full text-left">
           <thead>
-            <tr className="border-b border-white/10">
+            <tr className="border-b border-border">
               {["Order ID", "Date", "Customer", "Items", "Total", "Status"].map((h) => (
                 <th
                   key={h}
-                  className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-400"
+                  className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground"
                 >
                   {h}
                 </th>
@@ -111,23 +113,23 @@ export default async function AdminOrdersPage({
             {data.items.map((order) => (
               <tr
                 key={order.id}
-                className="border-t border-white/5 hover:bg-white/5 transition-colors"
+                className="border-t border-border hover:bg-muted transition-colors"
               >
-                <td className="px-4 py-3 font-mono text-xs text-gray-400">
+                <td className="px-4 py-3 font-mono text-xs text-muted-foreground">
                   {order.id.slice(0, 8)}…
                 </td>
-                <td className="px-4 py-3 text-sm text-gray-300">
+                <td className="px-4 py-3 text-sm text-foreground">
                   {new Date(order.placedAt).toLocaleDateString("en-GB", {
                     day: "2-digit",
                     month: "short",
                     year: "numeric",
                   })}
                 </td>
-                <td className="px-4 py-3 font-mono text-xs text-gray-400">
+                <td className="px-4 py-3 font-mono text-xs text-muted-foreground">
                   {order.customerId.slice(0, 8)}…
                 </td>
-                <td className="px-4 py-3 text-sm text-gray-300 text-center">{order.itemCount}</td>
-                <td className="px-4 py-3 text-sm font-medium text-white">
+                <td className="px-4 py-3 text-sm text-foreground text-center">{order.itemCount}</td>
+                <td className="px-4 py-3 text-sm font-medium text-foreground">
                   {formatPrice({
                     amount: order.totalAmountInCents / 100,
                     currency: order.currency,
@@ -135,7 +137,7 @@ export default async function AdminOrdersPage({
                 </td>
                 <td className="px-4 py-3">
                   <span
-                    className={`inline-block rounded-full border px-2.5 py-0.5 text-xs font-semibold capitalize ${STATUS_STYLES[order.status] ?? "bg-gray-700/50 text-gray-300"}`}
+                    className={`inline-block rounded-full border px-2.5 py-0.5 text-xs font-semibold capitalize ${STATUS_STYLES[order.status] ?? "bg-muted/50 text-foreground"}`}
                   >
                     {order.status}
                   </span>
@@ -147,7 +149,7 @@ export default async function AdminOrdersPage({
       </div>
 
       {totalPages > 1 && (
-        <div className="flex items-center justify-between text-sm text-gray-400">
+        <div className="flex items-center justify-between text-sm text-muted-foreground">
           <span>
             Page {page} of {totalPages}
           </span>
@@ -155,7 +157,7 @@ export default async function AdminOrdersPage({
             {page > 1 && (
               <Link
                 href={`/admin/orders?page=${page - 1}`}
-                className="rounded-lg border border-white/10 px-3 py-1.5 hover:bg-white/5"
+                className="rounded-lg border border-border px-3 py-1.5 hover:bg-muted"
               >
                 ← Prev
               </Link>
@@ -163,7 +165,7 @@ export default async function AdminOrdersPage({
             {page < totalPages && (
               <Link
                 href={`/admin/orders?page=${page + 1}`}
-                className="rounded-lg border border-white/10 px-3 py-1.5 hover:bg-white/5"
+                className="rounded-lg border border-border px-3 py-1.5 hover:bg-muted"
               >
                 Next →
               </Link>

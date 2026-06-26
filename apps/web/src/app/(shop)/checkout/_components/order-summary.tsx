@@ -10,6 +10,7 @@ import type { ShoppingCart } from "@/domain/cart/types";
 import { formatPrice } from "@/lib/price";
 import { Atom, useAtom, useAtomSet, useAtomValue } from "@effect-atom/atom-react";
 import { type Maybe, isNone, isSome } from "@fabric/types";
+import { Button, Input } from "@fabric/ui";
 import BigNumber from "bignumber.js";
 import Link from "next/link";
 
@@ -72,12 +73,12 @@ function VoucherSection({
   currency,
 }: VoucherSectionProps) {
   return (
-    <div className="border-t border-gray-100 pt-4">
-      <label htmlFor="voucher-input" className="block text-sm font-medium text-gray-700 mb-1">
+    <div className="border-t border-border pt-4">
+      <label htmlFor="voucher-input" className="block text-sm font-medium text-foreground mb-1">
         Voucher / Promo Code
       </label>
       <div className="flex gap-2">
-        <input
+        <Input
           id="voucher-input"
           type="text"
           value={voucherInput}
@@ -86,30 +87,31 @@ function VoucherSection({
             if (e.key === "Enter") onApply();
           }}
           placeholder="e.g. SAVE10"
-          className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm uppercase tracking-wider focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="flex-1 uppercase tracking-wider"
         />
         {appliedVoucherCode ? (
-          <button
+          <Button
             type="button"
+            variant="outline"
             onClick={onRemove}
-            className="rounded-lg border border-red-300 px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50"
+            className="border-destructive/40 text-destructive hover:bg-destructive-subtle hover:text-destructive/80"
           >
             Remove
-          </button>
+          </Button>
         ) : (
-          <button
+          <Button
             type="button"
+            variant="secondary"
             onClick={onApply}
             disabled={!voucherInput.trim()}
-            className="rounded-lg bg-gray-800 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700 disabled:opacity-40"
           >
             Apply
-          </button>
+          </Button>
         )}
       </div>
-      {voucherError.length > 0 && <p className="mt-1.5 text-xs text-red-600">{voucherError}</p>}
+      {voucherError.length > 0 && <p className="mt-1.5 text-xs text-destructive">{voucherError}</p>}
       {appliedVoucherCode && voucherError.length === 0 && discountAmount > 0 && (
-        <p className="mt-1.5 text-xs text-green-600">
+        <p className="mt-1.5 text-xs text-success">
           Voucher applied — saving {formatPrice({ amount: discountAmount, currency })} ✓
         </p>
       )}
@@ -157,7 +159,7 @@ function PricingBreakdown({
           </div>
 
           {discountAmount > 0 && (
-            <div className="flex justify-between text-sm text-green-600">
+            <div className="flex justify-between text-sm text-success">
               <span>Discount{appliedVoucherCode ? ` (${appliedVoucherCode})` : ""}</span>
               <span>−{formatPrice({ amount: discountAmount, currency })}</span>
             </div>
@@ -167,7 +169,7 @@ function PricingBreakdown({
             <span>Shipping</span>
             <span>
               {hasPreview && shippingAmount === 0 ? (
-                <span className="text-green-600 font-medium">Free</span>
+                <span className="text-success font-medium">Free</span>
               ) : (
                 formatPrice({ amount: shippingAmount, currency })
               )}
@@ -220,7 +222,7 @@ export function OrderSummary({ cart, onNext, onBack }: OrderSummaryProps) {
     return (
       <div className="bg-white rounded-lg border border-gray-200 p-6 text-center">
         <p className="text-gray-600">Your cart is empty.</p>
-        <Link href="/cart" className="mt-4 inline-block text-blue-600 hover:text-blue-800">
+        <Link href="/cart" className="mt-4 inline-block text-info hover:text-info/80">
           Go to Cart
         </Link>
       </div>
@@ -266,23 +268,18 @@ export function OrderSummary({ cart, onNext, onBack }: OrderSummaryProps) {
       />
 
       <div className="flex gap-3">
-        <button
-          type="button"
-          onClick={onBack}
-          className="flex-1 rounded-lg border border-gray-300 px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50"
-        >
+        <Button type="button" variant="outline" size="lg" onClick={onBack} className="flex-1">
           ← Back
-        </button>
-        <button
-          type="button"
-          onClick={onNext}
-          className="flex-1 rounded-lg bg-blue-600 px-4 py-3 text-white font-medium hover:bg-blue-700"
-        >
+        </Button>
+        <Button type="button" size="lg" onClick={onNext} className="flex-1">
           Continue to Payment
-        </button>
+        </Button>
       </div>
 
-      <Link href="/cart" className="block text-center text-xs text-gray-500 hover:text-gray-700">
+      <Link
+        href="/cart"
+        className="block text-center text-xs text-muted-foreground hover:text-foreground"
+      >
         Edit Cart
       </Link>
     </div>

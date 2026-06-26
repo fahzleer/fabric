@@ -1,8 +1,11 @@
 import { auth } from "@/lib/auth";
 import { formatPrice } from "@/lib/price";
+import { Badge } from "@fabric/ui";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+
+type StatusTone = "success" | "warning" | "info" | "danger" | "neutral";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3010";
 const INTERNAL_SECRET = process.env.INTERNAL_SECRET ?? "";
@@ -23,13 +26,13 @@ type OrdersPage = {
   perPage: number;
 };
 
-const STATUS_LABELS: Record<string, { label: string; colour: string }> = {
-  pending: { label: "Payment Pending", colour: "text-yellow-700 bg-yellow-50 border-yellow-200" },
-  confirmed: { label: "Confirmed", colour: "text-green-700 bg-green-50 border-green-200" },
-  processing: { label: "Processing", colour: "text-blue-700 bg-blue-50 border-blue-200" },
-  shipped: { label: "Shipped", colour: "text-blue-700 bg-blue-50 border-blue-200" },
-  delivered: { label: "Delivered", colour: "text-green-700 bg-green-50 border-green-200" },
-  cancelled: { label: "Cancelled", colour: "text-red-700 bg-red-50 border-red-200" },
+const STATUS_LABELS: Record<string, { label: string; tone: StatusTone }> = {
+  pending: { label: "Payment Pending", tone: "warning" },
+  confirmed: { label: "Confirmed", tone: "success" },
+  processing: { label: "Processing", tone: "info" },
+  shipped: { label: "Shipped", tone: "info" },
+  delivered: { label: "Delivered", tone: "success" },
+  cancelled: { label: "Cancelled", tone: "danger" },
 };
 
 async function getAuthToken(): Promise<string | null> {
@@ -84,7 +87,7 @@ export default async function OrdersPage() {
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-6 flex items-center justify-between">
           <h1 className="text-2xl font-bold text-gray-900">My Orders</h1>
-          <Link href="/products" className="text-sm text-blue-600 hover:underline">
+          <Link href="/products" className="text-sm text-info hover:underline">
             ← Continue Shopping
           </Link>
         </div>
@@ -94,7 +97,7 @@ export default async function OrdersPage() {
             <p className="text-gray-500">You have no orders yet.</p>
             <Link
               href="/products"
-              className="mt-4 inline-block rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+              className="mt-4 inline-block rounded-lg bg-info px-4 py-2 text-sm font-medium text-white hover:bg-info/90"
             >
               Browse Products
             </Link>
@@ -105,7 +108,7 @@ export default async function OrdersPage() {
               const orderId = order.id?.value ?? (order.id as unknown as string);
               const status = STATUS_LABELS[order.status] ?? {
                 label: order.status,
-                colour: "text-gray-700 bg-gray-50 border-gray-200",
+                tone: "neutral" as StatusTone,
               };
               const date = new Date(order.placedAt).toLocaleDateString("en-GB", {
                 day: "numeric",
@@ -118,7 +121,7 @@ export default async function OrdersPage() {
                 <Link
                   key={orderId}
                   href={`/order/${orderId}/confirmation`}
-                  className="block rounded-lg border border-gray-200 bg-white p-5 hover:border-blue-300 hover:shadow-sm transition-all"
+                  className="block rounded-lg border border-gray-200 bg-white p-5 hover:border-info/80 hover:shadow-sm transition-all"
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div>
@@ -129,11 +132,7 @@ export default async function OrdersPage() {
                       </p>
                     </div>
                     <div className="text-right shrink-0">
-                      <span
-                        className={`inline-block rounded-full border px-2.5 py-0.5 text-xs font-medium ${status.colour}`}
-                      >
-                        {status.label}
-                      </span>
+                      <Badge variant={status.tone}>{status.label}</Badge>
                       <p className="mt-2 text-base font-semibold text-gray-900">
                         {formatPrice({ amount: totalAmount, currency: order.currency ?? "THB" })}
                       </p>

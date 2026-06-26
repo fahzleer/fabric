@@ -10,35 +10,35 @@ export const metadata: Metadata = {
 };
 
 const PLAN_COLOURS: Record<string, string> = {
-  free: "bg-gray-700/50 text-gray-300 border-gray-600",
-  starter: "bg-blue-500/20 text-blue-300 border-blue-500/40",
-  professional: "bg-purple-500/20 text-purple-300 border-purple-500/40",
-  enterprise: "bg-amber-500/20 text-amber-300 border-amber-500/40",
+  free: "bg-muted/50 text-foreground border-border",
+  starter: "bg-info/20 text-info border-info/40",
+  professional: "bg-info/20 text-info border-info/40",
+  enterprise: "bg-warning/20 text-warning border-warning/40",
 };
 
 const STATUS_COLOURS: Record<string, string> = {
-  active: "text-emerald-400",
-  trialing: "text-blue-400",
-  past_due: "text-amber-400",
-  canceled: "text-red-400",
-  inactive: "text-gray-500",
+  active: "text-success",
+  trialing: "text-info",
+  past_due: "text-warning",
+  canceled: "text-destructive",
+  inactive: "text-muted-foreground",
 };
 
 function NotOnboardedView() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-white">Welcome to your store</h1>
-        <p className="mt-1 text-sm text-gray-400">Complete setup to start selling</p>
+        <h1 className="text-2xl font-bold text-foreground">Welcome to your store</h1>
+        <p className="mt-1 text-sm text-muted-foreground">Complete setup to start selling</p>
       </div>
-      <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-6">
-        <h2 className="text-lg font-semibold text-emerald-300">Finish setting up your store</h2>
-        <p className="mt-2 text-sm text-gray-400">
+      <div className="rounded-xl border border-success/30 bg-success/10 p-6">
+        <h2 className="text-lg font-semibold text-success">Finish setting up your store</h2>
+        <p className="mt-2 text-sm text-muted-foreground">
           Your store profile hasn&apos;t been created yet. Click below to complete onboarding.
         </p>
         <Link
           href="/merchant/onboarding"
-          className="mt-4 inline-block rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-emerald-500"
+          className="mt-4 inline-block rounded-lg bg-success px-5 py-2.5 text-sm font-medium text-foreground hover:bg-success"
         >
           Complete onboarding →
         </Link>
@@ -49,9 +49,9 @@ function NotOnboardedView() {
 
 function CapacityBar({ capacityPct }: { capacityPct: number }) {
   const barColour =
-    capacityPct >= 90 ? "bg-red-500" : capacityPct >= 70 ? "bg-amber-500" : "bg-emerald-500";
+    capacityPct >= 90 ? "bg-destructive" : capacityPct >= 70 ? "bg-warning" : "bg-success";
   return (
-    <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-gray-700">
+    <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-muted">
       <div
         className={`h-full rounded-full ${barColour}`}
         style={{ width: `${Math.min(100, capacityPct)}%` }}
@@ -73,8 +73,10 @@ function StatsCards({
 }) {
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-      <div className="rounded-xl border border-white/10 bg-gray-800/50 px-6 py-5">
-        <p className="text-xs font-medium uppercase tracking-wider text-gray-400">Current Plan</p>
+      <div className="rounded-xl border border-border bg-muted/50 px-6 py-5">
+        <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+          Current Plan
+        </p>
         <div className="mt-2 flex items-center gap-2">
           <span
             className={`rounded-full border px-2.5 py-0.5 text-xs font-semibold capitalize ${PLAN_COLOURS[planKey] ?? PLAN_COLOURS.free}`}
@@ -83,38 +85,36 @@ function StatsCards({
           </span>
         </div>
         <p
-          className={`mt-2 text-sm font-medium capitalize ${STATUS_COLOURS[statusKey] ?? "text-gray-400"}`}
+          className={`mt-2 text-sm font-medium capitalize ${STATUS_COLOURS[statusKey] ?? "text-muted-foreground"}`}
         >
           {statusKey}
         </p>
       </div>
-      <div className="rounded-xl border border-white/10 bg-gray-800/50 px-6 py-5">
-        <p className="text-xs font-medium uppercase tracking-wider text-gray-400">Products</p>
-        <p className="mt-2 text-3xl font-bold text-white">{billing.productCount ?? 0}</p>
-        <p className="mt-1 text-xs text-gray-500">of {maxProducts} on your plan</p>
+      <div className="rounded-xl border border-border bg-muted/50 px-6 py-5">
+        <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+          Products
+        </p>
+        <p className="mt-2 text-3xl font-bold text-foreground">{billing.productCount ?? 0}</p>
+        <p className="mt-1 text-xs text-muted-foreground">of {maxProducts} on your plan</p>
         {isSome(billing.productCapacityUsed) && (
           <CapacityBar capacityPct={billing.productCapacityUsed.value} />
         )}
       </div>
-      <div className="rounded-xl border border-white/10 bg-gray-800/50 px-6 py-5">
-        <p className="text-xs font-medium uppercase tracking-wider text-gray-400">Quick Actions</p>
+      <div className="rounded-xl border border-border bg-muted/50 px-6 py-5">
+        <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+          Quick Actions
+        </p>
         <div className="mt-3 flex flex-col gap-2">
-          <Link
-            href="/merchant/products"
-            className="text-sm text-emerald-400 hover:text-emerald-300"
-          >
+          <Link href="/merchant/products" className="text-sm text-success hover:text-success">
             → View products
           </Link>
-          <Link
-            href="/merchant/billing"
-            className="text-sm text-emerald-400 hover:text-emerald-300"
-          >
+          <Link href="/merchant/billing" className="text-sm text-success hover:text-success">
             → Manage billing
           </Link>
           {planKey === "free" && (
             <Link
               href="/merchant/billing"
-              className="text-sm font-medium text-amber-400 hover:text-amber-300"
+              className="text-sm font-medium text-warning hover:text-warning"
             >
               ↑ Upgrade plan
             </Link>
@@ -127,16 +127,16 @@ function StatsCards({
 
 function PlanLimits({ billing, maxProducts }: { billing: MerchantStatus; maxProducts: string }) {
   return (
-    <div className="rounded-xl border border-white/10 bg-gray-800/30 p-6">
-      <h2 className="text-sm font-semibold text-gray-300">Plan limits</h2>
+    <div className="rounded-xl border border-border bg-muted/30 p-6">
+      <h2 className="text-sm font-semibold text-foreground">Plan limits</h2>
       <div className="mt-3 grid grid-cols-2 gap-4 text-sm sm:grid-cols-3">
         <div>
-          <span className="text-gray-400">Max products</span>
-          <p className="mt-0.5 font-medium text-white">{maxProducts}</p>
+          <span className="text-muted-foreground">Max products</span>
+          <p className="mt-0.5 font-medium text-foreground">{maxProducts}</p>
         </div>
         <div>
-          <span className="text-gray-400">Monthly orders</span>
-          <p className="mt-0.5 font-medium text-white">
+          <span className="text-muted-foreground">Monthly orders</span>
+          <p className="mt-0.5 font-medium text-foreground">
             {billing.limits.maxOrdersPerMonth === -1
               ? "Unlimited"
               : billing.limits.maxOrdersPerMonth.toLocaleString()}
@@ -144,8 +144,8 @@ function PlanLimits({ billing, maxProducts }: { billing: MerchantStatus; maxProd
         </div>
         {isSome(billing.planExpiresAt) && (
           <div>
-            <span className="text-gray-400">Renews</span>
-            <p className="mt-0.5 font-medium text-white">
+            <span className="text-muted-foreground">Renews</span>
+            <p className="mt-0.5 font-medium text-foreground">
               {new Date(billing.planExpiresAt.value).toLocaleDateString()}
             </p>
           </div>
@@ -169,7 +169,7 @@ export default async function MerchantDashboardPage({
     return (
       <div className="flex h-full items-center justify-center">
         {welcome === "1" && <ClearCartOnMount />}
-        <p className="text-gray-400">Unable to load merchant data. Please refresh.</p>
+        <p className="text-muted-foreground">Unable to load merchant data. Please refresh.</p>
       </div>
     );
   }
@@ -202,12 +202,12 @@ export default async function MerchantDashboardPage({
       {welcome === "1" && <ClearCartOnMount />}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Dashboard</h1>
-          <p className="mt-1 text-sm text-gray-400">Your store at a glance</p>
+          <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
+          <p className="mt-1 text-sm text-muted-foreground">Your store at a glance</p>
         </div>
         <Link
           href="/merchant/products/new"
-          className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-500"
+          className="rounded-lg bg-success px-4 py-2 text-sm font-medium text-foreground hover:bg-success"
         >
           + New product
         </Link>

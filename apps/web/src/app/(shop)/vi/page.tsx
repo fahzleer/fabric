@@ -133,7 +133,7 @@ export default function VietnamPage() {
           </h2>
           <ul className="space-y-3">
             <li className="flex items-start gap-3 rounded-lg border border-gray-200 p-4">
-              <span className="text-green-600 font-bold mt-0.5">✓</span>
+              <span className="text-success font-bold mt-0.5">✓</span>
               <div>
                 <p className="font-medium text-gray-900">
                   Thẻ Tín Dụng / Ghi Nợ (Visa, Mastercard)
@@ -144,7 +144,7 @@ export default function VietnamPage() {
               </div>
             </li>
             <li className="flex items-start gap-3 rounded-lg border border-gray-200 p-4">
-              <span className="text-green-600 font-bold mt-0.5">✓</span>
+              <span className="text-success font-bold mt-0.5">✓</span>
               <div>
                 <p className="font-medium text-gray-900">USDC trên Base Network</p>
                 <p className="text-sm text-gray-500">
@@ -169,7 +169,7 @@ export default function VietnamPage() {
               "Xác nhận đơn hàng tự động qua email sau khi thanh toán thành công",
             ].map((item) => (
               <li key={item} className="flex items-start gap-2 text-sm text-gray-700">
-                <span className="text-green-600 font-bold mt-0.5 flex-shrink-0">✓</span>
+                <span className="text-success font-bold mt-0.5 flex-shrink-0">✓</span>
                 {item}
               </li>
             ))}

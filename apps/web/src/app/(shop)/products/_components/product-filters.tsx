@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@fabric/ui";
 import {
   GENRE_LABELS,
   PRICE_RANGE_LABELS,
@@ -59,34 +60,32 @@ export function ProductFilters({ products, filters, onChange }: ProductFiltersPr
   const hasActiveFilters = filters.genres.length > 0 || filters.priceRanges.length > 0;
 
   return (
-    <div className="space-y-4 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+    <div className="space-y-4 rounded-xl border border-border bg-card p-4 shadow-sm">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap gap-2">
           {genreOptions.map((genre) => (
-            <button
+            <Button
               key={genre}
               type="button"
+              size="sm"
+              variant={filters.genres.includes(genre) ? "default" : "outline"}
               onClick={() => toggleGenre(genre)}
-              className={`rounded-full border px-3 py-1.5 text-sm font-medium transition-colors ${
-                filters.genres.includes(genre)
-                  ? "border-gray-900 bg-gray-900 text-white"
-                  : "border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
-              }`}
+              className="rounded-full"
             >
               {GENRE_LABELS[genre]}
-            </button>
+            </Button>
           ))}
         </div>
 
         <div className="flex items-center gap-2">
-          <label htmlFor="sort" className="text-sm text-gray-500">
+          <label htmlFor="sort" className="text-sm text-muted-foreground">
             เรียงตาม
           </label>
           <select
             id="sort"
             value={filters.sort}
             onChange={(e) => setSort(e.target.value as SortOption)}
-            className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-700 focus:border-gray-900 focus:outline-none"
+            className="rounded-lg border border-border bg-background px-3 py-1.5 text-sm text-foreground focus:border-ring focus:outline-none"
           >
             {Object.entries(SORT_LABELS).map(([value, label]) => (
               <option key={value} value={value}>
@@ -97,28 +96,26 @@ export function ProductFilters({ products, filters, onChange }: ProductFiltersPr
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center gap-2 border-t border-gray-100 pt-4">
-        <span className="text-sm text-gray-500">ราคา:</span>
+      <div className="flex flex-wrap items-center gap-2 border-t border-border pt-4">
+        <span className="text-sm text-muted-foreground">ราคา:</span>
         {priceRangeOptions.map((range) => (
-          <button
+          <Button
             key={range}
             type="button"
+            size="sm"
+            variant={filters.priceRanges.includes(range) ? "default" : "outline"}
             onClick={() => togglePriceRange(range)}
-            className={`rounded-full border px-3 py-1.5 text-sm font-medium transition-colors ${
-              filters.priceRanges.includes(range)
-                ? "border-gray-900 bg-gray-900 text-white"
-                : "border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
-            }`}
+            className="rounded-full"
           >
             {PRICE_RANGE_LABELS[range]}
-          </button>
+          </Button>
         ))}
 
         {hasActiveFilters && (
           <button
             type="button"
             onClick={clearAll}
-            className="ml-auto text-sm font-medium text-gray-500 underline hover:text-gray-900"
+            className="ml-auto text-sm font-medium text-muted-foreground underline hover:text-foreground"
           >
             ล้างตัวกรอง
           </button>

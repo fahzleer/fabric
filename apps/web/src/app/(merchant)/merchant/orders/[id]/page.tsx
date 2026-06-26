@@ -9,11 +9,11 @@ import { StatusUpdateForm } from "../_components/status-update-form";
 export const metadata: Metadata = { title: "Order Detail — Merchant Portal" };
 
 const STATUS_STYLES: Record<string, string> = {
-  pending: "bg-amber-500/20 text-amber-300 border-amber-500/40",
-  confirmed: "bg-emerald-500/20 text-emerald-300 border-emerald-500/40",
-  shipped: "bg-blue-500/20 text-blue-300 border-blue-500/40",
-  delivered: "bg-green-500/20 text-green-300 border-green-500/40",
-  cancelled: "bg-red-500/20 text-red-300 border-red-500/40",
+  pending: "bg-warning/20 text-warning border-warning/40",
+  confirmed: "bg-success/20 text-success border-success/40",
+  shipped: "bg-info/20 text-info border-info/40",
+  delivered: "bg-success/20 text-success border-success/40",
+  cancelled: "bg-destructive/20 text-destructive border-destructive/40",
 };
 
 function formatDate(iso: string) {
@@ -42,7 +42,7 @@ export default async function MerchantOrderDetailPage({
   if (!isSome(maybeApi)) {
     return (
       <div className="flex h-full items-center justify-center">
-        <p className="text-gray-400">Unable to load data. Please refresh.</p>
+        <p className="text-muted-foreground">Unable to load data. Please refresh.</p>
       </div>
     );
   }
@@ -52,17 +52,20 @@ export default async function MerchantOrderDetailPage({
 
   const order = result.value;
   const orderId = order.id?.value ?? id;
-  const statusStyle = STATUS_STYLES[order.status] ?? "bg-gray-700/50 text-gray-300 border-gray-600";
+  const statusStyle = STATUS_STYLES[order.status] ?? "bg-muted/50 text-foreground border-border";
   const currency = order.currency;
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Link href="/merchant/orders" className="text-sm text-gray-400 hover:text-white">
+          <Link
+            href="/merchant/orders"
+            className="text-sm text-muted-foreground hover:text-foreground"
+          >
             ← Orders
           </Link>
-          <h1 className="text-2xl font-bold text-white">Order Detail</h1>
+          <h1 className="text-2xl font-bold text-foreground">Order Detail</h1>
           <span
             className={`rounded-full border px-3 py-0.5 text-sm font-semibold capitalize ${statusStyle}`}
           >
@@ -74,22 +77,22 @@ export default async function MerchantOrderDetailPage({
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {/* Order info */}
-        <div className="rounded-xl border border-white/10 bg-gray-800/50 p-5 space-y-3">
-          <h2 className="text-sm font-semibold uppercase tracking-wider text-gray-400">
+        <div className="rounded-xl border border-border bg-muted/50 p-5 space-y-3">
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
             Order Info
           </h2>
           <dl className="space-y-2 text-sm">
             <div className="flex justify-between">
-              <dt className="text-gray-400">Order ID</dt>
-              <dd className="font-mono text-xs text-gray-200">{orderId.slice(0, 8)}…</dd>
+              <dt className="text-muted-foreground">Order ID</dt>
+              <dd className="font-mono text-xs text-foreground">{orderId.slice(0, 8)}…</dd>
             </div>
             <div className="flex justify-between">
-              <dt className="text-gray-400">Placed</dt>
-              <dd className="text-gray-200">{formatDate(order.placedAt)}</dd>
+              <dt className="text-muted-foreground">Placed</dt>
+              <dd className="text-foreground">{formatDate(order.placedAt)}</dd>
             </div>
             <div className="flex justify-between">
-              <dt className="text-gray-400">Customer ID</dt>
-              <dd className="font-mono text-xs text-gray-200">
+              <dt className="text-muted-foreground">Customer ID</dt>
+              <dd className="font-mono text-xs text-foreground">
                 {order.userId?.value?.slice(0, 8) ?? "—"}…
               </dd>
             </div>
@@ -97,11 +100,13 @@ export default async function MerchantOrderDetailPage({
         </div>
 
         {/* Shipping address */}
-        <div className="rounded-xl border border-white/10 bg-gray-800/50 p-5 space-y-3">
-          <h2 className="text-sm font-semibold uppercase tracking-wider text-gray-400">Ship To</h2>
+        <div className="rounded-xl border border-border bg-muted/50 p-5 space-y-3">
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+            Ship To
+          </h2>
           {order.shippingAddress ? (
-            <address className="not-italic text-sm text-gray-200 space-y-1">
-              <p className="font-medium text-white">{order.shippingAddress.recipientName}</p>
+            <address className="not-italic text-sm text-foreground space-y-1">
+              <p className="font-medium text-foreground">{order.shippingAddress.recipientName}</p>
               <p>{order.shippingAddress.street}</p>
               <p>
                 {order.shippingAddress.city}
@@ -110,43 +115,47 @@ export default async function MerchantOrderDetailPage({
               <p>
                 {order.shippingAddress.postalCode} · {order.shippingAddress.country}
               </p>
-              <p className="text-gray-400">{order.shippingAddress.phone}</p>
+              <p className="text-muted-foreground">{order.shippingAddress.phone}</p>
             </address>
           ) : (
-            <p className="text-sm text-gray-400">No address on record</p>
+            <p className="text-sm text-muted-foreground">No address on record</p>
           )}
         </div>
       </div>
 
       {/* Order lines */}
-      <div className="rounded-xl border border-white/10 bg-gray-800/50 overflow-hidden">
-        <div className="border-b border-white/10 px-5 py-3">
-          <h2 className="text-sm font-semibold uppercase tracking-wider text-gray-400">Items</h2>
+      <div className="rounded-xl border border-border bg-muted/50 overflow-hidden">
+        <div className="border-b border-border px-5 py-3">
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+            Items
+          </h2>
         </div>
         <table className="w-full text-left">
           <thead>
-            <tr className="border-b border-white/5">
-              <th className="px-5 py-2.5 text-xs font-semibold text-gray-400">Product</th>
-              <th className="px-5 py-2.5 text-xs font-semibold text-gray-400">Size</th>
-              <th className="px-5 py-2.5 text-xs font-semibold text-gray-400 text-center">Qty</th>
-              <th className="px-5 py-2.5 text-xs font-semibold text-gray-400 text-right">
+            <tr className="border-b border-border">
+              <th className="px-5 py-2.5 text-xs font-semibold text-muted-foreground">Product</th>
+              <th className="px-5 py-2.5 text-xs font-semibold text-muted-foreground">Size</th>
+              <th className="px-5 py-2.5 text-xs font-semibold text-muted-foreground text-center">
+                Qty
+              </th>
+              <th className="px-5 py-2.5 text-xs font-semibold text-muted-foreground text-right">
                 Unit Price
               </th>
-              <th className="px-5 py-2.5 text-xs font-semibold text-gray-400 text-right">
+              <th className="px-5 py-2.5 text-xs font-semibold text-muted-foreground text-right">
                 Line Total
               </th>
             </tr>
           </thead>
           <tbody>
             {(order.lines ?? []).map((line) => (
-              <tr key={`${line.productId}-${line.size}`} className="border-t border-white/5">
-                <td className="px-5 py-3 text-sm text-white">{line.productName}</td>
-                <td className="px-5 py-3 text-sm text-gray-400 uppercase">{line.size}</td>
-                <td className="px-5 py-3 text-sm text-gray-200 text-center">{line.quantity}</td>
-                <td className="px-5 py-3 text-sm text-gray-200 text-right">
+              <tr key={`${line.productId}-${line.size}`} className="border-t border-border">
+                <td className="px-5 py-3 text-sm text-foreground">{line.productName}</td>
+                <td className="px-5 py-3 text-sm text-muted-foreground uppercase">{line.size}</td>
+                <td className="px-5 py-3 text-sm text-foreground text-center">{line.quantity}</td>
+                <td className="px-5 py-3 text-sm text-foreground text-right">
                   {formatAmount(Math.round(line.unitPrice.amount * 100), currency)}
                 </td>
-                <td className="px-5 py-3 text-sm font-medium text-white text-right">
+                <td className="px-5 py-3 text-sm font-medium text-foreground text-right">
                   {formatAmount(Math.round(line.unitPrice.amount * 100) * line.quantity, currency)}
                 </td>
               </tr>
@@ -156,21 +165,21 @@ export default async function MerchantOrderDetailPage({
       </div>
 
       {/* Totals */}
-      <div className="rounded-xl border border-white/10 bg-gray-800/50 p-5">
+      <div className="rounded-xl border border-border bg-muted/50 p-5">
         <dl className="space-y-2 text-sm">
           {order.discountCents > 0 && (
-            <div className="flex justify-between text-gray-400">
+            <div className="flex justify-between text-muted-foreground">
               <dt>Discount</dt>
-              <dd className="text-emerald-400">−{formatAmount(order.discountCents, currency)}</dd>
+              <dd className="text-success">−{formatAmount(order.discountCents, currency)}</dd>
             </div>
           )}
           {order.shippingCents > 0 && (
-            <div className="flex justify-between text-gray-400">
+            <div className="flex justify-between text-muted-foreground">
               <dt>Shipping</dt>
               <dd>{formatAmount(order.shippingCents, currency)}</dd>
             </div>
           )}
-          <div className="flex justify-between border-t border-white/10 pt-2 font-semibold text-white">
+          <div className="flex justify-between border-t border-border pt-2 font-semibold text-foreground">
             <dt>Total</dt>
             <dd>{formatAmount(order.totalAmountInCents, currency)}</dd>
           </div>

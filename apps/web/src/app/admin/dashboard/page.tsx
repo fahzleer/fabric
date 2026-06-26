@@ -33,21 +33,18 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-white">Dashboard</h1>
-        <p className="mt-1 text-sm text-gray-400">Store performance overview</p>
+        <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
+        <p className="mt-1 text-sm text-muted-foreground">Store performance overview</p>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {cards.map((card) => (
-          <div
-            key={card.label}
-            className="rounded-xl border border-white/10 bg-gray-800/50 px-6 py-5"
-          >
-            <p className="text-xs font-medium uppercase tracking-wider text-gray-400">
+          <div key={card.label} className="rounded-xl border border-border bg-muted/50 px-6 py-5">
+            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
               {card.label}
             </p>
-            <p className="mt-2 text-3xl font-bold text-white">{card.value}</p>
-            <p className="mt-1 text-xs text-gray-500">{card.note}</p>
+            <p className="mt-2 text-3xl font-bold text-foreground">{card.value}</p>
+            <p className="mt-1 text-xs text-muted-foreground">{card.note}</p>
           </div>
         ))}
       </div>

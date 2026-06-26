@@ -18,7 +18,9 @@ export default async function MerchantLayout({ children }: { children: ReactNode
   }
 
   return (
-    <div className="min-h-screen bg-gray-950">
+    // `dark` activates the token system's dark palette for the dashboard shell;
+    // the shared Navbar uses hardcoded light classes so it stays light on top.
+    <div className="dark min-h-screen bg-background text-foreground">
       <Suspense fallback={<NavbarSkeleton />}>
         <Navbar session={Some(session)} />
       </Suspense>

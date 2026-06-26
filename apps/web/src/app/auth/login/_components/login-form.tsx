@@ -3,6 +3,7 @@
 import { authClient } from "@/lib/auth-client";
 import { Atom, useAtom } from "@effect-atom/atom-react";
 import { type Maybe, None, Some, isSome } from "@fabric/types";
+import { Button, Input } from "@fabric/ui";
 import { useQueryState } from "nuqs";
 import type { ReactNode } from "react";
 import { loginAction } from "../_lib/actions";
@@ -127,77 +128,74 @@ export function LoginForm({ enabledProviders }: { enabledProviders: SocialProvid
   return (
     <div className="space-y-5">
       <form action={loginAction} className="space-y-5">
-        <h2 className="text-xl font-semibold text-gray-900">Welcome back</h2>
+        <h2 className="text-xl font-semibold text-foreground">Welcome back</h2>
 
         {errorMsg !== null && errorMsg !== "" && (
-          <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3">
-            <p className="text-sm text-red-700">{errorMsg}</p>
+          <div className="rounded-lg border border-destructive/30 bg-destructive-subtle px-4 py-3">
+            <p className="text-sm text-destructive">{errorMsg}</p>
           </div>
         )}
 
         {isSome(socialError) && (
-          <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
-            <p className="text-sm text-amber-800">{socialError.value}</p>
+          <div className="rounded-lg border border-warning/40 bg-warning-subtle px-4 py-3">
+            <p className="text-sm text-foreground">{socialError.value}</p>
           </div>
         )}
 
         <input type="hidden" name="callbackUrl" value={callbackUrl} />
 
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="email" className="block text-sm font-medium text-foreground">
             Email address
           </label>
-          <input
+          <Input
             id="email"
             name="email"
             type="email"
             autoComplete="email"
             required
             placeholder="you@example.com"
-            className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 shadow-sm focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+            className="mt-1"
           />
         </div>
 
         <div>
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="password" className="block text-sm font-medium text-foreground">
             Password
           </label>
           <div className="relative mt-1">
-            <input
+            <Input
               id="password"
               name="password"
               type={show ? "text" : "password"}
               autoComplete="current-password"
               required
               placeholder="••••••••"
-              className="block w-full rounded-lg border border-gray-300 py-2 pl-3 pr-10 text-sm text-gray-900 placeholder-gray-400 shadow-sm focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+              className="pr-10"
             />
             <button
               type="button"
               tabIndex={-1}
               onClick={() => setShow((v) => !v)}
               aria-label={show ? "Hide password" : "Show password"}
-              className="absolute inset-y-0 right-0 flex w-10 cursor-pointer items-center justify-center border-none bg-transparent text-gray-400 hover:text-gray-600"
+              className="absolute inset-y-0 right-0 flex w-10 cursor-pointer items-center justify-center border-none bg-transparent text-muted-foreground hover:text-foreground"
             >
               {show ? <IconEyeOn /> : <IconEyeOff />}
             </button>
           </div>
         </div>
 
-        <button
-          type="submit"
-          className="w-full rounded-lg bg-gray-900 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2"
-        >
+        <Button type="submit" className="w-full">
           Sign in
-        </button>
+        </Button>
       </form>
 
       {hasSocial && (
         <>
           <div className="flex items-center gap-3">
-            <div className="h-px flex-1 bg-gray-200" />
-            <span className="text-xs text-gray-400">or continue with</span>
-            <div className="h-px flex-1 bg-gray-200" />
+            <div className="h-px flex-1 bg-border" />
+            <span className="text-xs text-muted-foreground">or continue with</span>
+            <div className="h-px flex-1 bg-border" />
           </div>
 
           <div
@@ -207,17 +205,18 @@ export function LoginForm({ enabledProviders }: { enabledProviders: SocialProvid
               const meta = PROVIDER_META[provider];
               const isPending = pendingProvider === provider;
               return (
-                <button
+                <Button
                   key={provider}
                   type="button"
+                  variant="outline"
                   data-testid={`${provider}-login-btn`}
                   onClick={() => handleSocialLogin(provider)}
                   disabled={pendingProvider !== null}
-                  className="flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="w-full"
                 >
                   {meta.icon}
                   <span>{isPending ? "…" : meta.label}</span>
-                </button>
+                </Button>
               );
             })}
           </div>
