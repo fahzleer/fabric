@@ -3,10 +3,12 @@
 import { cartAtom } from "@/application/atoms/cart.atoms";
 import type { ShoppingCart } from "@/domain/cart/types";
 import { useDexieCartSync } from "@/infrastructure/dexie/use-dexie-cart-sync";
+import { EASE } from "@/lib/motion";
 import { syncCartToServer } from "@/lib/sync-cart";
 import { useAtomValue } from "@effect-atom/atom-react";
 import { type Maybe, None, Some, isSome } from "@fabric/types";
 import { Option } from "effect";
+import { AnimatePresence, motion } from "motion/react";
 import { parseAsStringLiteral, useQueryState } from "nuqs";
 import { AddressForm } from "./_components/address-form";
 import { OmiseCardForm } from "./_components/omise-card-form";
@@ -67,64 +69,77 @@ export default function CheckoutPage() {
           ))}
         </div>
 
-        {step === "address" && <AddressForm onNext={goToSummary} />}
-        {step === "summary" && (
-          <OrderSummary
-            cart={cart}
-            onNext={() => setStep("payment")}
-            onBack={() => setStep("address")}
-          />
-        )}
-        {step === "payment" && (
-          <div className="space-y-4">
-            {/* Payment method tabs — segmented control */}
-            <div className="bg-card rounded-lg border border-border p-1 flex gap-1">
-              <button
-                type="button"
-                onClick={() => setPaymentMethod("card")}
-                className={`flex-1 rounded-md py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 ${
-                  paymentMethod === "card"
-                    ? "bg-primary text-primary-foreground shadow-sm"
-                    : "text-muted-foreground hover:bg-muted"
-                }`}
-              >
-                Credit Card
-              </button>
-              <button
-                type="button"
-                onClick={() => setPaymentMethod("promptpay")}
-                className={`flex-1 rounded-md py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 ${
-                  paymentMethod === "promptpay"
-                    ? "bg-primary text-primary-foreground shadow-sm"
-                    : "text-muted-foreground hover:bg-muted"
-                }`}
-              >
-                PromptPay
-              </button>
-              <button
-                type="button"
-                onClick={() => setPaymentMethod("crypto")}
-                className={`flex-1 rounded-md py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 ${
-                  paymentMethod === "crypto"
-                    ? "bg-primary text-primary-foreground shadow-sm"
-                    : "text-muted-foreground hover:bg-muted"
-                }`}
-              >
-                USDC
-              </button>
-            </div>
+        {/* Step content — quick reassuring cross-fade + settle between steps.
+            mode="wait" avoids overlap so the checkout flow never feels busy;
+            kept fast (base duration) so it never delays a shopper. */}
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            key={step}
+            initial={{ opacity: 0, x: 8 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -8 }}
+            transition={{ duration: 0.25, ease: EASE.smooth }}
+          >
+            {step === "address" && <AddressForm onNext={goToSummary} />}
+            {step === "summary" && (
+              <OrderSummary
+                cart={cart}
+                onNext={() => setStep("payment")}
+                onBack={() => setStep("address")}
+              />
+            )}
+            {step === "payment" && (
+              <div className="space-y-4">
+                {/* Payment method tabs — segmented control */}
+                <div className="bg-card rounded-lg border border-border p-1 flex gap-1">
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMethod("card")}
+                    className={`flex-1 rounded-md py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 ${
+                      paymentMethod === "card"
+                        ? "bg-primary text-primary-foreground shadow-sm"
+                        : "text-muted-foreground hover:bg-muted"
+                    }`}
+                  >
+                    Credit Card
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMethod("promptpay")}
+                    className={`flex-1 rounded-md py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 ${
+                      paymentMethod === "promptpay"
+                        ? "bg-primary text-primary-foreground shadow-sm"
+                        : "text-muted-foreground hover:bg-muted"
+                    }`}
+                  >
+                    PromptPay
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMethod("crypto")}
+                    className={`flex-1 rounded-md py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 ${
+                      paymentMethod === "crypto"
+                        ? "bg-primary text-primary-foreground shadow-sm"
+                        : "text-muted-foreground hover:bg-muted"
+                    }`}
+                  >
+                    USDC
+                  </button>
+                </div>
 
-            {paymentMethod === "card" && (
-              <OmiseCardForm cart={cart} onBack={() => setStep("summary")} />
+                {paymentMethod === "card" && (
+                  <OmiseCardForm cart={cart} onBack={() => setStep("summary")} />
+                )}
+                {paymentMethod === "promptpay" && (
+                  <PromptPayForm cart={cart} onBack={() => setStep("summary")} />
+                )}
+                {paymentMethod === "crypto" && (
+                  <X402PaymentForm cart={cart} onBack={() => setStep("summary")} />
+                )}
+              </div>
             )}
-            {paymentMethod === "promptpay" && (
-              <PromptPayForm cart={cart} onBack={() => setStep("summary")} />
-            )}
-            {paymentMethod === "crypto" && (
-              <X402PaymentForm cart={cart} onBack={() => setStep("summary")} />
-            )}
-          </div>
-        )}
+          </motion.div>
+        </AnimatePresence>
       </div>
     </div>
   );
