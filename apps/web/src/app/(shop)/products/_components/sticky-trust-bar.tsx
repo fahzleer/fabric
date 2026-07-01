@@ -86,14 +86,14 @@ const ITEMS = [
 
 export function StickyTrustBar() {
   return (
-    <div className="sticky top-0 z-30 border-b border-gray-200 bg-white/95 py-2 shadow-sm backdrop-blur-sm">
+    <div className="sticky top-0 z-30 border-b border-border bg-white/95 py-2 shadow-sm backdrop-blur-sm">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 overflow-x-auto px-4 text-xs sm:text-sm">
         {ITEMS.map((item) => (
-          <div key={item.label} className="flex shrink-0 items-center gap-2 text-gray-600">
+          <div key={item.label} className="flex shrink-0 items-center gap-2 text-muted-foreground">
             {item.icon}
             <div className="leading-tight">
-              <span className="block font-medium text-gray-900">{item.label}</span>
-              <span className="hidden text-gray-500 sm:inline">{item.description}</span>
+              <span className="block font-medium text-foreground">{item.label}</span>
+              <span className="hidden text-muted-foreground sm:inline">{item.description}</span>
             </div>
           </div>
         ))}

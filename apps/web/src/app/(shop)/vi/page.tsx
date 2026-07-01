@@ -80,27 +80,27 @@ export default function VietnamPage() {
         <header className="mb-10">
           <div className="flex items-center gap-2 mb-3">
             <span className="text-2xl">🇻🇳</span>
-            <span className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+            <span className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
               Việt Nam
             </span>
           </div>
-          <h1 className="text-4xl font-bold text-gray-900">
+          <h1 className="text-4xl font-bold text-foreground">
             Áo Thun Premium — Giao Hàng Đến Việt Nam
           </h1>
-          <p className="mt-4 text-lg text-gray-600 max-w-2xl">
+          <p className="mt-4 text-lg text-muted-foreground max-w-2xl">
             Khám phá bộ sưu tập áo thun premium chất lượng cao từ Fabric, giao hàng trực tiếp đến
             Việt Nam. Thanh toán an toàn bằng thẻ Visa/Mastercard hoặc USDC crypto.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             <Link
               href="/products"
-              className="rounded-lg bg-gray-900 px-6 py-3 text-sm font-medium text-white hover:bg-gray-700"
+              className="rounded-lg bg-primary px-6 py-3 text-sm font-medium text-primary-foreground hover:bg-primary/90"
             >
               Xem Sản Phẩm
             </Link>
             <Link
               href="/payment/card"
-              className="rounded-lg border border-gray-300 px-6 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              className="rounded-lg border border-border-strong px-6 py-3 text-sm font-medium text-muted-foreground hover:bg-muted"
             >
               Phương Thức Thanh Toán →
             </Link>
@@ -110,7 +110,7 @@ export default function VietnamPage() {
         <TrustBadges className="mb-10" />
 
         <section aria-labelledby="shipping-heading" className="mb-10">
-          <h2 id="shipping-heading" className="text-xl font-semibold text-gray-900 mb-4">
+          <h2 id="shipping-heading" className="text-xl font-semibold text-foreground mb-4">
             Giao Hàng Đến Việt Nam
           </h2>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -119,35 +119,37 @@ export default function VietnamPage() {
               { label: "Theo dõi đơn hàng", value: "Có cho tất cả đơn hàng" },
               { label: "Đổi trả", value: "Chính sách 7 ngày" },
             ].map((item) => (
-              <div key={item.label} className="rounded-lg border border-gray-200 bg-white p-4">
-                <p className="text-xs text-gray-500 uppercase tracking-wide">{item.label}</p>
-                <p className="mt-1 font-semibold text-gray-900">{item.value}</p>
+              <div key={item.label} className="rounded-lg border border-border bg-card p-4">
+                <p className="text-xs text-muted-foreground uppercase tracking-wide">
+                  {item.label}
+                </p>
+                <p className="mt-1 font-semibold text-foreground">{item.value}</p>
               </div>
             ))}
           </div>
         </section>
 
         <section aria-labelledby="payment-heading" className="mb-10">
-          <h2 id="payment-heading" className="text-xl font-semibold text-gray-900 mb-4">
+          <h2 id="payment-heading" className="text-xl font-semibold text-foreground mb-4">
             Phương Thức Thanh Toán Cho Việt Nam
           </h2>
           <ul className="space-y-3">
-            <li className="flex items-start gap-3 rounded-lg border border-gray-200 p-4">
+            <li className="flex items-start gap-3 rounded-lg border border-border p-4">
               <span className="text-success font-bold mt-0.5">✓</span>
               <div>
-                <p className="font-medium text-gray-900">
+                <p className="font-medium text-foreground">
                   Thẻ Tín Dụng / Ghi Nợ (Visa, Mastercard)
                 </p>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-muted-foreground">
                   Chấp nhận từ tất cả ngân hàng Việt Nam — Vietcombank, Techcombank, BIDV, VPBank.
                 </p>
               </div>
             </li>
-            <li className="flex items-start gap-3 rounded-lg border border-gray-200 p-4">
+            <li className="flex items-start gap-3 rounded-lg border border-border p-4">
               <span className="text-success font-bold mt-0.5">✓</span>
               <div>
-                <p className="font-medium text-gray-900">USDC trên Base Network</p>
-                <p className="text-sm text-gray-500">
+                <p className="font-medium text-foreground">USDC trên Base Network</p>
+                <p className="text-sm text-muted-foreground">
                   Thanh toán bằng crypto — MetaMask hoặc Coinbase Wallet, không cần tài khoản ngân
                   hàng.
                 </p>
@@ -157,7 +159,7 @@ export default function VietnamPage() {
         </section>
 
         <section aria-labelledby="why-heading" className="mb-10">
-          <h2 id="why-heading" className="text-xl font-semibold text-gray-900 mb-4">
+          <h2 id="why-heading" className="text-xl font-semibold text-foreground mb-4">
             Tại Sao Chọn Fabric?
           </h2>
           <ul className="space-y-2">
@@ -168,7 +170,7 @@ export default function VietnamPage() {
               "Thanh toán bảo mật với mã hóa TLS 1.3 và tiêu chuẩn PCI-DSS",
               "Xác nhận đơn hàng tự động qua email sau khi thanh toán thành công",
             ].map((item) => (
-              <li key={item} className="flex items-start gap-2 text-sm text-gray-700">
+              <li key={item} className="flex items-start gap-2 text-sm text-muted-foreground">
                 <span className="text-success font-bold mt-0.5 flex-shrink-0">✓</span>
                 {item}
               </li>

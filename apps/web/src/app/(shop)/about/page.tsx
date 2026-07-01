@@ -91,21 +91,21 @@ export default function AboutPage() {
         ]}
       />
       <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8">
-        <nav aria-label="breadcrumb" className="mb-6 text-sm text-gray-500">
+        <nav aria-label="breadcrumb" className="mb-6 text-sm text-muted-foreground">
           <ol className="flex items-center gap-1">
             <li>
-              <Link href="/" className="hover:text-gray-700">
+              <Link href="/" className="hover:text-muted-foreground">
                 หน้าแรก
               </Link>
             </li>
             <li aria-hidden="true">/</li>
-            <li className="text-gray-900 font-medium">เกี่ยวกับ Fabric</li>
+            <li className="text-foreground font-medium">เกี่ยวกับ Fabric</li>
           </ol>
         </nav>
 
         <header className="mb-10">
-          <h1 className="text-4xl font-bold text-gray-900">เกี่ยวกับ Fabric</h1>
-          <p className="mt-4 text-lg text-gray-600 max-w-2xl">
+          <h1 className="text-4xl font-bold text-foreground">เกี่ยวกับ Fabric</h1>
+          <p className="mt-4 text-lg text-muted-foreground max-w-2xl">
             Fabric คือแพลตฟอร์มซื้อขายเสื้อผ้า premium quality สำหรับคนที่ใส่ใจในคุณภาพและรายละเอียด —
             ทั้งในไทยและทั่วเอเชียตะวันออกเฉียงใต้
           </p>
@@ -114,34 +114,34 @@ export default function AboutPage() {
         <TrustBadges className="mb-12" />
 
         <section aria-labelledby="mission-heading" className="mb-12">
-          <h2 id="mission-heading" className="text-2xl font-semibold text-gray-900 mb-4">
+          <h2 id="mission-heading" className="text-2xl font-semibold text-foreground mb-4">
             พันธกิจของเรา
           </h2>
-          <p className="text-gray-600 leading-relaxed">
+          <p className="text-muted-foreground leading-relaxed">
             เราเชื่อว่าเสื้อผ้าคุณภาพดีไม่ควรซับซ้อนหรือเข้าถึงยาก Fabric สร้างขึ้นเพื่อเชื่อมต่อ
             ผู้ผลิตที่ใส่ใจงานฝีมือกับผู้บริโภคที่รู้คุณค่า ผ่านประสบการณ์การช้อปปิ้งออนไลน์ ที่ราบรื่นและปลอดภัย
           </p>
         </section>
 
         <section aria-labelledby="values-heading" className="mb-12">
-          <h2 id="values-heading" className="text-2xl font-semibold text-gray-900 mb-6">
+          <h2 id="values-heading" className="text-2xl font-semibold text-foreground mb-6">
             สิ่งที่เราให้ความสำคัญ
           </h2>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
             {VALUES.map((v) => (
-              <div key={v.title} className="rounded-xl border border-gray-200 bg-white p-5">
-                <h3 className="font-semibold text-gray-900 mb-2">{v.title}</h3>
-                <p className="text-sm text-gray-600 leading-relaxed">{v.body}</p>
+              <div key={v.title} className="rounded-xl border border-border bg-card p-5">
+                <h3 className="font-semibold text-foreground mb-2">{v.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{v.body}</p>
               </div>
             ))}
           </div>
         </section>
 
         <section aria-labelledby="payment-heading" className="mb-12">
-          <h2 id="payment-heading" className="text-2xl font-semibold text-gray-900 mb-4">
+          <h2 id="payment-heading" className="text-2xl font-semibold text-foreground mb-4">
             วิธีชำระเงิน
           </h2>
-          <p className="text-gray-600 mb-4">
+          <p className="text-muted-foreground mb-4">
             Fabric รองรับหลายช่องทาง เพื่อให้ลูกค้าทั้งในไทยและต่างประเทศชำระเงินได้สะดวก
           </p>
           <div className="flex flex-wrap gap-2">
@@ -153,7 +153,7 @@ export default function AboutPage() {
               <Link
                 key={p.href}
                 href={p.href}
-                className="rounded-full border border-gray-200 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                className="rounded-full border border-border px-4 py-2 text-sm text-muted-foreground hover:bg-muted transition-colors"
               >
                 {p.label}
               </Link>
@@ -162,14 +162,19 @@ export default function AboutPage() {
         </section>
 
         <section aria-labelledby="coverage-heading" className="mb-12">
-          <h2 id="coverage-heading" className="text-2xl font-semibold text-gray-900 mb-4">
+          <h2 id="coverage-heading" className="text-2xl font-semibold text-foreground mb-4">
             พื้นที่ให้บริการ
           </h2>
-          <p className="text-gray-600 mb-3">จัดส่งทั่วไทย และรองรับลูกค้าจากประเทศในเอเชียตะวันออกเฉียงใต้</p>
+          <p className="text-muted-foreground mb-3">
+            จัดส่งทั่วไทย และรองรับลูกค้าจากประเทศในเอเชียตะวันออกเฉียงใต้
+          </p>
           <div className="flex flex-wrap gap-2">
             {["ไทย 🇹🇭", "มาเลเซีย 🇲🇾", "อินโดนีเซีย 🇮🇩", "ฟิลิปปินส์ 🇵🇭", "เวียดนาม 🇻🇳", "สิงคโปร์ 🇸🇬"].map(
               (c) => (
-                <span key={c} className="rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700">
+                <span
+                  key={c}
+                  className="rounded-full bg-secondary px-3 py-1 text-sm text-muted-foreground"
+                >
                   {c}
                 </span>
               )
@@ -199,14 +204,14 @@ export default function AboutPage() {
           ]}
         />
 
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-t border-gray-200 pt-8">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-t border-border pt-8">
           <div>
-            <h2 className="text-lg font-semibold text-gray-900">พร้อมเริ่มช้อปหรือยัง?</h2>
+            <h2 className="text-lg font-semibold text-foreground">พร้อมเริ่มช้อปหรือยัง?</h2>
             <FreshnessLabel updatedAt="2026-06-23" quarter="Q2 2026" />
           </div>
           <Link
             href="/auth/register"
-            className="rounded-lg bg-gray-900 px-6 py-3 text-sm font-medium text-white hover:bg-gray-700"
+            className="rounded-lg bg-primary px-6 py-3 text-sm font-medium text-primary-foreground hover:bg-primary/90"
           >
             สร้างบัญชีและเริ่มช้อป
           </Link>

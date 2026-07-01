@@ -100,39 +100,39 @@ export default function ReturnsPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
 
-      <nav aria-label="breadcrumb" className="mb-6 text-sm text-gray-500">
+      <nav aria-label="breadcrumb" className="mb-6 text-sm text-muted-foreground">
         <ol className="flex items-center gap-1">
           <li>
-            <Link href="/" className="hover:text-gray-700">
+            <Link href="/" className="hover:text-muted-foreground">
               หน้าแรก
             </Link>
           </li>
           <li aria-hidden="true">/</li>
           <li>
-            <Link href="/guides" className="hover:text-gray-700">
+            <Link href="/guides" className="hover:text-muted-foreground">
               คู่มือ
             </Link>
           </li>
           <li aria-hidden="true">/</li>
-          <li className="text-gray-900 font-medium">คืน / เปลี่ยนสินค้า</li>
+          <li className="text-foreground font-medium">คืน / เปลี่ยนสินค้า</li>
         </ol>
       </nav>
 
       <header className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">นโยบายคืนและเปลี่ยนสินค้า</h1>
+        <h1 className="text-3xl font-bold text-foreground">นโยบายคืนและเปลี่ยนสินค้า</h1>
         <FreshnessLabel updatedAt={UPDATED_AT} quarter={QUARTER} />
-        <p className="mt-3 text-gray-600 max-w-xl">
+        <p className="mt-3 text-muted-foreground max-w-xl">
           เราดูแลทุกการซื้อขาย — หากสินค้าไม่เป็นไปตามที่คาดหวัง แจ้งเราได้ภายใน 7 วัน
         </p>
       </header>
 
       <section aria-labelledby="conditions-heading" className="mb-8">
-        <h2 id="conditions-heading" className="text-lg font-semibold text-gray-900 mb-4">
+        <h2 id="conditions-heading" className="text-lg font-semibold text-foreground mb-4">
           เงื่อนไขการรับคืน
         </h2>
         <ul className="space-y-2">
           {CONDITIONS.map((c) => (
-            <li key={c} className="flex items-start gap-2 text-sm text-gray-700">
+            <li key={c} className="flex items-start gap-2 text-sm text-muted-foreground">
               <span className="mt-0.5 flex-shrink-0 text-success font-bold">✓</span>
               {c}
             </li>
@@ -141,18 +141,18 @@ export default function ReturnsPage() {
       </section>
 
       <section aria-labelledby="process-heading">
-        <h2 id="process-heading" className="text-xl font-semibold text-gray-900 mb-6">
+        <h2 id="process-heading" className="text-xl font-semibold text-foreground mb-6">
           ขั้นตอนการแจ้งคืนสินค้า
         </h2>
         <ol className="space-y-5">
           {STEPS.map((step, i) => (
             <li key={step.name} className="flex gap-4">
-              <span className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-900 text-white flex items-center justify-center text-sm font-semibold">
+              <span className="flex-shrink-0 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-semibold">
                 {i + 1}
               </span>
               <div>
-                <p className="font-medium text-gray-900">{step.name}</p>
-                <p className="mt-0.5 text-sm text-gray-600">{step.text}</p>
+                <p className="font-medium text-foreground">{step.name}</p>
+                <p className="mt-0.5 text-sm text-muted-foreground">{step.text}</p>
               </div>
             </li>
           ))}
@@ -166,13 +166,13 @@ export default function ReturnsPage() {
       <div className="mt-10 flex gap-3">
         <Link
           href="/products"
-          className="rounded-lg bg-gray-900 px-6 py-3 text-sm font-medium text-white hover:bg-gray-700"
+          className="rounded-lg bg-primary px-6 py-3 text-sm font-medium text-primary-foreground hover:bg-primary/90"
         >
           กลับไปเลือกสินค้า
         </Link>
         <Link
           href="/guides"
-          className="rounded-lg border border-gray-300 px-6 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50"
+          className="rounded-lg border border-border-strong px-6 py-3 text-sm font-medium text-muted-foreground hover:bg-muted"
         >
           คู่มืออื่นๆ
         </Link>

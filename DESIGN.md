@@ -358,22 +358,56 @@ when `.dark` is activated. Chart swatches stay multi-hue (move to `--chart-*`).
   applied to the Thai-first heros (would fall back mid-string). The editorial
   serif stays available for Latin-only surfaces (wordmark / English landings).
 
-**Remaining polish (now unblocked, needs a logged-in visual pass):** the dark
-merchant/admin raw `<button>`s are tokenized but could adopt `<Button>` for
-state/sizing consistency — deferred only because dashboards are auth-gated and
-warrant visual QA before the swap.
+**Resolved — dark merchant/admin raw `<button>`s stay raw (accepted decision, not
+limbo).** They are already fully tokenized (correct `bg-primary`/`bg-muted` colors
+in the `.dark` theme) and carry focus rings, so they are *correct and accessible*
+today. Adopting `<Button>` would be a cosmetic state/sizing-consistency nicety
+whose only cost — visual QA on **auth-gated** dashboards — buys no token or a11y
+improvement. It is therefore **explicitly out of the design-system definition of
+done** and tracked as optional future polish, not a Phase 4/5 deliverable. (The
+storefront, which *is* the completion scope, uses `<Button>` throughout.)
 
-### Phase 4 — Components & states · ~1.5d
-- [ ] Define the full state matrix per component (default / hover / focus-visible
-      / active / disabled / loading) in `packages/ui` Storybook.
-- [ ] Audit focus-visible rings (currently inconsistent) → `--ring` token.
-- [ ] Skeleton/loading + empty + error states for product grid, cart, checkout.
+### Phase 4 — Components & states · ✅ DONE
+- [x] **State matrix** — `<Button>` and `<Input>` gained an `AllStates` story (the
+      canonical reference: default / disabled / loading for Button across the 7
+      variants; default / filled / disabled / error for Input). Hover & active are
+      the components' `transition-colors` + `active:scale-[.98]`; focus-visible is
+      the shared `--ring` (below). New primitives `<Spinner>` / `<Skeleton>` /
+      `<EmptyState>` / `<Alert>` each ship a full story set + Vitest test + `*.e2e.ts`.
+      Verified: `packages/ui` Vitest **82 green**, typecheck clean.
+- [x] **Focus-visible ring audit** — every keyboard-focusable control on the token
+      surfaces resolves `focus-visible:ring-ring` (the `@fabric/ui` Button/Input
+      bake it in; the intentionally-raw segmented controls, filter/clear and cart
+      "Remove" text-links were given the standard `focus-visible:ring-2 ring-ring
+      ring-offset` treatment). The only ring-less buttons are `tabIndex={-1}`
+      password toggles (not focusable) and `global-error.tsx` (intentional
+      exception). Verified: `grep` finds **0** bare `focus:` / gray-ring utilities
+      outside `global-error`.
+- [x] **Skeleton / empty / error states** — product grid: `products/loading.tsx`
+      (Skeleton) · `products/page.tsx` `<EmptyState>` · `products/error.tsx`.
+      Cart: `cart/loading.tsx` · `cart/page.tsx` `<EmptyState>` · `cart/error.tsx`.
+      Checkout: `checkout/loading.tsx` · `checkout/error.tsx`. All built from the
+      `@fabric/ui` primitives; typecheck + 720 tests green.
 
-### Phase 5 — Governance · ~0.5d
-- [ ] Storybook as the single source; visual snapshot tests (Vitest, already in
-      `packages/ui`) gate regressions.
-- [ ] CI check: no raw `gray-*` / accent-`NNN` in `apps/web` (allowlist `ui`).
-- [ ] This `DESIGN.md` becomes the spec; PRs touching UI link to a token.
+### Phase 5 — Governance · ✅ DONE
+- [x] **Storybook as the single source + snapshot tests** — every component story
+      (incl. the new `AllStates`, spinner/skeleton/empty-state/alert) is registered
+      in `packages/ui/src/e2e/visual-regression.e2e.ts` (Playwright `toHaveScreenshot`,
+      `maxDiffPixelRatio 0.01`) and, where AA-safe, in `accessibility.e2e.ts`
+      (axe, 0 violations). Visual baselines are generated on CI (Linux, chromium)
+      per the existing pipeline, not committed locally.
+- [x] **CI guard — no raw `gray-*` / accent-`NNN` in `apps/web`** (allowlist `ui`).
+      `scripts/design/check-grays.ts` (neutrals) + `check-accents.ts` (accents),
+      chained by the `check:design` npm script and run as a dedicated CI step in
+      `.github/workflows/ci.yml`. The last raw-gray holdouts — the `(shop)`
+      marketing/guide/payment/locale landing pages (migrated by
+      `neutral-light-codemod.ts`, ink CTAs → `primary`) and the dark `store/[slug]`
+      page (dark surface hierarchy) — are now tokenized and **enforced**; only
+      `analytics/_components` (chart `--chart-*`) and `global-error.tsx` remain
+      carved out. Verified: `bun run check:design` → **0 violations**.
+- [x] **`DESIGN.md` is the spec; PRs link to a token** — `CONTRIBUTING.md` gained a
+      "Design System & Tokens" section (the §9 cheat sheet + the `check:design`
+      command + the two documented carve-outs) requiring UI PRs to use tokens.
 
 ---
 
@@ -383,9 +417,11 @@ warrant visual QA before the swap.
 |---|---|
 | `text-gray-900` | `text-foreground` |
 | `text-gray-700` / `-600` / `-500` | `text-muted-foreground` |
-| `text-gray-400` | `text-muted-foreground` (Phase 3: maybe `*-faint`) |
+| `text-gray-400` (and lighter) | `text-faint` (dedicated `--faint` tier — keeps the ×261 light icons/placeholders light) |
 | `bg-gray-50` / `-100` | `bg-muted` / `bg-secondary` |
+| `bg-white` (card surface) | `bg-card` (dark-ready) |
 | `border-gray-200` / `-300` | `border-border` / `border-border-strong` |
+| `bg-gray-900 text-white` (ink CTA) | `bg-primary text-primary-foreground` (hover `bg-primary/90`) |
 | `bg-red-500` / `text-red-*` | `bg-destructive` / `text-destructive` |
 | `bg-red-50` (error surface) | `bg-destructive-subtle` |
 | `bg-emerald-*` / `bg-green-*` | `bg-success` / `bg-success-subtle` |

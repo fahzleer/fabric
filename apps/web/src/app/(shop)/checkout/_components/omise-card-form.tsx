@@ -237,14 +237,14 @@ function MockModeCard({
   onPay: () => void;
 }) {
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-5">
+    <div className="bg-white rounded-lg border border-border p-6 space-y-5">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-900">Pay by Card</h2>
+        <h2 className="text-lg font-semibold text-foreground">Pay by Card</h2>
         <span className="rounded-full bg-warning-subtle px-2.5 py-0.5 text-xs font-medium text-warning">
           Test mode
         </span>
       </div>
-      <p className="text-sm text-gray-500">
+      <p className="text-sm text-muted-foreground">
         No Omise key configured — using mock payment gateway. Click the button to simulate a
         successful payment.
       </p>
@@ -253,8 +253,8 @@ function MockModeCard({
           {error.value}
         </div>
       )}
-      <div className="border-t border-gray-200 pt-4">
-        <div className="flex justify-between font-semibold text-gray-900">
+      <div className="border-t border-border pt-4">
+        <div className="flex justify-between font-semibold text-foreground">
           <span>Total</span>
           <span>{formatPrice({ amount: totalAmount, currency })}</span>
         </div>
@@ -425,10 +425,10 @@ export function OmiseCardForm({ cart, onBack }: OmiseCardFormProps) {
         }
       />
 
-      <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-5">
+      <div className="bg-white rounded-lg border border-border p-6 space-y-5">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-900">Pay by Card</h2>
-          <div className="flex items-center gap-1.5 text-xs text-gray-500">
+          <h2 className="text-lg font-semibold text-foreground">Pay by Card</h2>
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <svg
               className="h-3.5 w-3.5 text-success"
               fill="currentColor"
@@ -447,7 +447,10 @@ export function OmiseCardForm({ cart, onBack }: OmiseCardFormProps) {
 
         <div className="space-y-3">
           <div>
-            <label htmlFor="card-name" className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="card-name"
+              className="block text-sm font-medium text-muted-foreground mb-1"
+            >
               Cardholder Name
             </label>
             <input
@@ -458,12 +461,15 @@ export function OmiseCardForm({ cart, onBack }: OmiseCardFormProps) {
               value={cardName}
               onChange={(e) => setCardName(e.target.value)}
               disabled={isLoading}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-info disabled:bg-gray-50 disabled:text-gray-400"
+              className="w-full rounded-lg border border-border-strong px-3 py-2.5 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:bg-muted disabled:text-faint"
             />
           </div>
 
           <div>
-            <label htmlFor="card-number" className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="card-number"
+              className="block text-sm font-medium text-muted-foreground mb-1"
+            >
               Card Number
             </label>
             <input
@@ -480,13 +486,16 @@ export function OmiseCardForm({ cart, onBack }: OmiseCardFormProps) {
                 setCardNumber(formatted);
               }}
               disabled={isLoading}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-info disabled:bg-gray-50 disabled:text-gray-400"
+              className="w-full rounded-lg border border-border-strong px-3 py-2.5 text-sm font-mono focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:bg-muted disabled:text-faint"
             />
           </div>
 
           <div className="grid grid-cols-3 gap-3">
             <div>
-              <label htmlFor="exp-month" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="exp-month"
+                className="block text-sm font-medium text-muted-foreground mb-1"
+              >
                 Month
               </label>
               <input
@@ -499,11 +508,14 @@ export function OmiseCardForm({ cart, onBack }: OmiseCardFormProps) {
                 value={expMonth}
                 onChange={(e) => setExpMonth(e.target.value.replace(/\D/g, ""))}
                 disabled={isLoading}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-center font-mono focus:outline-none focus:ring-2 focus:ring-info disabled:bg-gray-50 disabled:text-gray-400"
+                className="w-full rounded-lg border border-border-strong px-3 py-2.5 text-sm text-center font-mono focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:bg-muted disabled:text-faint"
               />
             </div>
             <div>
-              <label htmlFor="exp-year" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="exp-year"
+                className="block text-sm font-medium text-muted-foreground mb-1"
+              >
                 Year
               </label>
               <input
@@ -516,11 +528,11 @@ export function OmiseCardForm({ cart, onBack }: OmiseCardFormProps) {
                 value={expYear}
                 onChange={(e) => setExpYear(e.target.value.replace(/\D/g, ""))}
                 disabled={isLoading}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-center font-mono focus:outline-none focus:ring-2 focus:ring-info disabled:bg-gray-50 disabled:text-gray-400"
+                className="w-full rounded-lg border border-border-strong px-3 py-2.5 text-sm text-center font-mono focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:bg-muted disabled:text-faint"
               />
             </div>
             <div>
-              <label htmlFor="cvv" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="cvv" className="block text-sm font-medium text-muted-foreground mb-1">
                 CVV
               </label>
               <input
@@ -533,7 +545,7 @@ export function OmiseCardForm({ cart, onBack }: OmiseCardFormProps) {
                 value={cvv}
                 onChange={(e) => setCvv(e.target.value.replace(/\D/g, ""))}
                 disabled={isLoading}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-center font-mono focus:outline-none focus:ring-2 focus:ring-info disabled:bg-gray-50 disabled:text-gray-400"
+                className="w-full rounded-lg border border-border-strong px-3 py-2.5 text-sm text-center font-mono focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:bg-muted disabled:text-faint"
               />
             </div>
           </div>
@@ -571,8 +583,8 @@ export function OmiseCardForm({ cart, onBack }: OmiseCardFormProps) {
           </div>
         )}
 
-        <div className="border-t border-gray-200 pt-4">
-          <div className="flex justify-between font-semibold text-gray-900">
+        <div className="border-t border-border pt-4">
+          <div className="flex justify-between font-semibold text-foreground">
             <span>Total</span>
             <span>{formatPrice({ amount: totalAmount, currency })}</span>
           </div>
@@ -601,7 +613,7 @@ export function OmiseCardForm({ cart, onBack }: OmiseCardFormProps) {
         </div>
 
         {!(omiseReady || error) && (
-          <p className="text-center text-xs text-gray-400">Loading payment library…</p>
+          <p className="text-center text-xs text-faint">Loading payment library…</p>
         )}
       </div>
     </>

@@ -49,3 +49,6 @@ project/project/
 firebase-debug.log
 ui-debug.log
 .vercel
+
+# Claude Code local worktrees / agent scratch
+.claude/worktrees/

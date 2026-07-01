@@ -251,7 +251,7 @@ export function StoreRegisterForm() {
       <Button type="submit" variant="success" disabled={!allValid} className="w-full">
         Create store account
       </Button>
-      <p className="text-center text-xs text-gray-500">
+      <p className="text-center text-xs text-muted-foreground">
         Start free — upgrade your plan anytime from the merchant dashboard.
       </p>
     </form>

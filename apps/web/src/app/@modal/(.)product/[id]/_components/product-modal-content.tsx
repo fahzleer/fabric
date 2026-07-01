@@ -16,7 +16,7 @@ export function ProductModalContent({ product }: ProductModalContentProps) {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2">
-      <div className="aspect-square bg-gray-100 flex items-center justify-center p-8 relative">
+      <div className="aspect-square bg-secondary flex items-center justify-center p-8 relative">
         <Image
           src={primaryImage.url}
           alt={primaryImage.altText}
@@ -30,16 +30,16 @@ export function ProductModalContent({ product }: ProductModalContentProps) {
 
       <div className="p-6 flex flex-col">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">{product.name.value}</h2>
+          <h2 className="text-2xl font-bold text-foreground">{product.name.value}</h2>
           {product.tagline.length > 0 && (
-            <p className="mt-1 text-sm text-gray-500">{product.tagline}</p>
+            <p className="mt-1 text-sm text-muted-foreground">{product.tagline}</p>
           )}
-          <p className="mt-3 text-2xl font-bold text-gray-900">{formattedPrice}</p>
+          <p className="mt-3 text-2xl font-bold text-foreground">{formattedPrice}</p>
         </div>
 
         <div className="mt-4 flex-1">
-          <h3 className="text-sm font-medium text-gray-900">Description</h3>
-          <p className="mt-2 text-sm text-gray-600">{product.description}</p>
+          <h3 className="text-sm font-medium text-foreground">Description</h3>
+          <p className="mt-2 text-sm text-muted-foreground">{product.description}</p>
         </div>
 
         <div className="mt-6">
@@ -55,7 +55,7 @@ export function ProductModalContent({ product }: ProductModalContentProps) {
         <div className="mt-3">
           <a
             href={`/product/${product.id.value}`}
-            className="block w-full text-center rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-700 font-medium hover:bg-gray-50 transition-colors"
+            className="block w-full text-center rounded-lg border border-border-strong px-4 py-2 text-sm text-muted-foreground font-medium hover:bg-muted transition-colors"
           >
             View Full Details
           </a>

@@ -34,7 +34,7 @@ function NavLink({
   href,
   children,
   className = "",
-  activeClassName = "text-gray-900 font-semibold",
+  activeClassName = "text-foreground font-semibold",
 }: NavLinkProps) {
   return (
     <Link href={href} className="text-sm font-medium transition-colors">
@@ -56,8 +56,8 @@ export function NavLinks({ isLoggedIn, isAdmin }: NavLinksProps) {
       {isLoggedIn && (
         <NavLink
           href="/products"
-          className="text-gray-500 hover:text-gray-900"
-          activeClassName="text-gray-900 font-semibold"
+          className="text-muted-foreground hover:text-foreground"
+          activeClassName="text-foreground font-semibold"
         >
           Products
         </NavLink>

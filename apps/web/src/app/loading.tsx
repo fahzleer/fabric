@@ -1,15 +1,17 @@
+import { Skeleton } from "@fabric/ui";
+
 export default function RootLoading() {
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+    <div className="flex min-h-screen items-center justify-center bg-muted">
       <div className="text-center">
         <div className="mb-8">
-          <div className="w-16 h-16 bg-gray-200 rounded-full mx-auto animate-pulse" />
+          <Skeleton className="mx-auto size-16 rounded-full" />
         </div>
 
-        <h1 className="text-xl font-semibold text-gray-900 mb-2">Loading Fabric...</h1>
+        <h1 className="mb-2 text-xl font-semibold text-foreground">Loading Fabric...</h1>
 
-        <div className="w-48 h-1 bg-gray-200 rounded-full mx-auto overflow-hidden">
-          <div className="h-full bg-gray-900 rounded-full w-1/3 animate-pulse" />
+        <div className="mx-auto h-1 w-48 overflow-hidden rounded-full bg-secondary">
+          <div className="h-full w-1/3 animate-pulse rounded-full bg-foreground" />
         </div>
       </div>
     </div>

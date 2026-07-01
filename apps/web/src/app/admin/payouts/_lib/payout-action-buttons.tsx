@@ -76,7 +76,7 @@ export function PayoutActionButtons({ requestId, ownerUserId }: Props) {
           value={reason}
           onChange={(e) => setReason(e.target.value)}
           placeholder="Rejection reason…"
-          className="rounded border border-border bg-muted px-2 py-1 text-xs text-foreground placeholder-muted-foreground focus:border-destructive/80 focus:outline-none"
+          className="rounded border border-border bg-muted px-2 py-1 text-xs text-foreground placeholder-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
         />
         <div className="flex gap-1">
           <Button

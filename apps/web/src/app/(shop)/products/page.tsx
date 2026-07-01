@@ -8,7 +8,9 @@ import {
   getServerVariant,
   getVariantTitle,
 } from "@/lib/server-experiment";
+import { Alert, AlertDescription, AlertTitle, EmptyState } from "@fabric/ui";
 import { Effect } from "effect";
+import { PackageOpen } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { connection } from "next/server";
@@ -45,7 +47,10 @@ export default async function ProductsPage() {
   if (result._tag === "Left") {
     return (
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <p className="text-destructive">{result.left.message}</p>
+        <Alert variant="destructive">
+          <AlertTitle>ไม่สามารถโหลดสินค้าได้</AlertTitle>
+          <AlertDescription>{result.left.message}</AlertDescription>
+        </Alert>
       </div>
     );
   }
@@ -55,7 +60,11 @@ export default async function ProductsPage() {
   if (products.length === 0) {
     return (
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <p className="text-gray-400">No products available.</p>
+        <EmptyState
+          icon={<PackageOpen />}
+          title="ยังไม่มีสินค้า"
+          description="ขออภัย ขณะนี้ยังไม่มีสินค้าให้เลือกซื้อ กรุณากลับมาใหม่อีกครั้ง"
+        />
       </div>
     );
   }
@@ -106,15 +115,15 @@ export default async function ProductsPage() {
             { name: "สินค้าทั้งหมด", href: "/products" },
           ]}
         />
-        <nav aria-label="breadcrumb" className="text-sm text-gray-500">
+        <nav aria-label="breadcrumb" className="text-sm text-muted-foreground">
           <ol className="flex items-center gap-1">
             <li>
-              <Link href="/" className="hover:text-gray-700">
+              <Link href="/" className="hover:text-muted-foreground">
                 หน้าแรก
               </Link>
             </li>
             <li aria-hidden="true">/</li>
-            <li className="font-medium text-gray-900">สินค้าทั้งหมด</li>
+            <li className="font-medium text-foreground">สินค้าทั้งหมด</li>
           </ol>
         </nav>
 
@@ -125,14 +134,14 @@ export default async function ProductsPage() {
 
         {catalogProducts.length > 0 && <ProductsCatalog products={catalogProducts} />}
 
-        <nav aria-label="ข้อมูลเพิ่มเติม" className="border-t border-gray-100 pt-8">
-          <p className="mb-3 text-sm font-medium text-gray-500">ข้อมูลที่เป็นประโยชน์</p>
+        <nav aria-label="ข้อมูลเพิ่มเติม" className="border-t border-border pt-8">
+          <p className="mb-3 text-sm font-medium text-muted-foreground">ข้อมูลที่เป็นประโยชน์</p>
           <div className="flex flex-wrap gap-2">
             {internalLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className="rounded-full border border-gray-200 px-3 py-1.5 text-xs text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900"
+                className="rounded-full border border-border px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
               >
                 {link.label}
               </Link>
@@ -140,11 +149,11 @@ export default async function ProductsPage() {
           </div>
         </nav>
 
-        <div className="flex flex-col items-start justify-between gap-4 border-t border-gray-100 pt-8 sm:flex-row sm:items-center">
-          <h2 className="text-lg font-semibold text-gray-900">พร้อมเริ่มช้อปหรือยัง?</h2>
+        <div className="flex flex-col items-start justify-between gap-4 border-t border-border pt-8 sm:flex-row sm:items-center">
+          <h2 className="text-lg font-semibold text-foreground">พร้อมเริ่มช้อปหรือยัง?</h2>
           <Link
             href="/auth/register"
-            className="rounded-lg bg-gray-900 px-6 py-3 text-center text-sm font-medium text-white hover:bg-gray-800"
+            className="rounded-lg bg-primary px-6 py-3 text-center text-sm font-medium text-primary-foreground hover:bg-primary/90"
           >
             สร้างบัญชีฟรี
           </Link>

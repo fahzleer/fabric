@@ -44,7 +44,7 @@ export default function CheckoutPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-muted">
       <div className="mx-auto max-w-2xl px-4 py-8 sm:px-6 lg:px-8">
         {/* Step indicator */}
         <div className="mb-8 flex items-center justify-center gap-4">
@@ -56,13 +56,13 @@ export default function CheckoutPage() {
                     ? "bg-info text-white"
                     : STEPS.indexOf(step) > i
                       ? "bg-success text-white"
-                      : "bg-gray-200 text-gray-600"
+                      : "bg-secondary text-muted-foreground"
                 }`}
               >
                 {i + 1}
               </div>
-              <span className="text-sm font-medium text-gray-600 capitalize">{s}</span>
-              {i < STEPS.length - 1 && <div className="h-px w-8 bg-gray-300" />}
+              <span className="text-sm font-medium text-muted-foreground capitalize">{s}</span>
+              {i < STEPS.length - 1 && <div className="h-px w-8 bg-border-strong" />}
             </div>
           ))}
         </div>
@@ -82,7 +82,7 @@ export default function CheckoutPage() {
               <button
                 type="button"
                 onClick={() => setPaymentMethod("card")}
-                className={`flex-1 rounded-md py-2 text-sm font-medium transition-colors ${
+                className={`flex-1 rounded-md py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 ${
                   paymentMethod === "card"
                     ? "bg-primary text-primary-foreground shadow-sm"
                     : "text-muted-foreground hover:bg-muted"
@@ -93,7 +93,7 @@ export default function CheckoutPage() {
               <button
                 type="button"
                 onClick={() => setPaymentMethod("promptpay")}
-                className={`flex-1 rounded-md py-2 text-sm font-medium transition-colors ${
+                className={`flex-1 rounded-md py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 ${
                   paymentMethod === "promptpay"
                     ? "bg-primary text-primary-foreground shadow-sm"
                     : "text-muted-foreground hover:bg-muted"
@@ -104,7 +104,7 @@ export default function CheckoutPage() {
               <button
                 type="button"
                 onClick={() => setPaymentMethod("crypto")}
-                className={`flex-1 rounded-md py-2 text-sm font-medium transition-colors ${
+                className={`flex-1 rounded-md py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 ${
                   paymentMethod === "crypto"
                     ? "bg-primary text-primary-foreground shadow-sm"
                     : "text-muted-foreground hover:bg-muted"

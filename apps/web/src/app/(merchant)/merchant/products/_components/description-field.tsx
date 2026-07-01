@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { generateProductDescriptionAction } from "../_lib/actions";
 
 const inputClass =
-  "block w-full rounded-lg border border-border bg-muted px-3 py-2.5 text-sm text-foreground placeholder-muted-foreground focus:border-success focus:outline-none focus:ring-1 focus:ring-success";
+  "block w-full rounded-lg border border-border bg-muted px-3 py-2.5 text-sm text-foreground placeholder-muted-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring";
 const labelClass = "block text-sm font-medium text-foreground";
 
 export const DescriptionField = forwardRef<

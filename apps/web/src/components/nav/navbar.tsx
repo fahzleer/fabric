@@ -9,10 +9,10 @@ import { NavbarClientParts } from "./navbar-dynamic";
 
 export function NavbarSkeleton() {
   return (
-    <nav className="border-b border-gray-100 bg-white">
+    <nav className="border-b border-border bg-white">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-        <div className="h-7 w-16 animate-pulse rounded bg-gray-100" />
-        <div className="h-8 w-20 animate-pulse rounded bg-gray-100" />
+        <div className="h-7 w-16 animate-pulse rounded bg-secondary" />
+        <div className="h-8 w-20 animate-pulse rounded bg-secondary" />
       </div>
     </nav>
   );
@@ -30,11 +30,11 @@ export async function Navbar({ session: sessionProp }: { session?: Maybe<Session
   const isAdmin = isLoggedIn && (session.value.user as { role?: string }).role === "admin";
 
   return (
-    <nav className="border-b border-gray-100 bg-white">
+    <nav className="border-b border-border bg-white">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
         {/* Brand */}
         <Link href="/products" className="flex items-center gap-2">
-          <span className="text-xl font-bold tracking-tight text-gray-900">Fabric</span>
+          <span className="text-xl font-bold tracking-tight text-foreground">Fabric</span>
         </Link>
 
         {/* Nav links — Client Component with active link styling */}

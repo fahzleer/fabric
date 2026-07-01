@@ -33,12 +33,14 @@ function CartLineItems({ items }: { items: ShoppingCart["items"] }) {
             className="flex justify-between items-start"
           >
             <div>
-              <p className="text-sm font-medium text-gray-900">{item.productSnapshot.name.value}</p>
-              <p className="text-xs text-gray-500">
+              <p className="text-sm font-medium text-foreground">
+                {item.productSnapshot.name.value}
+              </p>
+              <p className="text-xs text-muted-foreground">
                 Size: {item.size} · Qty: {item.quantity}
               </p>
             </div>
-            <p className="text-sm font-medium text-gray-900">
+            <p className="text-sm font-medium text-foreground">
               {formatPrice({
                 amount: lineAmount.toNumber(),
                 currency: item.productSnapshot.price.currency,
@@ -143,17 +145,17 @@ function PricingBreakdown({
   appliedVoucherCode,
 }: PricingBreakdownProps) {
   return (
-    <div className="border-t border-gray-200 pt-4 space-y-2">
+    <div className="border-t border-border pt-4 space-y-2">
       {previewLoading ? (
         <div className="animate-pulse space-y-2">
-          <div className="h-4 bg-gray-100 rounded w-full" />
-          <div className="h-4 bg-gray-100 rounded w-3/4" />
-          <div className="h-4 bg-gray-100 rounded w-2/3" />
-          <div className="h-4 bg-gray-100 rounded w-1/2" />
+          <div className="h-4 bg-secondary rounded w-full" />
+          <div className="h-4 bg-secondary rounded w-3/4" />
+          <div className="h-4 bg-secondary rounded w-2/3" />
+          <div className="h-4 bg-secondary rounded w-1/2" />
         </div>
       ) : (
         <>
-          <div className="flex justify-between text-sm text-gray-600">
+          <div className="flex justify-between text-sm text-muted-foreground">
             <span>Subtotal</span>
             <span>{formatPrice({ amount: subtotalAmount, currency })}</span>
           </div>
@@ -165,7 +167,7 @@ function PricingBreakdown({
             </div>
           )}
 
-          <div className="flex justify-between text-sm text-gray-600">
+          <div className="flex justify-between text-sm text-muted-foreground">
             <span>Shipping</span>
             <span>
               {hasPreview && shippingAmount === 0 ? (
@@ -177,21 +179,21 @@ function PricingBreakdown({
           </div>
 
           {taxAmount > 0 && (
-            <div className="flex justify-between text-sm text-gray-600">
+            <div className="flex justify-between text-sm text-muted-foreground">
               <span>VAT (7%)</span>
               <span>{formatPrice({ amount: taxAmount, currency })}</span>
             </div>
           )}
 
           {!hasPreview && (
-            <p className="text-xs text-gray-400 italic">
+            <p className="text-xs text-faint italic">
               Shipping &amp; tax calculated at order placement
             </p>
           )}
         </>
       )}
 
-      <div className="flex justify-between font-semibold text-gray-900 border-t border-gray-200 pt-3 mt-1">
+      <div className="flex justify-between font-semibold text-foreground border-t border-border pt-3 mt-1">
         <span>Total</span>
         <span>{formatPrice({ amount: totalAmount, currency })}</span>
       </div>
@@ -220,8 +222,8 @@ export function OrderSummary({ cart, onNext, onBack }: OrderSummaryProps) {
 
   if (isNone(cart) || cart.value.items.length === 0) {
     return (
-      <div className="bg-white rounded-lg border border-gray-200 p-6 text-center">
-        <p className="text-gray-600">Your cart is empty.</p>
+      <div className="bg-white rounded-lg border border-border p-6 text-center">
+        <p className="text-muted-foreground">Your cart is empty.</p>
         <Link href="/cart" className="mt-4 inline-block text-info hover:text-info/80">
           Go to Cart
         </Link>
@@ -239,8 +241,8 @@ export function OrderSummary({ cart, onNext, onBack }: OrderSummaryProps) {
   const voucherError = hasPreview ? (preview.value.voucherError ?? "") : "";
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-4">
-      <h2 className="text-lg font-semibold text-gray-900">Order Summary</h2>
+    <div className="bg-white rounded-lg border border-border p-6 space-y-4">
+      <h2 className="text-lg font-semibold text-foreground">Order Summary</h2>
 
       <CartLineItems items={cart.value.items} />
 

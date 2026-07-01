@@ -56,7 +56,7 @@ export function Modal({ children }: ModalProps) {
       <div className="relative max-w-2xl w-full bg-card rounded-lg shadow-xl overflow-hidden animate-in zoom-in-95 duration-200">
         <button
           onClick={closeModal}
-          className="absolute top-4 right-4 z-10 rounded-full bg-background/80 p-2 hover:bg-background transition-colors focus:outline-none focus:ring-2 focus:ring-ring"
+          className="absolute top-4 right-4 z-10 rounded-full bg-background/80 p-2 hover:bg-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           aria-label="Close modal"
           type="button"
         >

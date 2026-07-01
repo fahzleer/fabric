@@ -56,7 +56,7 @@ export function PriceElasticityAnalyzer() {
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
             rows={9}
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm font-mono focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm font-mono focus-visible:border-ring focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
           />
         </div>
 

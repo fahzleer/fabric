@@ -24,6 +24,9 @@
 
   --muted: 0 0% 94%;
   --muted-foreground: 0 0% 42%;
+  /* Faint tier — preserves the lightness of the ×261 gray-400 (icons,
+     placeholders, timestamps) so the later neutral migration doesn't darken it. */
+  --faint: 0 0% 64%;
 
   --accent: 0 0% 94%;
   --accent-foreground: 0 0% 4%;
@@ -41,6 +44,8 @@
   --warning: 38 92% 50%; /* amber + yellow + orange */
   --warning-foreground: 0 0% 4%;
   --warning-subtle: 48 96% 95%;
+  /* amber-700 — AA-legible as small text on warning-subtle (amber-500 was ~1.7:1). */
+  --warning-text: 26 90% 37%;
 
   --info: 221 83% 53%; /* blue + indigo + violet + cyan */
   --info-foreground: 0 0% 100%;
@@ -91,6 +96,7 @@
 
   --muted: 0 0% 12%;
   --muted-foreground: 0 0% 60%;
+  --faint: 0 0% 50%;
 
   --accent: 33 30% 65%;
   --accent-foreground: 0 0% 4%;
@@ -106,6 +112,7 @@
   --warning: 38 80% 55%;
   --warning-foreground: 0 0% 4%;
   --warning-subtle: 36 40% 12%;
+  --warning-text: 38 90% 65%;
 
   --info: 217 80% 62%;
   --info-foreground: 0 0% 4%;
@@ -145,6 +152,7 @@
 
   --color-muted: hsl(var(--muted));
   --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-faint: hsl(var(--faint));
 
   --color-accent: hsl(var(--accent));
   --color-accent-foreground: hsl(var(--accent-foreground));
@@ -160,6 +168,7 @@
   --color-warning: hsl(var(--warning));
   --color-warning-foreground: hsl(var(--warning-foreground));
   --color-warning-subtle: hsl(var(--warning-subtle));
+  --color-warning-text: hsl(var(--warning-text));
 
   --color-info: hsl(var(--info));
   --color-info-foreground: hsl(var(--info-foreground));
@@ -180,6 +189,25 @@
   --font-sans: var(--font-sans);
   --font-serif: var(--font-serif);
   --font-mono: var(--font-mono);
+
+  /* Named type scale (DESIGN.md §7.3) — size + line-height as one token.
+     Weight stays a separate utility; text-price pairs with .font-price (mono). */
+  --text-caption: 0.75rem;
+  --text-caption--line-height: 1rem;
+  --text-body-sm: 0.875rem;
+  --text-body-sm--line-height: 1.25rem;
+  --text-body: 1rem;
+  --text-body--line-height: 1.5rem;
+  --text-title: 1.125rem;
+  --text-title--line-height: 1.75rem;
+  --text-price: 1.25rem;
+  --text-price--line-height: 1.75rem;
+  --text-h2: 1.5rem;
+  --text-h2--line-height: 2rem;
+  --text-h1: 1.875rem;
+  --text-h1--line-height: 2.25rem;
+  --text-display: 2.25rem;
+  --text-display--line-height: 1.1;
 }
 
 *,

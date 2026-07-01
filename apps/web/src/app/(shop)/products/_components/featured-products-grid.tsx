@@ -13,9 +13,9 @@ function HeroCard({ product }: { product: ProductSummary }) {
   return (
     <Link
       href={`/product/${product.id.value}`}
-      className="group block overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-shadow hover:shadow-md"
+      className="group block overflow-hidden rounded-2xl border border-border bg-white shadow-sm transition-shadow hover:shadow-md"
     >
-      <div className="relative aspect-[4/3] overflow-hidden bg-gray-50">
+      <div className="relative aspect-[4/3] overflow-hidden bg-muted">
         <Image
           src={product.primaryImage.url}
           alt={product.primaryImage.altText}
@@ -26,9 +26,9 @@ function HeroCard({ product }: { product: ProductSummary }) {
         />
       </div>
       <div className="p-6">
-        <h3 className="text-2xl font-bold text-gray-900">{product.name.value}</h3>
-        <p className="mt-1 text-sm text-gray-500">{product.tagline}</p>
-        <p className="mt-3 text-xl font-bold text-gray-900">{formattedPrice}</p>
+        <h3 className="text-2xl font-bold text-foreground">{product.name.value}</h3>
+        <p className="mt-1 text-sm text-muted-foreground">{product.tagline}</p>
+        <p className="mt-3 text-xl font-bold text-foreground">{formattedPrice}</p>
       </div>
     </Link>
   );
@@ -40,9 +40,9 @@ function SmallCard({ product }: { product: ProductSummary }) {
   return (
     <Link
       href={`/product/${product.id.value}`}
-      className="group block overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-shadow hover:shadow-md"
+      className="group block overflow-hidden rounded-2xl border border-border bg-white shadow-sm transition-shadow hover:shadow-md"
     >
-      <div className="relative aspect-square overflow-hidden bg-gray-50">
+      <div className="relative aspect-square overflow-hidden bg-muted">
         <Image
           src={product.primaryImage.url}
           alt={product.primaryImage.altText}
@@ -52,8 +52,8 @@ function SmallCard({ product }: { product: ProductSummary }) {
         />
       </div>
       <div className="p-4">
-        <h3 className="text-base font-semibold text-gray-900">{product.name.value}</h3>
-        <p className="mt-0.5 text-lg font-bold text-gray-900">{formattedPrice}</p>
+        <h3 className="text-base font-semibold text-foreground">{product.name.value}</h3>
+        <p className="mt-0.5 text-lg font-bold text-foreground">{formattedPrice}</p>
       </div>
     </Link>
   );

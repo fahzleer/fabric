@@ -73,7 +73,7 @@ export function AddToCartButton({
               key={size}
               type="button"
               onClick={() => setSelectedSize(Some(size))}
-              className={`border rounded px-4 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring ${
+              className={`border rounded px-4 py-2 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
                 isSome(selectedSize) && selectedSize.value === size
                   ? "border-foreground bg-secondary text-foreground"
                   : "border-input text-foreground hover:border-border-strong"

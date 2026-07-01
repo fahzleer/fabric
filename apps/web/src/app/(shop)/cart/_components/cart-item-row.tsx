@@ -91,7 +91,7 @@ export function CartItemRow({ item }: CartItemRowProps) {
           <button
             type="button"
             onClick={handleRemove}
-            className="text-xs text-destructive hover:text-destructive/80"
+            className="rounded-sm text-xs text-destructive hover:text-destructive/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >
             Remove
           </button>

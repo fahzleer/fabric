@@ -76,27 +76,27 @@ export default function MalaysiaPage() {
         <header className="mb-10">
           <div className="flex items-center gap-2 mb-3">
             <span className="text-2xl">🇲🇾</span>
-            <span className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+            <span className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
               Malaysia
             </span>
           </div>
-          <h1 className="text-4xl font-bold text-gray-900">
+          <h1 className="text-4xl font-bold text-foreground">
             Premium T-Shirts — Delivered to Malaysia
           </h1>
-          <p className="mt-4 text-lg text-gray-600 max-w-2xl">
+          <p className="mt-4 text-lg text-muted-foreground max-w-2xl">
             Shop curated, premium quality t-shirts from Fabric and get them shipped directly to your
             door in Malaysia. Pay safely with your international Mastercard, Visa, or USDC crypto.
           </p>
           <div className="mt-6 flex gap-3">
             <Link
               href="/products"
-              className="rounded-lg bg-gray-900 px-6 py-3 text-sm font-medium text-white hover:bg-gray-700"
+              className="rounded-lg bg-primary px-6 py-3 text-sm font-medium text-primary-foreground hover:bg-primary/90"
             >
               Browse Products
             </Link>
             <Link
               href="/payment/card"
-              className="rounded-lg border border-gray-300 px-6 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              className="rounded-lg border border-border-strong px-6 py-3 text-sm font-medium text-muted-foreground hover:bg-muted"
             >
               Payment Options →
             </Link>
@@ -106,7 +106,7 @@ export default function MalaysiaPage() {
         <TrustBadges className="mb-10" />
 
         <section aria-labelledby="shipping-heading" className="mb-10">
-          <h2 id="shipping-heading" className="text-xl font-semibold text-gray-900 mb-4">
+          <h2 id="shipping-heading" className="text-xl font-semibold text-foreground mb-4">
             Shipping to Malaysia
           </h2>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -115,33 +115,37 @@ export default function MalaysiaPage() {
               { label: "Tracking", value: "Available on all orders" },
               { label: "Returns", value: "7-day return policy" },
             ].map((item) => (
-              <div key={item.label} className="rounded-lg border border-gray-200 bg-white p-4">
-                <p className="text-xs text-gray-500 uppercase tracking-wide">{item.label}</p>
-                <p className="mt-1 font-semibold text-gray-900">{item.value}</p>
+              <div key={item.label} className="rounded-lg border border-border bg-card p-4">
+                <p className="text-xs text-muted-foreground uppercase tracking-wide">
+                  {item.label}
+                </p>
+                <p className="mt-1 font-semibold text-foreground">{item.value}</p>
               </div>
             ))}
           </div>
         </section>
 
         <section aria-labelledby="payment-heading" className="mb-10">
-          <h2 id="payment-heading" className="text-xl font-semibold text-gray-900 mb-4">
+          <h2 id="payment-heading" className="text-xl font-semibold text-foreground mb-4">
             Payment Options for Malaysia
           </h2>
           <ul className="space-y-3">
-            <li className="flex items-start gap-3 rounded-lg border border-gray-200 p-4">
+            <li className="flex items-start gap-3 rounded-lg border border-border p-4">
               <span className="text-success font-bold mt-0.5">✓</span>
               <div>
-                <p className="font-medium text-gray-900">Credit / Debit Card (Visa, Mastercard)</p>
-                <p className="text-sm text-gray-500">
+                <p className="font-medium text-foreground">
+                  Credit / Debit Card (Visa, Mastercard)
+                </p>
+                <p className="text-sm text-muted-foreground">
                   International cards accepted. Currency shown in THB, converted by your bank.
                 </p>
               </div>
             </li>
-            <li className="flex items-start gap-3 rounded-lg border border-gray-200 p-4">
+            <li className="flex items-start gap-3 rounded-lg border border-border p-4">
               <span className="text-success font-bold mt-0.5">✓</span>
               <div>
-                <p className="font-medium text-gray-900">USDC on Base Network</p>
-                <p className="text-sm text-gray-500">
+                <p className="font-medium text-foreground">USDC on Base Network</p>
+                <p className="text-sm text-muted-foreground">
                   Pay with crypto — MetaMask or Coinbase Wallet, no bank account needed.
                 </p>
               </div>

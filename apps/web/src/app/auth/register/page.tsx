@@ -10,28 +10,28 @@ export const metadata: Metadata = {
 
 export default function RegisterPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
+    <div className="flex min-h-screen items-center justify-center bg-muted px-4">
       <div className="w-full max-w-md">
         {/* Logo / Brand */}
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold text-gray-900">Fabric</h1>
-          <p className="mt-2 text-sm text-gray-600">Create your account</p>
+          <h1 className="text-3xl font-bold text-foreground">Fabric</h1>
+          <p className="mt-2 text-sm text-muted-foreground">Create your account</p>
         </div>
 
         {/* Register Card — Suspense required because RegisterForm uses useSearchParams() */}
-        <div className="rounded-2xl border border-gray-200 bg-white p-8 shadow-sm">
-          <Suspense fallback={<div className="h-96 animate-pulse rounded-lg bg-gray-100" />}>
+        <div className="rounded-2xl border border-border bg-white p-8 shadow-sm">
+          <Suspense fallback={<div className="h-96 animate-pulse rounded-lg bg-secondary" />}>
             <RegisterForm />
           </Suspense>
         </div>
 
         {/* Login + store links */}
-        <div className="mt-6 space-y-2 text-center text-sm text-gray-600">
+        <div className="mt-6 space-y-2 text-center text-sm text-muted-foreground">
           <p>
             Already have an account?{" "}
             <Link
               href="/auth/login"
-              className="font-medium text-gray-900 underline underline-offset-4 hover:text-gray-700"
+              className="font-medium text-foreground underline underline-offset-4 hover:text-muted-foreground"
             >
               Sign in
             </Link>
@@ -40,7 +40,7 @@ export default function RegisterPage() {
             Want to sell on Fabric?{" "}
             <Link
               href="/auth/register/store"
-              className="font-medium text-gray-900 underline underline-offset-4 hover:text-gray-700"
+              className="font-medium text-foreground underline underline-offset-4 hover:text-muted-foreground"
             >
               Open a store
             </Link>

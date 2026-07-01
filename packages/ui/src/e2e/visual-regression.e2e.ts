@@ -23,8 +23,13 @@ const STORIES = {
     "ui-button--size-large",
     "ui-button--size-icon",
     "ui-button--disabled",
+    "ui-button--loading",
+    "ui-button--success",
+    "ui-button--info",
+    "ui-button--warning",
     "ui-button--with-class-name",
     "ui-button--as-child-link",
+    "ui-button--all-states",
   ],
   card: ["ui-card--default", "ui-card--with-custom-class-name"],
   dialog: ["ui-dialog--default"],
@@ -35,8 +40,22 @@ const STORIES = {
     "ui-input--disabled",
     "ui-input--with-value",
     "ui-input--with-class-name",
+    "ui-input--all-states",
   ],
   select: ["ui-select--default", "ui-select--with-groups", "ui-select--disabled"],
+  spinner: [
+    "ui-spinner--default",
+    "ui-spinner--small",
+    "ui-spinner--large",
+    "ui-spinner--showcase",
+  ],
+  skeleton: ["ui-skeleton--default", "ui-skeleton--circle", "ui-skeleton--card"],
+  "empty-state": [
+    "ui-empty-state--default",
+    "ui-empty-state--with-action",
+    "ui-empty-state--title-only",
+  ],
+  alert: ["ui-alert--info", "ui-alert--success", "ui-alert--warning", "ui-alert--destructive"],
 } as const;
 
 for (const [component, storyIds] of Object.entries(STORIES)) {

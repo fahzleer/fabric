@@ -88,12 +88,12 @@ export function TrustBadges({ className = "" }: TrustBadgesProps) {
       {BADGES.map((badge) => (
         <div
           key={badge.label}
-          className="flex items-center gap-3 rounded-lg border border-gray-200 bg-white p-3"
+          className="flex items-center gap-3 rounded-lg border border-border bg-white p-3"
         >
-          <span className="text-gray-500">{badge.icon}</span>
+          <span className="text-muted-foreground">{badge.icon}</span>
           <div>
-            <p className="text-xs font-semibold text-gray-900">{badge.label}</p>
-            <p className="text-xs text-gray-500">{badge.sub}</p>
+            <p className="text-xs font-semibold text-foreground">{badge.label}</p>
+            <p className="text-xs text-muted-foreground">{badge.sub}</p>
           </div>
         </div>
       ))}

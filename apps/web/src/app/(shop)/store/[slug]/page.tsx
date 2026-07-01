@@ -45,9 +45,9 @@ function StoreProductCard({
   return (
     <Link
       href={`/product/${product.id.value}`}
-      className="group block overflow-hidden rounded-xl border border-white/10 bg-gray-800/50 transition-colors hover:border-white/20 hover:bg-gray-800/80"
+      className="group block overflow-hidden rounded-xl border border-border bg-muted/50 transition-colors hover:border-border-strong hover:bg-muted/80"
     >
-      <div className="aspect-square overflow-hidden bg-gray-900 relative">
+      <div className="aspect-square overflow-hidden bg-card relative">
         <Image
           src={product.primaryImage.url}
           alt={product.primaryImage.altText || product.name.value}
@@ -57,16 +57,16 @@ function StoreProductCard({
         />
         {!product.isInStock && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-            <span className="rounded-full bg-black/70 px-3 py-1 text-xs font-medium text-gray-300">
+            <span className="rounded-full bg-black/70 px-3 py-1 text-xs font-medium text-foreground">
               Out of stock
             </span>
           </div>
         )}
       </div>
       <div className="p-4">
-        <h3 className="text-sm font-semibold text-white line-clamp-2">{product.name.value}</h3>
+        <h3 className="text-sm font-semibold text-foreground line-clamp-2">{product.name.value}</h3>
         {product.tagline && (
-          <p className="mt-1 text-xs text-gray-400 line-clamp-1">{product.tagline}</p>
+          <p className="mt-1 text-xs text-muted-foreground line-clamp-1">{product.tagline}</p>
         )}
         <p className="mt-2 text-base font-bold text-success">{price}</p>
       </div>
@@ -91,27 +91,27 @@ export default async function StorefrontPage({
   const store = maybeStore.value;
 
   return (
-    <div className="min-h-screen bg-gray-950">
+    <div className="dark min-h-screen bg-background text-foreground">
       {/* Breadcrumb */}
-      <div className="border-b border-white/10 bg-gray-900/50">
+      <div className="border-b border-border bg-card/50">
         <div className="mx-auto max-w-7xl px-4 py-3 sm:px-6 lg:px-8">
-          <nav className="flex items-center gap-2 text-xs text-gray-400">
-            <Link href="/" className="hover:text-gray-300">
+          <nav className="flex items-center gap-2 text-xs text-muted-foreground">
+            <Link href="/" className="hover:text-foreground">
               Home
             </Link>
             <span>›</span>
-            <Link href="/products" className="hover:text-gray-300">
+            <Link href="/products" className="hover:text-foreground">
               Products
             </Link>
             <span>›</span>
-            <span className="text-gray-200">{store.storeName}</span>
+            <span className="text-foreground">{store.storeName}</span>
           </nav>
         </div>
       </div>
 
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         {/* Store header */}
-        <div className="mb-10 rounded-2xl border border-white/10 bg-gray-800/50 p-6 sm:p-8">
+        <div className="mb-10 rounded-2xl border border-border bg-muted/50 p-6 sm:p-8">
           <div className="flex flex-wrap items-center gap-4">
             {/* Store avatar placeholder */}
             <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-success/20 text-2xl ring-2 ring-success/30">
@@ -119,12 +119,12 @@ export default async function StorefrontPage({
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex flex-wrap items-center gap-2">
-                <h1 className="text-2xl font-bold text-white">{store.storeName}</h1>
+                <h1 className="text-2xl font-bold text-foreground">{store.storeName}</h1>
                 <span className="rounded-full bg-success/15 px-2.5 py-0.5 text-xs font-medium text-success ring-1 ring-success/30">
                   Official Store
                 </span>
               </div>
-              <p className="mt-1 text-sm text-gray-400">
+              <p className="mt-1 text-sm text-muted-foreground">
                 {products.total} {products.total === 1 ? "product" : "products"} available
               </p>
             </div>
@@ -133,18 +133,20 @@ export default async function StorefrontPage({
 
         {/* Product grid */}
         <div>
-          <h2 className="mb-4 text-lg font-semibold text-white">
+          <h2 className="mb-4 text-lg font-semibold text-foreground">
             All Products
             {products.total > 0 && (
-              <span className="ml-2 text-sm font-normal text-gray-400">({products.total})</span>
+              <span className="ml-2 text-sm font-normal text-muted-foreground">
+                ({products.total})
+              </span>
             )}
           </h2>
 
           {products.data.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-white/10 px-6 py-16 text-center">
+            <div className="rounded-xl border border-dashed border-border px-6 py-16 text-center">
               <p className="text-3xl">📦</p>
-              <p className="mt-4 text-sm font-medium text-gray-300">No products yet</p>
-              <p className="mt-1 text-xs text-gray-500">
+              <p className="mt-4 text-sm font-medium text-foreground">No products yet</p>
+              <p className="mt-1 text-xs text-muted-foreground">
                 This store hasn&apos;t listed any products yet. Check back soon!
               </p>
             </div>
@@ -159,7 +161,7 @@ export default async function StorefrontPage({
 
         {/* Pagination hint (if more products) */}
         {products.total > products.perPage && (
-          <p className="mt-8 text-center text-sm text-gray-500">
+          <p className="mt-8 text-center text-sm text-muted-foreground">
             Showing {products.data.length} of {products.total} products
           </p>
         )}

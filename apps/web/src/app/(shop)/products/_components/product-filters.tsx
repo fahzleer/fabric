@@ -85,7 +85,7 @@ export function ProductFilters({ products, filters, onChange }: ProductFiltersPr
             id="sort"
             value={filters.sort}
             onChange={(e) => setSort(e.target.value as SortOption)}
-            className="rounded-lg border border-border bg-background px-3 py-1.5 text-sm text-foreground focus:border-ring focus:outline-none"
+            className="rounded-lg border border-border bg-background px-3 py-1.5 text-sm text-foreground focus-visible:border-ring focus-visible:outline-none"
           >
             {Object.entries(SORT_LABELS).map(([value, label]) => (
               <option key={value} value={value}>
@@ -115,7 +115,7 @@ export function ProductFilters({ products, filters, onChange }: ProductFiltersPr
           <button
             type="button"
             onClick={clearAll}
-            className="ml-auto text-sm font-medium text-muted-foreground underline hover:text-foreground"
+            className="ml-auto rounded-sm text-sm font-medium text-muted-foreground underline hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >
             ล้างตัวกรอง
           </button>

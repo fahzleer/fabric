@@ -4,7 +4,9 @@ import { cartAtom } from "@/application/atoms/cart.atoms";
 import { getCartItemCount, isCartEmpty } from "@/domain/cart/types";
 import { useDexieCartSync } from "@/infrastructure/dexie/use-dexie-cart-sync";
 import { useAtomValue } from "@effect-atom/atom-react";
+import { Button, EmptyState } from "@fabric/ui";
 import { Option } from "effect";
+import { ShoppingCart } from "lucide-react";
 import Link from "next/link";
 import { CartItemRow } from "./_components/cart-item-row";
 import { CartSummary } from "./_components/cart-summary";
@@ -15,8 +17,8 @@ export default function CartPage() {
 
   if (Option.isNone(cartOption)) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-pulse text-gray-400">Loading cart...</div>
+      <div className="min-h-screen bg-muted flex items-center justify-center">
+        <div className="animate-pulse text-faint">Loading cart...</div>
       </div>
     );
   }
@@ -25,25 +27,26 @@ export default function CartPage() {
 
   if (isCartEmpty(cart)) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="mx-auto max-w-2xl px-4 py-16 text-center">
-          <h1 className="text-2xl font-bold text-gray-900">Your cart is empty</h1>
-          <p className="mt-4 text-gray-600">Add some products to get started.</p>
-          <Link
-            href="/products"
-            className="mt-6 inline-block rounded-lg bg-info px-6 py-3 text-white font-medium hover:bg-info/90"
+      <div className="min-h-screen bg-muted">
+        <div className="mx-auto max-w-2xl px-4 py-16">
+          <EmptyState
+            icon={<ShoppingCart />}
+            title="Your cart is empty"
+            description="Add some products to get started."
           >
-            Browse Products
-          </Link>
+            <Button asChild>
+              <Link href="/products">Browse Products</Link>
+            </Button>
+          </EmptyState>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-muted">
       <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
-        <h1 className="text-2xl font-bold text-gray-900 mb-8">
+        <h1 className="text-2xl font-bold text-foreground mb-8">
           Shopping Cart ({getCartItemCount(cart)} items)
         </h1>
 

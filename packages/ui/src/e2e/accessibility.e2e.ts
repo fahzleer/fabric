@@ -23,6 +23,7 @@ const STORIES: Record<string, string[]> = {
     "ui-button--size-large",
     "ui-button--size-icon",
     "ui-button--disabled",
+    "ui-button--loading",
     "ui-button--with-class-name",
     "ui-button--as-child-link",
   ],
@@ -35,8 +36,16 @@ const STORIES: Record<string, string[]> = {
     "ui-input--disabled",
     "ui-input--with-value",
     "ui-input--with-class-name",
+    "ui-input--all-states",
   ],
   select: ["ui-select--default", "ui-select--with-groups", "ui-select--disabled"],
+  // Solid success/info/warning buttons are visual-only: white/near-black on the
+  // mid-tone fills is borderline for axe contrast. The status surfaces below put
+  // foreground/muted-foreground text on subtle tints (AA-safe), so they're gated.
+  spinner: ["ui-spinner--default", "ui-spinner--showcase"],
+  skeleton: ["ui-skeleton--default", "ui-skeleton--card"],
+  "empty-state": ["ui-empty-state--default", "ui-empty-state--with-action"],
+  alert: ["ui-alert--info", "ui-alert--success", "ui-alert--warning", "ui-alert--destructive"],
 };
 
 for (const [component, storyIds] of Object.entries(STORIES)) {

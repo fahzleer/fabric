@@ -379,9 +379,9 @@ export function X402PaymentForm({ cart, onBack }: X402PaymentFormProps) {
   };
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-4">
+    <div className="bg-white rounded-lg border border-border p-6 space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-900">Pay with USDC</h2>
+        <h2 className="text-lg font-semibold text-foreground">Pay with USDC</h2>
         <span className="inline-flex items-center gap-1 rounded-full bg-info-subtle border border-info px-2.5 py-1 text-xs font-medium text-info">
           <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
             <circle cx="10" cy="10" r="9" />
@@ -390,8 +390,8 @@ export function X402PaymentForm({ cart, onBack }: X402PaymentFormProps) {
         </span>
       </div>
 
-      <p className="text-xs text-gray-500">
-        Network: <span className="font-medium text-gray-700">{TARGET_CHAIN.name}</span>
+      <p className="text-xs text-muted-foreground">
+        Network: <span className="font-medium text-muted-foreground">{TARGET_CHAIN.name}</span>
         {MERCHANT_WALLET && (
           <>
             {" "}
@@ -416,7 +416,7 @@ export function X402PaymentForm({ cart, onBack }: X402PaymentFormProps) {
           )}
         </div>
       ) : (
-        <div className="rounded-lg bg-gray-50 border border-gray-200 p-3 text-sm text-gray-600">
+        <div className="rounded-lg bg-muted border border-border p-3 text-sm text-muted-foreground">
           Connect a Web3 wallet (MetaMask or compatible) to pay with USDC.
         </div>
       )}
@@ -448,13 +448,13 @@ export function X402PaymentForm({ cart, onBack }: X402PaymentFormProps) {
         </div>
       )}
 
-      <div className="border-t border-gray-200 pt-4 space-y-1">
-        <div className="flex justify-between font-semibold text-gray-900">
+      <div className="border-t border-border pt-4 space-y-1">
+        <div className="flex justify-between font-semibold text-foreground">
           <span>Total to pay</span>
           <span>{formatPrice({ amount: totalCents / 100, currency })}</span>
         </div>
         {Option.isSome(estimatedUsdc) && (
-          <div className="flex justify-between text-sm text-gray-500">
+          <div className="flex justify-between text-sm text-muted-foreground">
             <span>Approx. USDC</span>
             <span>≈ {estimatedUsdc.value.toFixed(2)} USDC</span>
           </div>

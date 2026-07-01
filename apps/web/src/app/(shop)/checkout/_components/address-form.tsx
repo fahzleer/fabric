@@ -54,19 +54,22 @@ export function AddressForm({ onNext }: AddressFormProps) {
   };
 
   const fieldClass = (err?: string) =>
-    `w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-info ${
-      err ? "border-destructive" : "border-gray-300"
+    `w-full rounded-lg border px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+      err ? "border-destructive" : "border-border-strong"
     }`;
 
   return (
     <form
       onSubmit={handleSubmit}
-      className="bg-white rounded-lg border border-gray-200 p-6 space-y-4"
+      className="bg-white rounded-lg border border-border p-6 space-y-4"
     >
-      <h2 className="text-lg font-semibold text-gray-900">Shipping Address</h2>
+      <h2 className="text-lg font-semibold text-foreground">Shipping Address</h2>
 
       <div>
-        <label htmlFor="recipientName" className="block text-sm font-medium text-gray-700 mb-1">
+        <label
+          htmlFor="recipientName"
+          className="block text-sm font-medium text-muted-foreground mb-1"
+        >
           Recipient Name
         </label>
         <input
@@ -83,7 +86,7 @@ export function AddressForm({ onNext }: AddressFormProps) {
       </div>
 
       <div>
-        <label htmlFor="street" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="street" className="block text-sm font-medium text-muted-foreground mb-1">
           Street Address
         </label>
         <input
@@ -99,7 +102,7 @@ export function AddressForm({ onNext }: AddressFormProps) {
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="city" className="block text-sm font-medium text-muted-foreground mb-1">
             City
           </label>
           <input
@@ -113,7 +116,10 @@ export function AddressForm({ onNext }: AddressFormProps) {
           {errors.city && <p className="mt-1 text-xs text-destructive">{errors.city}</p>}
         </div>
         <div>
-          <label htmlFor="postalCode" className="block text-sm font-medium text-gray-700 mb-1">
+          <label
+            htmlFor="postalCode"
+            className="block text-sm font-medium text-muted-foreground mb-1"
+          >
             Postal Code
           </label>
           <input
@@ -131,7 +137,7 @@ export function AddressForm({ onNext }: AddressFormProps) {
       </div>
 
       <div>
-        <label htmlFor="country" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="country" className="block text-sm font-medium text-muted-foreground mb-1">
           Country
         </label>
         <select
@@ -148,7 +154,7 @@ export function AddressForm({ onNext }: AddressFormProps) {
       </div>
 
       <div>
-        <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="phone" className="block text-sm font-medium text-muted-foreground mb-1">
           Phone Number
         </label>
         <input

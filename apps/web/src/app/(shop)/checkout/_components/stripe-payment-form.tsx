@@ -285,7 +285,7 @@ export function StripePaymentForm({ cart, onBack }: StripePaymentFormProps) {
             value={cardholderName}
             onChange={(e) => setCardholderName(e.target.value)}
             disabled={isLoading}
-            className="w-full rounded-sm border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring disabled:bg-muted"
+            className="w-full rounded-sm border border-input bg-background px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:bg-muted"
             placeholder="Name on card"
             autoComplete="cc-name"
           />
@@ -303,7 +303,7 @@ export function StripePaymentForm({ cart, onBack }: StripePaymentFormProps) {
             onChange={(e) => setCardNumber(formatCardNumber(e.target.value))}
             disabled={isLoading}
             maxLength={19}
-            className="w-full rounded-sm border border-input bg-background px-3 py-2 text-sm font-price text-foreground focus:outline-none focus:ring-2 focus:ring-ring disabled:bg-muted"
+            className="w-full rounded-sm border border-input bg-background px-3 py-2 text-sm font-price text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:bg-muted"
             placeholder="1234 5678 9012 3456"
             autoComplete="cc-number"
           />
@@ -322,7 +322,7 @@ export function StripePaymentForm({ cart, onBack }: StripePaymentFormProps) {
               onChange={(e) => setExpiry(formatExpiry(e.target.value))}
               disabled={isLoading}
               maxLength={5}
-              className="w-full rounded-sm border border-input bg-background px-3 py-2 text-sm font-price text-foreground focus:outline-none focus:ring-2 focus:ring-ring disabled:bg-muted"
+              className="w-full rounded-sm border border-input bg-background px-3 py-2 text-sm font-price text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:bg-muted"
               placeholder="MM/YY"
               autoComplete="cc-exp"
             />
@@ -339,7 +339,7 @@ export function StripePaymentForm({ cart, onBack }: StripePaymentFormProps) {
               onChange={(e) => setCvv(e.target.value.replace(/\D/g, "").slice(0, 4))}
               disabled={isLoading}
               maxLength={4}
-              className="w-full rounded-sm border border-input bg-background px-3 py-2 text-sm font-price text-foreground focus:outline-none focus:ring-2 focus:ring-ring disabled:bg-muted"
+              className="w-full rounded-sm border border-input bg-background px-3 py-2 text-sm font-price text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:bg-muted"
               placeholder="CVV"
               autoComplete="cc-csc"
             />

@@ -34,6 +34,7 @@
     "lint:all": "turbo lint",
     "format": "biome format --write .",
     "check": "biome check --write .",
+    "check:design": "bun run scripts/design/check-accents.ts && bun run scripts/design/check-grays.ts",
     "typecheck": "turbo typecheck",
     "test": "turbo test",
     "prepare": "husky"

@@ -39,7 +39,7 @@ export function RequestPayoutForm({ availableBalanceCents }: { availableBalanceC
             step={1}
             placeholder="500"
             required
-            className="w-full rounded-lg border border-border bg-muted pl-8 pr-4 py-2.5 text-sm text-foreground placeholder-muted-foreground focus:border-success focus:outline-none focus:ring-1 focus:ring-success"
+            className="w-full rounded-lg border border-border bg-muted pl-8 pr-4 py-2.5 text-sm text-foreground placeholder-muted-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
           />
         </div>
         <p className="mt-1 text-xs text-muted-foreground">Min ฿100 · Available: ฿{availableBaht}</p>
@@ -58,7 +58,7 @@ export function RequestPayoutForm({ availableBalanceCents }: { availableBalanceC
           required
           minLength={5}
           maxLength={200}
-          className="w-full rounded-lg border border-border bg-muted px-3 py-2.5 text-sm text-foreground placeholder-muted-foreground focus:border-success focus:outline-none focus:ring-1 focus:ring-success resize-none"
+          className="w-full rounded-lg border border-border bg-muted px-3 py-2.5 text-sm text-foreground placeholder-muted-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none"
         />
         <p className="mt-1 text-xs text-muted-foreground">
           Bank name, account number, and account holder name

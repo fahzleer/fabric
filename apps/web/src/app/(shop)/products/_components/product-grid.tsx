@@ -56,7 +56,7 @@ export function ProductGrid({ products, filters }: ProductGridProps) {
 
   if (filtered.length === 0) {
     return (
-      <div className="rounded-xl border border-gray-200 bg-white p-8 text-center text-gray-500">
+      <div className="rounded-xl border border-border bg-white p-8 text-center text-muted-foreground">
         ไม่พบสินค้าที่ตรงกับตัวกรอง ลองปรับตัวกรองใหม่
       </div>
     );
@@ -64,7 +64,7 @@ export function ProductGrid({ products, filters }: ProductGridProps) {
 
   return (
     <div>
-      <p className="mb-3 text-sm text-gray-500">แสดง {filtered.length} รายการ</p>
+      <p className="mb-3 text-sm text-muted-foreground">แสดง {filtered.length} รายการ</p>
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
         {filtered.map((product) => (
           <ProductCard

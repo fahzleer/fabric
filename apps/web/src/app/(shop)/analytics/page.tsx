@@ -58,20 +58,20 @@ export default async function AnalyticsPage({
   const groups = Array.from(new Set(TABS.map((t) => t.group)));
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-muted">
       {/* Header */}
-      <div className="border-b border-gray-200 bg-white">
+      <div className="border-b border-border bg-white">
         <div className="mx-auto max-w-6xl px-4 py-6">
           <div className="flex items-start justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Marketing Science</h1>
-              <p className="mt-1 text-sm text-gray-500">
+              <h1 className="text-2xl font-bold text-foreground">Marketing Science</h1>
+              <p className="mt-1 text-sm text-muted-foreground">
                 TypeScript · scikit-learn (Python MMM) · statistical models · Celery async
               </p>
             </div>
-            <div className="hidden sm:flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2">
+            <div className="hidden sm:flex items-center gap-2 rounded-lg border border-border bg-muted px-3 py-2">
               <span className="h-2 w-2 rounded-full bg-success animate-pulse" />
-              <span className="text-xs text-gray-500">Live</span>
+              <span className="text-xs text-muted-foreground">Live</span>
             </div>
           </div>
 
@@ -84,7 +84,7 @@ export default async function AnalyticsPage({
           <nav className="mt-4 space-y-1">
             {groups.map((group) => (
               <div key={group} className="flex flex-wrap items-center gap-1">
-                <span className="w-20 shrink-0 text-xs font-semibold uppercase tracking-wider text-gray-400">
+                <span className="w-20 shrink-0 text-xs font-semibold uppercase tracking-wider text-faint">
                   {group}
                 </span>
                 {TABS.filter((t) => t.group === group).map(({ id, label }) => (
@@ -94,7 +94,7 @@ export default async function AnalyticsPage({
                     className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
                       activeTab === id
                         ? "bg-info text-white shadow-sm"
-                        : "text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+                        : "text-muted-foreground hover:bg-secondary hover:text-muted-foreground"
                     }`}
                   >
                     {label}

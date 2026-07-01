@@ -96,21 +96,21 @@ export default function PromptPayPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
 
-      <nav aria-label="breadcrumb" className="mb-6 text-sm text-gray-500">
+      <nav aria-label="breadcrumb" className="mb-6 text-sm text-muted-foreground">
         <ol className="flex items-center gap-1">
           <li>
-            <Link href="/" className="hover:text-gray-700">
+            <Link href="/" className="hover:text-muted-foreground">
               หน้าแรก
             </Link>
           </li>
           <li aria-hidden="true">/</li>
           <li>
-            <Link href="/products" className="hover:text-gray-700">
+            <Link href="/products" className="hover:text-muted-foreground">
               สินค้า
             </Link>
           </li>
           <li aria-hidden="true">/</li>
-          <li className="text-gray-900 font-medium">ชำระผ่าน PromptPay</li>
+          <li className="text-foreground font-medium">ชำระผ่าน PromptPay</li>
         </ol>
       </nav>
 
@@ -119,10 +119,10 @@ export default function PromptPayPage() {
           <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-info-subtle text-info font-bold text-lg">
             QR
           </span>
-          <h1 className="text-3xl font-bold text-gray-900">ชำระเงินผ่าน PromptPay</h1>
+          <h1 className="text-3xl font-bold text-foreground">ชำระเงินผ่าน PromptPay</h1>
         </div>
         <FreshnessLabel updatedAt={UPDATED_AT} quarter={QUARTER} />
-        <p className="mt-3 text-gray-600 max-w-xl">
+        <p className="mt-3 text-muted-foreground max-w-xl">
           สะดวก รวดเร็ว ปลอดภัย — สแกน QR ด้วยแอปธนาคารที่คุณใช้อยู่ ไม่ต้องใส่เลขบัตรหรือรหัสใดๆ
         </p>
       </header>
@@ -130,18 +130,18 @@ export default function PromptPayPage() {
       <TrustBadges className="mb-8" />
 
       <section aria-labelledby="steps-heading">
-        <h2 id="steps-heading" className="text-xl font-semibold text-gray-900 mb-6">
+        <h2 id="steps-heading" className="text-xl font-semibold text-foreground mb-6">
           ขั้นตอนการชำระเงิน
         </h2>
         <ol className="space-y-5">
           {STEPS.map((step, i) => (
             <li key={step.name} className="flex gap-4">
-              <span className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-900 text-white flex items-center justify-center text-sm font-semibold">
+              <span className="flex-shrink-0 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-semibold">
                 {i + 1}
               </span>
               <div>
-                <p className="font-medium text-gray-900">{step.name}</p>
-                <p className="mt-0.5 text-sm text-gray-600">{step.text}</p>
+                <p className="font-medium text-foreground">{step.name}</p>
+                <p className="mt-0.5 text-sm text-muted-foreground">{step.text}</p>
               </div>
             </li>
           ))}
@@ -158,21 +158,21 @@ export default function PromptPayPage() {
 
       <AuthorBio name="ทีมงาน Fabric" jobTitle="ฝ่ายบริการลูกค้า" updatedAt={UPDATED_AT} />
 
-      <div className="mt-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-t border-gray-200 pt-8">
+      <div className="mt-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-t border-border pt-8">
         <div>
-          <h2 className="text-lg font-semibold text-gray-900">พร้อมใช้ PromptPay ชำระเงิน?</h2>
-          <p className="text-sm text-gray-500">สมัครบัญชีฟรี แล้วเริ่มช้อปด้วย QR Code</p>
+          <h2 className="text-lg font-semibold text-foreground">พร้อมใช้ PromptPay ชำระเงิน?</h2>
+          <p className="text-sm text-muted-foreground">สมัครบัญชีฟรี แล้วเริ่มช้อปด้วย QR Code</p>
         </div>
         <div className="flex gap-3">
           <Link
             href="/auth/register"
-            className="rounded-lg bg-info px-6 py-3 text-sm font-medium text-white hover:bg-info/90"
+            className="rounded-lg bg-info px-6 py-3 text-sm font-medium text-primary-foreground hover:bg-info/90"
           >
             สมัครบัญชีและชำระเงิน
           </Link>
           <Link
             href="/checkout"
-            className="rounded-lg border border-gray-300 px-6 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            className="rounded-lg border border-border-strong px-6 py-3 text-sm font-medium text-muted-foreground hover:bg-muted"
           >
             ไปหน้าชำระเงิน →
           </Link>

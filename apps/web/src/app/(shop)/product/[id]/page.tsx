@@ -175,7 +175,7 @@ export default async function ProductPage({ params: paramsPromise }: PageProps) 
   const breadcrumbSchema = buildBreadcrumbSchema(baseUrl, product.name.value, productUrl);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-muted">
       <script
         type="application/ld+json"
         // biome-ignore lint/security/noDangerouslySetInnerHtml: controlled server-side JSON-LD, no user input
@@ -187,23 +187,23 @@ export default async function ProductPage({ params: paramsPromise }: PageProps) 
         price={product.price.amount}
         currency={product.price.currency}
       />
-      <header className="border-b border-gray-200 bg-white shadow-sm">
+      <header className="border-b border-border bg-card shadow-sm">
         <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
-          <nav aria-label="breadcrumb" className="text-sm text-gray-500">
+          <nav aria-label="breadcrumb" className="text-sm text-muted-foreground">
             <ol className="flex items-center gap-1">
               <li>
-                <Link href="/" className="hover:text-gray-700">
+                <Link href="/" className="hover:text-muted-foreground">
                   หน้าแรก
                 </Link>
               </li>
               <li aria-hidden="true">/</li>
               <li>
-                <Link href="/products" className="hover:text-gray-700">
+                <Link href="/products" className="hover:text-muted-foreground">
                   สินค้า
                 </Link>
               </li>
               <li aria-hidden="true">/</li>
-              <li className="text-gray-900 font-medium truncate max-w-[200px] sm:max-w-md">
+              <li className="text-foreground font-medium truncate max-w-[200px] sm:max-w-md">
                 {product.name.value}
               </li>
             </ol>
@@ -214,7 +214,7 @@ export default async function ProductPage({ params: paramsPromise }: PageProps) 
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
           <div className="space-y-4">
-            <div className="aspect-square overflow-hidden rounded-lg bg-gray-100 flex items-center justify-center p-8 relative">
+            <div className="aspect-square overflow-hidden rounded-lg bg-secondary flex items-center justify-center p-8 relative">
               <Image
                 src={primaryImage.url}
                 alt={primaryImage.altText}
@@ -230,7 +230,7 @@ export default async function ProductPage({ params: paramsPromise }: PageProps) 
                 {product.images.map((image) => (
                   <div
                     key={image.order}
-                    className="aspect-square overflow-hidden rounded border border-gray-200 bg-gray-100 flex items-center justify-center p-2 relative"
+                    className="aspect-square overflow-hidden rounded border border-border bg-secondary flex items-center justify-center p-2 relative"
                   >
                     <Image
                       src={image.url}
@@ -248,7 +248,7 @@ export default async function ProductPage({ params: paramsPromise }: PageProps) 
 
           <div className="flex flex-col">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">{product.name.value}</h1>
+              <h1 className="text-3xl font-bold text-foreground">{product.name.value}</h1>
               {isSome(storeInfo) && (
                 <Link
                   href={`/store/${storeInfo.value.slug}`}
@@ -264,8 +264,8 @@ export default async function ProductPage({ params: paramsPromise }: PageProps) 
             </div>
 
             <div className="mt-6">
-              <h3 className="text-sm font-medium text-gray-900">Description</h3>
-              <p className="mt-2 text-gray-600">{product.description}</p>
+              <h3 className="text-sm font-medium text-foreground">Description</h3>
+              <p className="mt-2 text-muted-foreground">{product.description}</p>
             </div>
 
             <TrustBadges className="mt-4" />
@@ -292,17 +292,17 @@ export default async function ProductPage({ params: paramsPromise }: PageProps) 
               )}
             </div>
 
-            <div className="mt-8 border-t border-gray-200 pt-8 space-y-4">
+            <div className="mt-8 border-t border-border pt-8 space-y-4">
               {product.material.length > 0 && (
                 <div>
-                  <h3 className="text-sm font-medium text-gray-900">Material</h3>
-                  <p className="mt-2 text-sm text-gray-600">{product.material}</p>
+                  <h3 className="text-sm font-medium text-foreground">Material</h3>
+                  <p className="mt-2 text-sm text-muted-foreground">{product.material}</p>
                 </div>
               )}
               {product.care.length > 0 && (
                 <div>
-                  <h3 className="text-sm font-medium text-gray-900">Care Instructions</h3>
-                  <p className="mt-2 text-sm text-gray-600">{product.care}</p>
+                  <h3 className="text-sm font-medium text-foreground">Care Instructions</h3>
+                  <p className="mt-2 text-sm text-muted-foreground">{product.care}</p>
                 </div>
               )}
             </div>
@@ -342,14 +342,14 @@ export default async function ProductPage({ params: paramsPromise }: PageProps) 
           ]}
         />
 
-        <div className="mt-12 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-t border-gray-200 pt-8">
+        <div className="mt-12 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-t border-border pt-8">
           <div>
-            <h2 className="text-lg font-semibold text-gray-900">พร้อมชำระเงิน?</h2>
+            <h2 className="text-lg font-semibold text-foreground">พร้อมชำระเงิน?</h2>
             <FreshnessLabel updatedAt={updatedAt} quarter="Q2 2026" />
           </div>
           <Link
             href="/checkout"
-            className="rounded-lg bg-gray-900 px-6 py-3 text-sm font-medium text-white hover:bg-gray-700"
+            className="rounded-lg bg-primary px-6 py-3 text-sm font-medium text-primary-foreground hover:bg-primary/90"
           >
             ไปที่หน้าชำระเงิน
           </Link>
