@@ -5,12 +5,21 @@ import { expect, test } from "./fixtures";
 // Each test verifies WCAG 2.1 AA compliance with zero violations.
 
 const STORIES: Record<string, string[]> = {
+  // Badge's success/warning/info/danger/neutral use *-subtle surfaces with
+  // foreground/muted-foreground-safe text (same AA-safe pattern as Alert), so
+  // unlike Button's solid status fills they're safe to gate on axe contrast.
   badge: [
     "ui-badge--default",
     "ui-badge--secondary",
     "ui-badge--destructive",
     "ui-badge--outline",
     "ui-badge--with-custom-class",
+    "ui-badge--success",
+    "ui-badge--warning",
+    "ui-badge--info",
+    "ui-badge--danger",
+    "ui-badge--neutral",
+    "ui-badge--all-states",
   ],
   button: [
     "ui-button--default",
@@ -27,8 +36,8 @@ const STORIES: Record<string, string[]> = {
     "ui-button--with-class-name",
     "ui-button--as-child-link",
   ],
-  card: ["ui-card--default", "ui-card--with-custom-class-name"],
-  dialog: ["ui-dialog--default"],
+  card: ["ui-card--default", "ui-card--with-custom-class-name", "ui-card--all-states"],
+  dialog: ["ui-dialog--default", "ui-dialog--open"],
   input: [
     "ui-input--default",
     "ui-input--with-type",
@@ -38,7 +47,13 @@ const STORIES: Record<string, string[]> = {
     "ui-input--with-class-name",
     "ui-input--all-states",
   ],
-  select: ["ui-select--default", "ui-select--with-groups", "ui-select--disabled"],
+  select: [
+    "ui-select--default",
+    "ui-select--with-groups",
+    "ui-select--disabled",
+    "ui-select--all-states",
+    "ui-select--open",
+  ],
   // Solid success/info/warning buttons are visual-only: white/near-black on the
   // mid-tone fills is borderline for axe contrast. The status surfaces below put
   // foreground/muted-foreground text on subtle tints (AA-safe), so they're gated.

@@ -88,3 +88,28 @@ export const pageTransition: Variants = {
     transition: { duration: DURATION.base, ease: EASE.editorial },
   },
 };
+
+/**
+ * Hero / above-the-fold entrance (e.g. the featured-products hero on the
+ * storefront landing). Same LCP-safety rule as `pageTransition` — **transform-only,
+ * opacity never leaves 1** — so the LCP image (marked `priority`) is painted
+ * immediately and only nudges into its resting position, never hidden pre-animation.
+ * Use with `heroStagger` on the parent to offset each child slightly.
+ */
+export const heroSettle: Variants = {
+  hidden: { y: DISTANCE.md },
+  visible: {
+    y: 0,
+    transition: { duration: DURATION.slow, ease: EASE.editorial },
+  },
+};
+
+/** Parent for `heroSettle` children — coordinates the hero + secondary cards
+ *  mount animation (runs once immediately, not whileInView, since it's above
+ *  the fold and already visible on first paint). */
+export const heroStagger: Variants = {
+  hidden: {},
+  visible: {
+    transition: { staggerChildren: 0.08, delayChildren: 0.05 },
+  },
+};

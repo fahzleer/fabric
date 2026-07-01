@@ -11,6 +11,12 @@ const STORIES = {
     "ui-badge--destructive",
     "ui-badge--outline",
     "ui-badge--with-custom-class",
+    "ui-badge--success",
+    "ui-badge--warning",
+    "ui-badge--info",
+    "ui-badge--danger",
+    "ui-badge--neutral",
+    "ui-badge--all-states",
   ],
   button: [
     "ui-button--default",
@@ -31,8 +37,8 @@ const STORIES = {
     "ui-button--as-child-link",
     "ui-button--all-states",
   ],
-  card: ["ui-card--default", "ui-card--with-custom-class-name"],
-  dialog: ["ui-dialog--default"],
+  card: ["ui-card--default", "ui-card--with-custom-class-name", "ui-card--all-states"],
+  dialog: ["ui-dialog--default", "ui-dialog--open"],
   input: [
     "ui-input--default",
     "ui-input--with-type",
@@ -42,7 +48,13 @@ const STORIES = {
     "ui-input--with-class-name",
     "ui-input--all-states",
   ],
-  select: ["ui-select--default", "ui-select--with-groups", "ui-select--disabled"],
+  select: [
+    "ui-select--default",
+    "ui-select--with-groups",
+    "ui-select--disabled",
+    "ui-select--all-states",
+    "ui-select--open",
+  ],
   spinner: [
     "ui-spinner--default",
     "ui-spinner--small",

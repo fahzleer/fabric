@@ -1,6 +1,10 @@
+"use client";
+
 import { AddToCartButton } from "@/app/(shop)/product/[id]/_components/add-to-cart-button";
+import { productImageLayoutId } from "@/app/(shop)/products/_lib/product-image-layout-id";
 import type { Product } from "@/domain/product/types";
 import { formatPrice } from "@/lib/price";
+import { motion } from "motion/react";
 import Image from "next/image";
 
 interface ProductModalContentProps {
@@ -16,7 +20,10 @@ export function ProductModalContent({ product }: ProductModalContentProps) {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2">
-      <div className="aspect-square bg-secondary flex items-center justify-center p-8 relative">
+      <motion.div
+        layoutId={productImageLayoutId(product.id.value)}
+        className="aspect-square bg-secondary flex items-center justify-center p-8 relative"
+      >
         <Image
           src={primaryImage.url}
           alt={primaryImage.altText}
@@ -26,7 +33,7 @@ export function ProductModalContent({ product }: ProductModalContentProps) {
           className="object-contain"
           style={{ backgroundColor: "#f3f4f6" }}
         />
-      </div>
+      </motion.div>
 
       <div className="p-6 flex flex-col">
         <div>

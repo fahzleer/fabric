@@ -1,5 +1,9 @@
+"use client";
+
 import type { ProductSummary } from "@/domain/product/types";
+import { heroSettle, heroStagger } from "@/lib/motion";
 import { formatPrice } from "@/lib/price";
+import { motion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -66,15 +70,20 @@ export function FeaturedProductsGrid({ products }: Props) {
   if (!hero) return null;
 
   return (
-    <div className="grid grid-cols-3 gap-4">
-      <div className="col-span-2">
+    <motion.div
+      className="grid grid-cols-3 gap-4"
+      variants={heroStagger}
+      initial="hidden"
+      animate="visible"
+    >
+      <motion.div variants={heroSettle} className="col-span-2">
         <HeroCard product={hero} />
-      </div>
-      <div className="flex flex-col gap-4">
+      </motion.div>
+      <motion.div variants={heroSettle} className="flex flex-col gap-4">
         {rest.map((product) => (
           <SmallCard key={product.id.value} product={product} />
         ))}
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }

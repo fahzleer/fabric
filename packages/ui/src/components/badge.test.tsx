@@ -9,7 +9,17 @@ describe("Badge", () => {
   });
 
   it("renders all variants without error", () => {
-    const variants = ["default", "secondary", "destructive", "outline"] as const;
+    const variants = [
+      "default",
+      "secondary",
+      "destructive",
+      "outline",
+      "success",
+      "warning",
+      "info",
+      "danger",
+      "neutral",
+    ] as const;
     for (const variant of variants) {
       const { unmount } = render(<Badge variant={variant}>{variant}</Badge>);
       expect(screen.getByText(variant)).not.toBeNull();
