@@ -1,9 +1,11 @@
+import { Reveal } from "@/components/motion/reveal";
 import { auth } from "@/lib/auth";
 import { formatPrice } from "@/lib/price";
 import { type Maybe, None, Some, isNone, isSome } from "@fabric/types";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { ClearCartOnMount } from "./_components/clear-cart-on-mount";
+import { OrderSuccessHeader } from "./_components/order-success-header";
 import { OrderTracker } from "./_components/order-tracker";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3010";
@@ -241,31 +243,14 @@ export default async function OrderConfirmationPage({ params }: PageProps) {
       )}
 
       <div className="mx-auto max-w-2xl px-4 py-16 sm:px-6 lg:px-8">
-        {/* Success icon */}
-        <div className="text-center mb-8">
-          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-success-subtle">
-            <svg
-              className="h-8 w-8 text-success"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              aria-hidden="true"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M5 13l4 4L19 7"
-              />
-            </svg>
-          </div>
-          <h1 className="text-3xl font-bold text-foreground">Order Placed!</h1>
-          <p className="mt-2 text-muted-foreground">Thank you for your order. Your order ID is:</p>
-          <p className="mt-1 text-lg font-mono font-semibold text-info">#{id}</p>
-        </div>
+        {/* Success header — the animated completion moment */}
+        <OrderSuccessHeader orderId={id} />
 
         {/* Order detail card */}
-        <div className="rounded-lg bg-white border border-border divide-y divide-border">
+        <Reveal
+          delay={0.1}
+          className="rounded-lg bg-white border border-border divide-y divide-border"
+        >
           {/* Status */}
           {isSome(order) && (
             <div className="px-6 py-4 flex items-center justify-between">
@@ -303,7 +288,7 @@ export default async function OrderConfirmationPage({ params }: PageProps) {
               Your order will be processed and shipped within 2–3 business days.
             </p>
           </div>
-        </div>
+        </Reveal>
 
         {/* Actions */}
         <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">

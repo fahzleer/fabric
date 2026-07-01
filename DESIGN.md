@@ -431,3 +431,66 @@ storefront, which *is* the completion scope, uses `<Button>` throughout.)
 | raw `<input className=…>` | `<Input>` from `@fabric/ui` |
 | `rounded-lg border bg-white shadow-sm` | `<Card>` from `@fabric/ui` |
 | price `text-xl font-bold` | `text-price` |
+
+---
+
+## 10. Motion — *storefront motion layer*
+
+> Scope: the customer-facing **`(shop)`** storefront only. Admin & merchant
+> dashboards are tools, not showcases, and carry no motion. This is a motion
+> layer, not a redesign — it choreographs movement on top of the existing design.
+
+**Aesthetic.** Quiet luxury, editorial calm, tactile quality — the way good
+fabric falls. Never bouncy, springy, or attention-grabbing. Restraint reads as
+premium: small distances, weighted ease-out, one focal motion per view.
+
+**Library.** [`motion`](https://motion.dev) (`motion/react`, the Framer Motion
+successor) — React 19 / Next 16 compatible. CSS/Tailwind transitions are used for
+trivial hovers (product cards) to keep those Server Components and the bundle
+lean. No second animation library.
+
+### 10.1 Motion tokens — `src/lib/motion.ts` (+ CSS easings in `globals.css`)
+
+| Token | Value | Use |
+|---|---|---|
+| `EASE.editorial` | `cubic-bezier(0.16, 1, 0.3, 1)` | entrances (weighted ease-out) |
+| `EASE.smooth` | `cubic-bezier(0.4, 0, 0.2, 1)` | reversible state changes |
+| `DURATION.fast / base / slow` | 0.2 / 0.4 / 0.6 s | micro / transition / entrance |
+| `DISTANCE.sm / md` | 8 / 16 px | subtle travel offsets |
+
+The same curves exist as CSS vars `--ease-editorial` / `--ease-smooth` (exposed as
+Tailwind `ease-editorial` / `ease-smooth` utilities) so CSS hovers and JS motion
+speak one language. Reusable variants: `fadeInUp`, `fadeInUpItem`,
+`staggerContainer`, `pageTransition`, plus the `inViewOnce` viewport config.
+
+### 10.2 Shared components — `src/components/motion/`
+
+- **`<MotionProvider>`** — wraps the `(shop)` layout in `MotionConfig
+  reducedMotion="user"`; every `motion` element honors reduced-motion automatically.
+- **`<Reveal>` / `<RevealGroup>` + `<RevealItem>`** — `whileInView` (run once)
+  editorial fade-up for single elements and staggered grids/lists.
+- **`<PageTransition>`** — used by `(shop)/template.tsx`; a quick settle on every
+  route change.
+
+### 10.3 Where motion is applied
+
+| Surface | Motion |
+|---|---|
+| Route changes (`(shop)/template.tsx`) | transform-only settle (see §10.4) |
+| Product card (`product-card`, `featured-products-grid`) | CSS lift + image zoom + shadow on hover, `ease-editorial` |
+| Product grid (`product-grid`) | staggered `whileInView` reveal; replays on re-filter |
+| Add-to-cart (`add-to-cart-button`) | quick label pop (`AnimatePresence mode="wait"`) |
+| Cart (`cart/page`) | item add/remove via `AnimatePresence` + `layout` (FLIP) |
+| Order confirmation | success ring scale-in + checkmark **draw** + settled detail card |
+
+### 10.4 Non-negotiables (kept)
+
+- **Reduced motion** — honored everywhere: `MotionProvider` (JS) + a global
+  `@media (prefers-reduced-motion: reduce)` reset in `globals.css` (CSS hovers).
+  Motion becomes instant; content/function never change.
+- **Performance / CLS / LCP** — only `transform` + `opacity` animate (never layout
+  props). The page-level template transition is **transform-only** (no opacity
+  hide) precisely so above-the-fold / LCP content is never invisible before
+  hydration. Full fade-ups are reserved for below-the-fold `whileInView` reveals.
+- **SSR / hydration** — motion lives in `"use client"` leaves; pages stay Server
+  Components where possible. No `Date.now()`/`Math.random()`-driven animation.

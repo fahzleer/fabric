@@ -40,7 +40,7 @@ export function ProductCard({ product, badge }: ProductCardProps) {
   return (
     <Link
       href={`/product/${product.id.value}`}
-      className="group block overflow-hidden rounded-lg border border-border bg-card shadow-sm transition-shadow hover:shadow-md"
+      className="group block overflow-hidden rounded-lg border border-border bg-card shadow-sm transition-[transform,box-shadow] duration-300 ease-editorial hover:-translate-y-1 hover:shadow-md"
     >
       <div className="aspect-square overflow-hidden bg-muted relative">
         {badge && (
@@ -55,7 +55,7 @@ export function ProductCard({ product, badge }: ProductCardProps) {
           alt={product.primaryImage.altText}
           fill
           sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 25vw"
-          className="object-cover transition-transform group-hover:scale-105"
+          className="object-cover transition-transform duration-500 ease-editorial group-hover:scale-105"
           style={{ backgroundColor: "#e5e7eb" }}
         />
       </div>

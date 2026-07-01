@@ -1,5 +1,6 @@
 "use client";
 
+import { RevealGroup, RevealItem } from "@/components/motion/reveal";
 import { useMemo } from "react";
 import { type ProductListItem, isBestSeller } from "../_lib/product-helpers";
 import { ProductCard } from "./product-card";
@@ -65,15 +66,17 @@ export function ProductGrid({ products, filters }: ProductGridProps) {
   return (
     <div>
       <p className="mb-3 text-sm text-muted-foreground">แสดง {filtered.length} รายการ</p>
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+      {/* key on the filter signature so re-filtering replays the staggered reveal */}
+      <RevealGroup
+        key={`${filtered.length}-${filters.sort}`}
+        className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
+      >
         {filtered.map((product) => (
-          <ProductCard
-            key={product.id.value}
-            product={product}
-            badge={getBadge(product, products)}
-          />
+          <RevealItem key={product.id.value}>
+            <ProductCard product={product} badge={getBadge(product, products)} />
+          </RevealItem>
         ))}
-      </div>
+      </RevealGroup>
     </div>
   );
 }

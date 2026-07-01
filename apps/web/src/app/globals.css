@@ -190,6 +190,11 @@
   --font-serif: var(--font-serif);
   --font-mono: var(--font-mono);
 
+  /* Motion easings (DESIGN.md §10) — shared by CSS hovers and the JS `motion`
+     tokens in src/lib/motion.ts so every storefront surface moves the same way. */
+  --ease-editorial: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+
   /* Named type scale (DESIGN.md §7.3) — size + line-height as one token.
      Weight stays a separate utility; text-price pairs with .font-price (mono). */
   --text-caption: 0.75rem;
@@ -253,4 +258,20 @@ body {
 }
 ::-webkit-scrollbar-thumb:hover {
   background: hsl(var(--muted-foreground));
+}
+
+/* Accessibility — honor the OS "reduce motion" setting for CSS-driven motion
+   (hover zooms, transitions). The `motion` library is handled separately by
+   MotionProvider (reducedMotion="user"); this covers everything else so no
+   animation plays against the user's wishes. Content/function never change —
+   motion just becomes instant. (DESIGN.md §10 reduced-motion policy.) */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

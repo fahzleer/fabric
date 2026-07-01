@@ -3,10 +3,12 @@
 import { cartAtom } from "@/application/atoms/cart.atoms";
 import { getCartItemCount, isCartEmpty } from "@/domain/cart/types";
 import { useDexieCartSync } from "@/infrastructure/dexie/use-dexie-cart-sync";
+import { EASE } from "@/lib/motion";
 import { useAtomValue } from "@effect-atom/atom-react";
 import { Button, EmptyState } from "@fabric/ui";
 import { Option } from "effect";
 import { ShoppingCart } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
 import { CartItemRow } from "./_components/cart-item-row";
 import { CartSummary } from "./_components/cart-summary";
@@ -51,11 +53,23 @@ export default function CartPage() {
         </h1>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Cart items */}
+          {/* Cart items — add/remove animate reassuringly (transform + opacity;
+              `layout` slides the remaining rows via FLIP, no height reflow) */}
           <div className="lg:col-span-2 space-y-4">
-            {cart.items.map((item) => (
-              <CartItemRow key={`${item.productId.value}:${item.size}`} item={item} />
-            ))}
+            <AnimatePresence initial={false}>
+              {cart.items.map((item) => (
+                <motion.div
+                  key={`${item.productId.value}:${item.size}`}
+                  layout
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, x: -12 }}
+                  transition={{ duration: 0.25, ease: EASE.smooth }}
+                >
+                  <CartItemRow item={item} />
+                </motion.div>
+              ))}
+            </AnimatePresence>
           </div>
 
           {/* Summary */}
