@@ -268,7 +268,7 @@ function WaitingSection({ phase, timeLeft }: { phase: Phase; timeLeft: number })
         />
       </div>
       <div className="flex flex-col items-center gap-3 py-4">
-        <div className="rounded-xl border-2 border-success p-4 bg-white shadow-sm">
+        <div className="rounded-xl border-2 border-success p-4 bg-card shadow-sm">
           <img
             src={phase.qrImageUrl}
             alt="PromptPay QR code"
@@ -378,7 +378,7 @@ export function PromptPayForm({ cart, onBack }: PromptPayFormProps) {
   const isLoading = phase._tag === "placing" || phase._tag === "generating";
 
   return (
-    <div className="bg-white rounded-lg border border-border p-6 space-y-5">
+    <div className="bg-card rounded-lg border border-border p-6 space-y-5">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold text-foreground">Pay via PromptPay</h2>
         <span className="inline-flex items-center gap-1 rounded-full bg-success-subtle border border-success px-2.5 py-1 text-xs font-medium text-success">

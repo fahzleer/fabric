@@ -21,7 +21,7 @@ export default function StoreRegisterPage() {
         </div>
 
         {/* Form card */}
-        <div className="rounded-2xl border border-border bg-white p-8 shadow-sm">
+        <div className="rounded-2xl border border-border bg-card p-8 shadow-sm">
           <Suspense fallback={<div className="h-130 animate-pulse rounded-lg bg-secondary" />}>
             <StoreRegisterForm />
           </Suspense>

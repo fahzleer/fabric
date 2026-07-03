@@ -27,7 +27,7 @@ export default function LoginPage() {
         </div>
 
         {/* Login Card — Suspense required because LoginForm uses useSearchParams() */}
-        <div className="rounded-2xl border border-border bg-white p-8 shadow-sm">
+        <div className="rounded-2xl border border-border bg-card p-8 shadow-sm">
           <Suspense fallback={<div className="h-48 animate-pulse rounded-lg bg-secondary" />}>
             <LoginForm enabledProviders={enabledProviders} />
           </Suspense>

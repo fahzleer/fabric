@@ -17,7 +17,7 @@ function HeroCard({ product }: { product: ProductSummary }) {
   return (
     <Link
       href={`/product/${product.id.value}`}
-      className="group block overflow-hidden rounded-2xl border border-border bg-white shadow-sm transition-[transform,box-shadow] duration-300 ease-entrance hover:-translate-y-1 hover:shadow-md"
+      className="group block overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-[transform,box-shadow] duration-300 ease-entrance hover:-translate-y-1 hover:shadow-md"
     >
       <div className="relative aspect-[4/3] overflow-hidden bg-muted">
         <Image
@@ -44,7 +44,7 @@ function SmallCard({ product }: { product: ProductSummary }) {
   return (
     <Link
       href={`/product/${product.id.value}`}
-      className="group block overflow-hidden rounded-2xl border border-border bg-white shadow-sm transition-[transform,box-shadow] duration-300 ease-entrance hover:-translate-y-1 hover:shadow-md"
+      className="group block overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-[transform,box-shadow] duration-300 ease-entrance hover:-translate-y-1 hover:shadow-md"
     >
       <div className="relative aspect-square overflow-hidden bg-muted">
         <Image

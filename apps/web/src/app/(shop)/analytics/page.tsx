@@ -60,7 +60,7 @@ export default async function AnalyticsPage({
   return (
     <div className="min-h-screen bg-muted">
       {/* Header */}
-      <div className="border-b border-border bg-white">
+      <div className="border-b border-border bg-card">
         <div className="mx-auto max-w-6xl px-4 py-6">
           <div className="flex items-start justify-between">
             <div>

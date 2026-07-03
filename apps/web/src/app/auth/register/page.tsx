@@ -19,7 +19,7 @@ export default function RegisterPage() {
         </div>
 
         {/* Register Card — Suspense required because RegisterForm uses useSearchParams() */}
-        <div className="rounded-2xl border border-border bg-white p-8 shadow-sm">
+        <div className="rounded-2xl border border-border bg-card p-8 shadow-sm">
           <Suspense fallback={<div className="h-96 animate-pulse rounded-lg bg-secondary" />}>
             <RegisterForm />
           </Suspense>

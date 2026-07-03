@@ -379,7 +379,7 @@ export function X402PaymentForm({ cart, onBack }: X402PaymentFormProps) {
   };
 
   return (
-    <div className="bg-white rounded-lg border border-border p-6 space-y-4">
+    <div className="bg-card rounded-lg border border-border p-6 space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold text-foreground">Pay with USDC</h2>
         <span className="inline-flex items-center gap-1 rounded-full bg-info-subtle border border-info px-2.5 py-1 text-xs font-medium text-info">

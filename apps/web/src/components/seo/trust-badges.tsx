@@ -88,7 +88,7 @@ export function TrustBadges({ className = "" }: TrustBadgesProps) {
       {BADGES.map((badge) => (
         <div
           key={badge.label}
-          className="flex items-center gap-3 rounded-lg border border-border bg-white p-3"
+          className="flex items-center gap-3 rounded-lg border border-border bg-card p-3"
         >
           <span className="text-muted-foreground">{badge.icon}</span>
           <div>

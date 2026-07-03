@@ -249,7 +249,7 @@ export default async function OrderConfirmationPage({ params }: PageProps) {
         {/* Order detail card */}
         <Reveal
           delay={0.1}
-          className="rounded-lg bg-white border border-border divide-y divide-border"
+          className="rounded-lg bg-card border border-border divide-y divide-border"
         >
           {/* Status */}
           {isSome(order) && (

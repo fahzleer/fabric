@@ -16,6 +16,7 @@ export type FilterState = {
   readonly genres: ProductGenre[];
   readonly priceRanges: PriceRange[];
   readonly sort: SortOption;
+  readonly query: string;
 };
 
 type ProductFiltersProps = {
@@ -54,13 +55,30 @@ export function ProductFilters({ products, filters, onChange }: ProductFiltersPr
   }
 
   function clearAll() {
-    onChange({ genres: [], priceRanges: [], sort: "default" });
+    onChange({ genres: [], priceRanges: [], sort: "default", query: "" });
   }
 
-  const hasActiveFilters = filters.genres.length > 0 || filters.priceRanges.length > 0;
+  const hasActiveFilters =
+    filters.genres.length > 0 || filters.priceRanges.length > 0 || filters.query.length > 0;
 
   return (
     <div className="space-y-4 rounded-xl border border-border bg-card p-4 shadow-sm">
+      {filters.query.length > 0 && (
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <span>
+            ผลการค้นหา: <span className="font-medium text-foreground">"{filters.query}"</span>
+          </span>
+          <button
+            type="button"
+            onClick={() => onChange({ ...filters, query: "" })}
+            className="rounded-sm text-brand hover:text-brand/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            aria-label="ล้างคำค้นหา"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap gap-2">
           {genreOptions.map((genre) => (

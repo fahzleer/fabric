@@ -16,7 +16,7 @@ export default function ProductModalNotFound() {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="bg-white rounded-lg p-8 text-center max-w-md">
+      <div className="bg-card rounded-lg p-8 text-center max-w-md">
         <div className="mx-auto mb-4 w-16 h-16 bg-secondary rounded-full flex items-center justify-center">
           <svg
             className="w-8 h-8 text-faint"

@@ -17,6 +17,13 @@ import { PromptPayForm } from "./_components/promptpay-form";
 import { X402PaymentForm } from "./_components/x402-payment-form";
 
 const STEPS = ["address", "summary", "payment"] as const;
+// Display-only Thai labels — the STEPS values themselves stay as the nuqs
+// query-param data model so bookmarked/shared checkout URLs keep working.
+const STEP_LABELS: Record<(typeof STEPS)[number], string> = {
+  address: "ที่อยู่จัดส่ง",
+  summary: "สรุปคำสั่งซื้อ",
+  payment: "ชำระเงิน",
+};
 const PAYMENT_METHODS = ["card", "promptpay", "crypto"] as const;
 
 export default function CheckoutPage() {
@@ -63,7 +70,7 @@ export default function CheckoutPage() {
               >
                 {i + 1}
               </div>
-              <span className="text-sm font-medium text-muted-foreground capitalize">{s}</span>
+              <span className="text-sm font-medium text-muted-foreground">{STEP_LABELS[s]}</span>
               {i < STEPS.length - 1 && <div className="h-px w-8 bg-border-strong" />}
             </div>
           ))}
@@ -101,7 +108,7 @@ export default function CheckoutPage() {
                         : "text-muted-foreground hover:bg-muted"
                     }`}
                   >
-                    Credit Card
+                    บัตรเครดิต
                   </button>
                   <button
                     type="button"

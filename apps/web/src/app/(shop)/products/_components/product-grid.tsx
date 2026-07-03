@@ -20,6 +20,13 @@ function applyFilters(
     result = result.filter((p) => filters.priceRanges.includes(p.priceRange));
   }
 
+  if (filters.query.trim().length > 0) {
+    const q = filters.query.trim().toLowerCase();
+    result = result.filter(
+      (p) => p.name.value.toLowerCase().includes(q) || p.tagline.toLowerCase().includes(q)
+    );
+  }
+
   switch (filters.sort) {
     case "price-asc":
       result.sort((a, b) => a.price.amount - b.price.amount);
@@ -57,7 +64,7 @@ export function ProductGrid({ products, filters }: ProductGridProps) {
 
   if (filtered.length === 0) {
     return (
-      <div className="rounded-xl border border-border bg-white p-8 text-center text-muted-foreground">
+      <div className="rounded-xl border border-border bg-card p-8 text-center text-muted-foreground">
         ไม่พบสินค้าที่ตรงกับตัวกรอง ลองปรับตัวกรองใหม่
       </div>
     );

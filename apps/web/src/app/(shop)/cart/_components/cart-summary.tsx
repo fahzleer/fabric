@@ -13,7 +13,7 @@ export function CartSummary({ cart }: CartSummaryProps) {
   const formattedTotal = formatPrice({ amount: getCartTotal(cart), currency });
 
   return (
-    <div className="bg-white rounded-lg border border-border p-6 space-y-4">
+    <div className="bg-card rounded-lg border border-border p-6 space-y-4">
       <h2 className="text-lg font-semibold text-foreground">Order Summary</h2>
 
       <div className="space-y-2">

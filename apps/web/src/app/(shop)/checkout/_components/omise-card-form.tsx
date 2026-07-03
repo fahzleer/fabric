@@ -237,7 +237,7 @@ function MockModeCard({
   onPay: () => void;
 }) {
   return (
-    <div className="bg-white rounded-lg border border-border p-6 space-y-5">
+    <div className="bg-card rounded-lg border border-border p-6 space-y-5">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold text-foreground">Pay by Card</h2>
         <span className="rounded-full bg-warning-subtle px-2.5 py-0.5 text-xs font-medium text-warning">
@@ -425,7 +425,7 @@ export function OmiseCardForm({ cart, onBack }: OmiseCardFormProps) {
         }
       />
 
-      <div className="bg-white rounded-lg border border-border p-6 space-y-5">
+      <div className="bg-card rounded-lg border border-border p-6 space-y-5">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold text-foreground">Pay by Card</h2>
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">

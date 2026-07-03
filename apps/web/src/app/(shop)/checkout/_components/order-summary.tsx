@@ -222,7 +222,7 @@ export function OrderSummary({ cart, onNext, onBack }: OrderSummaryProps) {
 
   if (isNone(cart) || cart.value.items.length === 0) {
     return (
-      <div className="bg-white rounded-lg border border-border p-6 text-center">
+      <div className="bg-card rounded-lg border border-border p-6 text-center">
         <p className="text-muted-foreground">Your cart is empty.</p>
         <Link href="/cart" className="mt-4 inline-block text-info hover:text-info/80">
           Go to Cart
@@ -241,7 +241,7 @@ export function OrderSummary({ cart, onNext, onBack }: OrderSummaryProps) {
   const voucherError = hasPreview ? (preview.value.voucherError ?? "") : "";
 
   return (
-    <div className="bg-white rounded-lg border border-border p-6 space-y-4">
+    <div className="bg-card rounded-lg border border-border p-6 space-y-4">
       <h2 className="text-lg font-semibold text-foreground">Order Summary</h2>
 
       <CartLineItems items={cart.value.items} />
