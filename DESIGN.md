@@ -1,5 +1,26 @@
 # Fabric — Design System
 
+> **v2 — Punk/Band-Merch Identity Redesign (current).** Sections 3, 4, 5, 7,
+> 9, and 10 describe the **current** system. §0–§2, §6, and §8 below that
+> predate this redesign are kept as **historical record** of the original
+> token-consolidation project (still an accurate account of *how* the token
+> architecture came to exist) — their *specific color/radius values* are
+> superseded by §1 in this preface and by the updated §3/§4/§5/§7/§9/§10.
+>
+> **Why this redesign happened.** A UX/IA audit (see the redesign roadmap,
+> §11) found a fundamental brand-identity mismatch: Fabric sells band/
+> subculture t-shirts (genres: Punk, Metal, Emo, Hardcore, Deathcore — see
+> `apps/web/src/app/(shop)/products/_lib/product-helpers.ts`), but the
+> original system (§0–§7 below) was "quiet luxury editorial" — an ink/cream/
+> thread-gold palette with a Playfair Display serif, restrained "the way good
+> fabric falls" motion. A punk/metal merch shop should not look like a
+> minimalist fashion boutique. This redesign replaces the palette, radius,
+> shadow, typography, and motion timing with a dark-canvas, high-contrast,
+> gig-poster-derived identity, and fixes the real IA/friction problems the
+> audit surfaced (orphaned content pages, forced login at checkout, English
+> labels in a Thai-first UI, blind admin approvals, a mislabeled KPI). See
+> §11 for the full roadmap and evidence log.
+>
 > **How this was measured.** Tokens below are extracted from the source of truth
 > (`apps/web/src/app/globals.css`, the Tailwind class usage across all 48 page
 > routes, and `packages/ui`). Because Fabric owns this code, the Tailwind classes
@@ -123,6 +144,45 @@ fabric-smoke #6b6b6b · fabric-linen #e8e2d8   ← brand palette, 0 uses
 > ⚠️ Shadow color: every shadow uses Tailwind's default
 > (`rgb(0 0 0 / 0.05–0.1)`), neutral black — no branded shadow tint.
 
+### 3.5 Color — v2 punk identity (**current**, supersedes above)
+
+Dark-canvas is now the **app-wide default** (`<html className="dark">` in
+`apps/web/src/app/layout.tsx`) — the storefront moved from a light "quiet
+luxury" shell to the same dark identity merchant/admin already used. `:root`
+remains only as a lighter print/email escape hatch, not the primary experience.
+
+| Token | Value (HSL) | Hex approx | Role |
+|---|---|---|---|
+| `--background` | `0 0% 3%` | `#080808` | deep black canvas |
+| `--foreground` | `40 15% 94%` | `#efeceA` | cool bone-white (dropped the old warm-cream tint) |
+| `--card` / `--popover` | `0 0% 8%` | `#141414` | raised surface |
+| `--primary` | `0 0% 96%` | `#f5f5f5` | flat near-white button — 1–2 color print aesthetic, not tonal gold |
+| `--secondary` | `0 0% 14%` | — | |
+| `--muted` | `0 0% 13%` | — | |
+| `--muted-foreground` | `0 0% 66%` | — | |
+| `--brand` / `--accent` | `355 78% 48%` | `#c2263d` "riot red" | primary CTA accent, active nav, price emphasis |
+| `--destructive` | `0 84% 48%` | `#c22a1a`-ish | errors, out-of-stock |
+| `--border` / `--border-strong` | `0 0% 20%` / `0 0% 32%` | — | visible, heavier borders — hard edges, not soft hairlines |
+| `--ring` | `355 78% 48%` (= brand) | — | focus ring reinforces brand on every keyboard interaction |
+| `--radius` | `0.25rem` (4px) | — | sharp corners — gig-poster/flyer edges, not boutique-soft |
+
+**Brand vs. destructive hue separation (verified, not assumed).** `--brand`
+sits at hue 355 (crimson) and `--destructive` at hue 0 (red-orange) — a
+deliberate ~15° split so a payment CTA and an error message never read as the
+same swatch. **Lightness was computed, not guessed**: both were originally
+drafted at a lighter 56–60%, but WCAG contrast math against their white
+`-foreground` text measured **3.78–4.19:1 — failing AA's 4.5:1 normal-text
+threshold**. Darkening both to **48% lightness** measures **4.87:1** (destructive)
+and **5.03:1** (brand) — passing comfortably. This is the same rigor the
+original system applied when it caught `text-warning`'s ~1.7:1 failure (§7.2)
+— measure the actual ratio, don't eyeball it.
+
+**Card treatment:** the soft blur-shadow elevation model is replaced by a
+**flat offset "sticker" shadow** on product-card hover (`2px 2px 0 0
+hsl(var(--border-strong))`) instead of `shadow-md` — the single highest-impact
+micro-decision for reading as "merch" rather than "menswear." Modals/dropdowns
+keep normal soft shadows (functional elevation, not a brand statement).
+
 ---
 
 ## 4. Border radius — *measured (current)*
@@ -140,6 +200,13 @@ fabric-smoke #6b6b6b · fabric-linen #e8e2d8   ← brand palette, 0 uses
 > ⚠️ `--radius: 0.25rem` (4px) in `globals.css` is the nominal token but real
 > cards are 8–12px. The token doesn't reflect reality.
 
+> **v2 update (current):** `--radius` is `0.25rem` (4px) again — but this time
+> deliberately, not a stale unused value. The punk identity (§3.5) wants sharp,
+> gig-poster edges; `rounded-lg`/`rounded-xl` cards now render genuinely
+> sharper (`--radius-lg` = 4px, `--radius-md` = 2px, `--radius-sm` = 0px) via
+> the existing `--radius-sm/md/lg` calc chain in `@theme inline` — no separate
+> per-tier edits needed.
+
 ---
 
 ## 5. Shadow — *measured (current)*
@@ -154,6 +221,10 @@ fabric-smoke #6b6b6b · fabric-linen #e8e2d8   ← brand palette, 0 uses
 
 **Card hover pattern (actual):** `shadow-sm` → `hover:shadow-md` +
 `transition-shadow`. Product image: `group-hover:scale-105`.
+
+> **v2 update (current):** product-card hover replaces `shadow-md` with a flat
+> offset "sticker" shadow (`2px 2px 0 0 hsl(var(--border-strong))`) — see §3.5.
+> Modals/dropdowns are unchanged (functional elevation, not a brand statement).
 
 ---
 
@@ -205,11 +276,11 @@ migration is a find-and-replace, not a redraw.
 > folds into `muted-foreground` or gets one dedicated `*-faint` token to avoid
 > darkening a lot of currently-light text.
 
-### 7.2 Functional — collapse 14 families → **5**, one shade each *(implemented Phase 0)*
+### 7.2 Functional — collapse 14 families → **5**, one shade each *(implemented Phase 0; `brand`/`destructive` values superseded — see §3.5)*
 
 | Token (utility prefix) | Value | Subsumes |
 |---|---|---|
-| `brand` | `36 38% 64%` (#c4a882 thread gold) | the editorial accent (currently nothing) |
+| `brand` | `355 78% 48%` (#c2263d "riot red") — was `36 38% 64%` thread gold | the punk/band-merch accent (see §3.5) |
 | `success` | `160 84% 39%` (#10b981) | emerald + green (257 uses) |
 | `warning` | `38 92% 50%` (#f59e0b) | amber + yellow + orange (136) |
 | `destructive` | `0 84% 60%` (#ef4444) | red + rose (174) |
@@ -242,17 +313,24 @@ in status-semantic UI.**
 | `text-price` | 20 / 28 | 700, **mono tabular** | prices (revive `.font-price`) |
 | `text-h2` | 24 / 32 | 600 | section |
 | `text-h1` | 30 / 36 | 700 | page |
-| `text-display` | 36–48 / 1.1 | 700, serif optional | hero (revive Playfair `--font-serif`) |
+| `text-display` | 36–48 / 1.1 | 700, display font | hero |
+
+> **v2 update (current):** the display role now pairs with `.font-display`
+> (Kanit, `--font-display`) instead of Playfair `--font-serif` — see §3.5's
+> sibling typography note below and §10 for the full rationale (Playfair was
+> Latin-only and, per the original audit, never even applied to Thai content;
+> Kanit is one family natively covering Thai + Latin at every weight 100–900).
 
 ### 7.4 Radius / shadow / spacing — restrict the scale
 
 | Category | Keep only | Drop |
 |---|---|---|
-| Radius | `sm` 4 (inputs) · `lg` 8 (cards) · `xl` 12 (modals) · `full` (pills) | `rounded` bare, `2xl`, `3xl` |
-| Shadow | `xs`=resting · `md`=hover/raised · `xl`=overlay/modal | the rest |
+| Radius | `sm` 0 (inputs) · `lg` 4 (cards) · `xl` 8 (modals) · `full` (pills) | `rounded` bare, `2xl`, `3xl` |
+| Shadow | `xs`=resting · `md`=hover/raised (sticker-offset on cards, see §3.5) · `xl`=overlay/modal | the rest |
 | Spacing | 4-base: 1,2,3,4,6,8,12,16 | ad-hoc 5,7 etc. |
 
-> Set `--radius` to `0.5rem` (8px) so the token matches the real card radius.
+> **v2 update (current):** `--radius` is `0.25rem` (4px), not `0.5rem` (8px) —
+> the punk identity wants sharp gig-poster edges. See §3.5/§4.
 
 ### 7.5 Grid — canonical
 
@@ -431,6 +509,9 @@ storefront, which *is* the completion scope, uses `<Button>` throughout.)
 | raw `<input className=…>` | `<Input>` from `@fabric/ui` |
 | `rounded-lg border bg-white shadow-sm` | `<Card>` from `@fabric/ui` |
 | price `text-xl font-bold` | `text-price` |
+| `.font-editorial` (Playfair) | `.font-display` (Kanit) — see §3.5 |
+| accent gold `bg-brand` (was `#c4a882`) | `bg-brand` now resolves to riot-red `#c2263d` — same class, new value |
+| soft `shadow-md` on product-card hover | flat offset "sticker" shadow — see §3.5 |
 
 ---
 
@@ -438,11 +519,15 @@ storefront, which *is* the completion scope, uses `<Button>` throughout.)
 
 > Scope: the customer-facing **`(shop)`** storefront only. Admin & merchant
 > dashboards are tools, not showcases, and carry no motion. This is a motion
-> layer, not a redesign — it choreographs movement on top of the existing design.
+> layer, not a redesign — it choreographs movement on top of the design.
 
-**Aesthetic.** Quiet luxury, editorial calm, tactile quality — the way good
-fabric falls. Never bouncy, springy, or attention-grabbing. Restraint reads as
-premium: small distances, weighted ease-out, one focal motion per view.
+**Aesthetic — v2 update (current).** Quick, present, a little raw — DIY/gig-
+poster energy, not quiet-luxury restraint. Never bouncy or springy (that's
+still off-limits), but no longer *lingering* either: the old system's
+"editorial calm, the way good fabric falls" pacing has been retuned faster
+across the board. Small distances and one focal motion per view are kept —
+those are about avoiding visual noise, not about the old aesthetic — but
+speed now carries the "punk" feeling instead of unhurried pacing.
 
 **Library.** [`motion`](https://motion.dev) (`motion/react`, the Framer Motion
 successor) — React 19 / Next 16 compatible. CSS/Tailwind transitions are used for
@@ -453,22 +538,28 @@ lean. No second animation library.
 
 | Token | Value | Use |
 |---|---|---|
-| `EASE.editorial` | `cubic-bezier(0.16, 1, 0.3, 1)` | entrances (weighted ease-out) |
-| `EASE.smooth` | `cubic-bezier(0.4, 0, 0.2, 1)` | reversible state changes |
-| `DURATION.fast / base / slow` | 0.2 / 0.4 / 0.6 s | micro / transition / entrance |
-| `DISTANCE.sm / md` | 8 / 16 px | subtle travel offsets |
+| `EASE.entrance` (was `EASE.editorial`) | `cubic-bezier(0.16, 1, 0.3, 1)` | entrances (weighted ease-out) — curve unchanged, renamed only |
+| `EASE.settle` (was `EASE.smooth`) | `cubic-bezier(0.4, 0, 0.2, 1)` | reversible state changes — curve unchanged, renamed only |
+| `DURATION.fast` | 0.2 s | micro-interactions — unchanged, already snappy |
+| `DURATION.base` | **0.25 s** (was 0.4 s) | transitions |
+| `DURATION.slow` | **0.35 s** (was 0.6 s) | entrances |
+| `DISTANCE.sm / md` | 8 / 16 px | subtle travel offsets — unchanged; speed carries the feel, not distance |
 
-The same curves exist as CSS vars `--ease-editorial` / `--ease-smooth` (exposed as
-Tailwind `ease-editorial` / `ease-smooth` utilities) so CSS hovers and JS motion
-speak one language. Reusable variants: `fadeInUp`, `fadeInUpItem`,
-`staggerContainer`, `pageTransition`, plus the `inViewOnce` viewport config.
+The rename drops the old identity's branding from the API surface — the
+curve *shapes* are unchanged (they were never the "quiet luxury" signal,
+duration was), only the *names* and the *durations*. The same curves exist as
+CSS vars `--ease-entrance` / `--ease-settle` (exposed as Tailwind `ease-entrance`
+/ `ease-settle` utilities) so CSS hovers and JS motion speak one language.
+Reusable variants: `fadeInUp`, `fadeInUpItem`, `staggerContainer`,
+`pageTransition`, `heroSettle`/`heroStagger`, plus the `inViewOnce` viewport
+config — all mechanically retuned, no new motion code.
 
 ### 10.2 Shared components — `src/components/motion/`
 
 - **`<MotionProvider>`** — wraps the `(shop)` layout in `MotionConfig
   reducedMotion="user"`; every `motion` element honors reduced-motion automatically.
 - **`<Reveal>` / `<RevealGroup>` + `<RevealItem>`** — `whileInView` (run once)
-  editorial fade-up for single elements and staggered grids/lists.
+  fade-up for single elements and staggered grids/lists.
 - **`<PageTransition>`** — used by `(shop)/template.tsx`; a quick settle on every
   route change.
 
@@ -477,7 +568,7 @@ speak one language. Reusable variants: `fadeInUp`, `fadeInUpItem`,
 | Surface | Motion |
 |---|---|
 | Route changes (`(shop)/template.tsx`) | transform-only settle (see §10.4) |
-| Product card (`product-card`, `featured-products-grid`) | CSS lift + image zoom + shadow on hover, `ease-editorial` |
+| Product card (`product-card`, `featured-products-grid`) | CSS lift + image zoom + flat sticker-shadow on hover (§3.5), `ease-entrance` |
 | Product grid (`product-grid`) | staggered `whileInView` reveal; replays on re-filter |
 | Add-to-cart (`add-to-cart-button`) | quick label pop (`AnimatePresence mode="wait"`) |
 | Cart (`cart/page`) | item add/remove via `AnimatePresence` + `layout` (FLIP) |
@@ -494,3 +585,76 @@ speak one language. Reusable variants: `fadeInUp`, `fadeInUpItem`,
   hydration. Full fade-ups are reserved for below-the-fold `whileInView` reveals.
 - **SSR / hydration** — motion lives in `"use client"` leaves; pages stay Server
   Components where possible. No `Date.now()`/`Math.random()`-driven animation.
+
+---
+
+## 11. v2 Redesign Roadmap — Punk/Band-Merch Identity
+
+Grounded in a 3-surface UX audit (storefront, merchant, admin) run before any
+code changed — see the audit findings summary at the top of each phase below.
+Phased the same way §8's original project was: each phase ships independently,
+keeps `bun run check:design` / `turbo typecheck` / `bun test` green, and is
+committed incrementally with cited evidence.
+
+### Phase 0 — Token foundation · ⏳ IN PROGRESS
+- [x] Palette: dark-canvas became the app-wide default (`<html className="dark">`
+      in `apps/web/src/app/layout.tsx`); riot-red `--brand`/`--accent`/`--ring`,
+      re-verified `--destructive` lightness, sharper `--border`/`--border-strong`,
+      `--radius: 0.25rem`. See §3.5 for the full table and the measured
+      (not assumed) AA contrast verification for brand/destructive.
+- [x] Typography: Kanit (`next/font/google`, `subsets: ["latin","thai"]`,
+      weights 400/500/700/900) replaces Playfair Display as `--font-display`;
+      `.font-editorial` renamed `.font-display`. See §7.3/§10.
+- [x] Motion: `EASE.editorial`→`EASE.entrance`, `EASE.smooth`→`EASE.settle`,
+      `DURATION.base` 0.4s→0.25s, `DURATION.slow` 0.6s→0.35s — mechanical
+      rename + retune across `apps/web/src/lib/motion.ts` and all 8 consumers
+      (`components/motion/*`, `product-card.tsx`, `featured-products-grid.tsx`,
+      `add-to-cart-button.tsx`, `checkout/page.tsx`, `cart/page.tsx`,
+      `cart-item-row.tsx`, `order-success-header.tsx`, `modal.tsx`). See §10.
+- [x] `packages/ui/src/index.css` kept in lockstep with `globals.css`.
+- [ ] DESIGN.md rewrite — this section; §3.5/§4/§5/§7/§9/§10 updated in place
+      (in progress, this commit).
+- [ ] Live browser contrast verification (`preview_inspect` computed styles on
+      a real rendered button/card) — pending.
+- Verified so far: `bun run check:design` 0 violations, `turbo typecheck`
+  clean (web + ui), `bun test` 785 pass / 0 fail (no markup changed yet, so
+  the existing suite runs unmodified).
+
+### Phase 1 — Storefront IA · not started
+Audit findings this phase fixes: no search on `/products`; content pages
+(about/guides/payment) orphaned from nav with no site footer; checkout forces
+login with no guest option; address-form/checkout-steps/order-status labels
+are English on a Thai-first UI; featured-products grid doesn't react to
+filters; locale landing pages (`/en/my`, `/en/ph`, `/id`, `/vi`) unreachable
+from any navigation.
+
+### Phase 2 — Storefront visual application · not started
+Applies the Phase 0 tokens/typography/motion to product-card, product-detail,
+cart, checkout, order-confirmation, trust-badges, FAQ — plus the CTA copy fix
+that depends on Phase 1's guest checkout landing, and inline payment-method/
+voucher help text.
+
+### Phase 3 — Merchant dashboard IA + visual · not started
+Audit findings this phase fixes: flat 9-item sidebar (regroups into
+Overview/Catalog/Sales/Finance/Growth); no onboarding progress feedback;
+unsectioned product form; no per-size stock on the product list; payout
+minimum buried in helper text; freeform bank-info textarea; no customer name
+on orders; no analytics date range; billing allows upgrade before onboarding
+completes; no inventory stock legend; Affiliates crammed onto one scrolling
+page. New shared `Tabs` + `DateRangePicker` primitives land in `packages/ui`.
+
+### Phase 4 — Admin dashboard IA (incl. KPI bug) + visual · not started
+**Confirmed real bug** (not just a UX nit): `admin/dashboard/_lib/queries.ts`
+line 56 maps `data.confirmedOrders` to a field rendered as "Active Buyers
+(30d)" / "unique buyers in last 30 days" — it is neither unique nor buyers.
+The "Churn Rate" card is hardcoded `churnRatePct: 0`, never computed. Both get
+an honest relabel (not a new backend active-users/churn query — out of scope
+for this redesign). Also fixes: payout approval shows only a truncated user
+ID with no merchant context (admins approve/reject nearly blind); rejection
+reason lost on reload; no inventory search; truncated order/customer IDs with
+no copy affordance; no analytics date range; invoices have no view/download.
+
+### Phase 5 — Content/marketing/locale pages · not started
+About, guides, payment-method pages, and the 4 locale landing pages get
+folded into the Phase 1 footer (no longer orphaned) and the Phase 0/2 visual
+identity. Sequenced last — lowest business risk, benefits from settled nav.

@@ -31,7 +31,10 @@
   --accent: 0 0% 94%;
   --accent-foreground: 0 0% 4%;
 
-  --destructive: 0 84% 60%;
+  /* Destructive lightness verified (not assumed) against white destructive-
+     foreground text: HSL(0,84%,60%) only contrast 3.78:1 (fails AA 4.5:1
+     normal text). 48% lightness measures 4.87:1. */
+  --destructive: 0 84% 48%;
   --destructive-foreground: 0 0% 100%;
   --destructive-subtle: 0 86% 97%;
 
@@ -51,21 +54,31 @@
   --info-foreground: 0 0% 100%;
   --info-subtle: 214 95% 96%;
 
-  --brand: 36 38% 64%; /* fabric-thread editorial gold */
-  --brand-foreground: 0 0% 4%;
+  /* Brand — "riot red" (see DESIGN.md §1, punk/band-merch identity). Hue 355
+     (crimson) is ~15° from --destructive's hue 0 (red-orange) so the two
+     never read as the same swatch on a CTA vs. an error. Lightness verified
+     against white brand-foreground text: 56% measures 4.19:1 (fails AA),
+     48% measures 5.03:1 (passes). */
+  --brand: 355 78% 48%;
+  --brand-foreground: 0 0% 100%;
 
   --border: 0 0% 91%;
   --border-strong: 0 0% 84%;
   --input: 0 0% 91%;
-  --ring: 0 0% 6%;
+  --ring: 355 78% 48%;
 
-  /* Card radius matches reality (rounded-lg, 8px) — was 4px and unused. */
-  --radius: 0.5rem;
+  /* Sharp corners — gig-poster/flyer edges, not boutique-soft. */
+  --radius: 0.25rem;
 
   /* Geist loaded via next/font; --font-geist-sans injected on <body> by layout.tsx */
   --font-sans: var(--font-geist-sans, "Inter Variable", ui-sans-serif), "Noto Sans Thai", "Sarabun",
     "Tahoma", system-ui, sans-serif;
-  --font-serif: "Playfair Display", Georgia, "Times New Roman", serif;
+  /* Kanit (Cadson Demak) — one family natively covering Thai + Latin, weights
+     100–900 incl. true Black. Replaces Playfair Display: Playfair was
+     Latin-only and (per its own history in this file) was never even applied
+     to Thai content — a single bold Thai+Latin family avoids that mismatch
+     by construction instead of pairing two separate display faces. */
+  --font-display: var(--font-kanit, "Kanit"), var(--font-sans);
   --font-mono: var(--font-geist-mono, "JetBrains Mono", "Fira Code", ui-monospace), monospace;
 
   --space-page: clamp(1rem, 5vw, 5rem);
@@ -78,53 +91,70 @@
   --fabric-linen: #e8e2d8;
 }
 
+/* .dark is now the app-wide default (see layout.tsx <html className="dark">)
+   — the storefront moves from a light "quiet luxury" shell to the same
+   dark-canvas identity merchant/admin already used, retiring the old
+   documented "Navbar stays light" exception since there's no seam left to
+   bridge. :root above remains a lighter escape hatch for print/email only. */
 .dark {
-  --background: 0 0% 4%;
-  --foreground: 40 30% 96%;
+  --background: 0 0% 3%;
+  /* Cool bone-white — drops the old warm-cream "editorial" tint. */
+  --foreground: 40 15% 94%;
 
-  --card: 0 0% 7%;
-  --card-foreground: 40 30% 96%;
+  --card: 0 0% 8%;
+  --card-foreground: 40 15% 94%;
 
-  --popover: 0 0% 7%;
-  --popover-foreground: 40 30% 96%;
+  --popover: 0 0% 8%;
+  --popover-foreground: 40 15% 94%;
 
-  --primary: 33 30% 65%;
+  /* Flat near-white primary button — 1-2 color print aesthetic, not a
+     tonal gold. */
+  --primary: 0 0% 96%;
   --primary-foreground: 0 0% 4%;
 
-  --secondary: 0 0% 12%;
-  --secondary-foreground: 40 30% 96%;
+  --secondary: 0 0% 14%;
+  --secondary-foreground: 40 15% 94%;
 
-  --muted: 0 0% 12%;
-  --muted-foreground: 0 0% 60%;
+  --muted: 0 0% 13%;
+  --muted-foreground: 0 0% 66%;
   --faint: 0 0% 50%;
 
-  --accent: 33 30% 65%;
-  --accent-foreground: 0 0% 4%;
+  /* Accent = brand (riot red), not a separate gold tone. */
+  --accent: 355 78% 48%;
+  --accent-foreground: 0 0% 100%;
 
-  --destructive: 0 63% 55%;
-  --destructive-foreground: 40 30% 96%;
+  /* Verified against white destructive-foreground: 60% lightness measured
+     3.78:1 (fails AA); 48% measures 4.87:1. */
+  --destructive: 0 84% 48%;
+  --destructive-foreground: 0 0% 100%;
   --destructive-subtle: 0 40% 14%;
 
-  --success: 160 60% 45%;
+  --success: 142 71% 45%;
   --success-foreground: 0 0% 4%;
   --success-subtle: 158 40% 12%;
 
-  --warning: 38 80% 55%;
+  --warning: 38 92% 58%;
   --warning-foreground: 0 0% 4%;
   --warning-subtle: 36 40% 12%;
   --warning-text: 38 90% 65%;
 
-  --info: 217 80% 62%;
+  --info: 217 91% 65%;
   --info-foreground: 0 0% 4%;
   --info-subtle: 220 40% 14%;
 
-  --brand: 33 30% 65%;
-  --brand-foreground: 0 0% 4%;
+  /* Riot red — hue 355 (crimson), ~15° from --destructive's hue 0
+     (red-orange) so brand CTAs and error states never share a swatch.
+     Lightness verified against white brand-foreground: 56% measured 4.19:1
+     (fails AA), 48% measures 5.03:1 (passes). */
+  --brand: 355 78% 48%;
+  --brand-foreground: 0 0% 100%;
 
-  --border: 0 0% 15%;
-  --border-strong: 0 0% 22%;
-  --input: 0 0% 15%;
-  --ring: 33 30% 65%;
+  /* Punk aesthetic wants visible, heavier borders — hard edges, not soft
+     hairlines. */
+  --border: 0 0% 20%;
+  --border-strong: 0 0% 32%;
+  --input: 0 0% 20%;
+  --ring: 355 78% 48%;
 
   --fabric-ink: #f5f0e8;
   --fabric-cream: #0a0a0a;
@@ -187,13 +217,15 @@
   --radius-sm: calc(var(--radius) - 4px);
 
   --font-sans: var(--font-sans);
-  --font-serif: var(--font-serif);
+  --font-display: var(--font-display);
   --font-mono: var(--font-mono);
 
   /* Motion easings (DESIGN.md §10) — shared by CSS hovers and the JS `motion`
-     tokens in src/lib/motion.ts so every storefront surface moves the same way. */
-  --ease-editorial: cubic-bezier(0.16, 1, 0.3, 1);
-  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+     tokens in src/lib/motion.ts so every storefront surface moves the same way.
+     Renamed from ease-editorial/ease-smooth — "editorial" was the old quiet-
+     luxury identity's branding, dropped along with the rest of that system. */
+  --ease-entrance: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-settle: cubic-bezier(0.4, 0, 0.2, 1);
 
   /* Named type scale (DESIGN.md §7.3) — size + line-height as one token.
      Weight stays a separate utility; text-price pairs with .font-price (mono). */
@@ -230,10 +262,13 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-.font-editorial {
-  font-family: var(--font-serif);
-  font-weight: 400;
-  letter-spacing: -0.02em;
+/* Kanit display treatment — replaces .font-editorial (Playfair). Bold weight
+   by default; pair with .tracking-wordmark for the widest gig-poster tracking
+   on all-caps headings/wordmarks. */
+.font-display {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: 0;
 }
 
 .font-price {

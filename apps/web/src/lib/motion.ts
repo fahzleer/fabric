@@ -1,8 +1,8 @@
 /**
- * Fabric storefront — motion tokens (see DESIGN.md §10 "Motion").
+ * Fabric storefront — motion tokens (see DESIGN.md §1.3 "Motion").
  *
- * One motion language for the customer-facing `(shop)` storefront: quiet,
- * editorial, tactile — the way good fabric falls, never bouncy or springy.
+ * One motion language for the customer-facing `(shop)` storefront: quick,
+ * present, a little raw — DIY/gig-poster energy, never bouncy or springy.
  * Every value below is reused across surfaces so the whole storefront moves
  * coherently. Reduced-motion is honored globally by wrapping the storefront in
  * `<MotionProvider>` (MotionConfig reducedMotion="user"); these variants also
@@ -14,21 +14,27 @@
  */
 import type { Transition, Variants } from "motion/react";
 
-/** Easing curves. `editorial` is a weighted ease-out for entrances; `smooth`
- *  an ease-in-out for reversible state/transition changes. No overshoot. */
+/** Easing curves. `entrance` is a weighted ease-out for entrances; `settle`
+ *  an ease-in-out for reversible state/transition changes. No overshoot.
+ *  Renamed from editorial/smooth — those names belonged to the old quiet-
+ *  luxury identity; the curve shapes themselves are unchanged. */
 export const EASE = {
-  editorial: [0.16, 1, 0.3, 1],
-  smooth: [0.4, 0, 0.2, 1],
+  entrance: [0.16, 1, 0.3, 1],
+  settle: [0.4, 0, 0.2, 1],
 } as const;
 
-/** Duration scale (seconds). Micro-interactions fast; entrances base/slow. */
+/** Duration scale (seconds). Retuned faster than the old "restrained"
+ *  system — punk/DIY energy reads as quick and present, not lingering.
+ *  `fast` (micro-interactions) was already snappy and is unchanged. */
 export const DURATION = {
   fast: 0.2,
-  base: 0.4,
-  slow: 0.6,
+  base: 0.25,
+  slow: 0.35,
 } as const;
 
-/** Subtle travel distances (px). Restraint reads as premium. */
+/** Subtle travel distances (px). Unchanged — speed carries the "punk" feel,
+ *  not travel distance (more distance risks CLS/motion-sickness for no
+ *  aesthetic gain). */
 export const DISTANCE = {
   sm: 8,
   md: 16,
@@ -36,7 +42,7 @@ export const DISTANCE = {
 
 export const springlessBase: Transition = {
   duration: DURATION.base,
-  ease: EASE.editorial,
+  ease: EASE.entrance,
 };
 
 /** Content settling into place: fade + a small upward drift. */
@@ -45,7 +51,7 @@ export const fadeInUp: Variants = {
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: DURATION.slow, ease: EASE.editorial },
+    transition: { duration: DURATION.slow, ease: EASE.entrance },
   },
 };
 
@@ -55,7 +61,7 @@ export const fadeInUpItem: Variants = {
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: DURATION.base, ease: EASE.editorial },
+    transition: { duration: DURATION.base, ease: EASE.entrance },
   },
 };
 
@@ -85,7 +91,7 @@ export const pageTransition: Variants = {
   hidden: { y: DISTANCE.sm },
   visible: {
     y: 0,
-    transition: { duration: DURATION.base, ease: EASE.editorial },
+    transition: { duration: DURATION.base, ease: EASE.entrance },
   },
 };
 
@@ -100,7 +106,7 @@ export const heroSettle: Variants = {
   hidden: { y: DISTANCE.md },
   visible: {
     y: 0,
-    transition: { duration: DURATION.slow, ease: EASE.editorial },
+    transition: { duration: DURATION.slow, ease: EASE.entrance },
   },
 };
 

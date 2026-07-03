@@ -17,7 +17,7 @@ function HeroCard({ product }: { product: ProductSummary }) {
   return (
     <Link
       href={`/product/${product.id.value}`}
-      className="group block overflow-hidden rounded-2xl border border-border bg-white shadow-sm transition-[transform,box-shadow] duration-300 ease-editorial hover:-translate-y-1 hover:shadow-md"
+      className="group block overflow-hidden rounded-2xl border border-border bg-white shadow-sm transition-[transform,box-shadow] duration-300 ease-entrance hover:-translate-y-1 hover:shadow-md"
     >
       <div className="relative aspect-[4/3] overflow-hidden bg-muted">
         <Image
@@ -26,7 +26,7 @@ function HeroCard({ product }: { product: ProductSummary }) {
           fill
           sizes="66vw"
           priority
-          className="object-cover transition-transform duration-500 ease-editorial group-hover:scale-105"
+          className="object-cover transition-transform duration-500 ease-entrance group-hover:scale-105"
         />
       </div>
       <div className="p-6">
@@ -44,7 +44,7 @@ function SmallCard({ product }: { product: ProductSummary }) {
   return (
     <Link
       href={`/product/${product.id.value}`}
-      className="group block overflow-hidden rounded-2xl border border-border bg-white shadow-sm transition-[transform,box-shadow] duration-300 ease-editorial hover:-translate-y-1 hover:shadow-md"
+      className="group block overflow-hidden rounded-2xl border border-border bg-white shadow-sm transition-[transform,box-shadow] duration-300 ease-entrance hover:-translate-y-1 hover:shadow-md"
     >
       <div className="relative aspect-square overflow-hidden bg-muted">
         <Image
@@ -52,7 +52,7 @@ function SmallCard({ product }: { product: ProductSummary }) {
           alt={product.primaryImage.altText}
           fill
           sizes="33vw"
-          className="object-cover transition-transform duration-500 ease-editorial group-hover:scale-105"
+          className="object-cover transition-transform duration-500 ease-entrance group-hover:scale-105"
         />
       </div>
       <div className="p-4">

@@ -16,7 +16,7 @@ export function OrderSuccessHeader({ orderId }: { orderId: string }) {
       <motion.div
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 0.5, ease: EASE.editorial }}
+        transition={{ duration: 0.5, ease: EASE.entrance }}
         className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-success-subtle"
       >
         <svg
@@ -33,14 +33,14 @@ export function OrderSuccessHeader({ orderId }: { orderId: string }) {
             d="M5 13l4 4L19 7"
             initial={{ pathLength: 0 }}
             animate={{ pathLength: 1 }}
-            transition={{ duration: 0.5, ease: EASE.editorial, delay: 0.25 }}
+            transition={{ duration: 0.5, ease: EASE.entrance, delay: 0.25 }}
           />
         </svg>
       </motion.div>
       <motion.h1
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: EASE.editorial, delay: 0.15 }}
+        transition={{ duration: 0.5, ease: EASE.entrance, delay: 0.15 }}
         className="text-3xl font-bold text-foreground"
       >
         Order Placed!
@@ -48,7 +48,7 @@ export function OrderSuccessHeader({ orderId }: { orderId: string }) {
       <motion.p
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: EASE.editorial, delay: 0.22 }}
+        transition={{ duration: 0.5, ease: EASE.entrance, delay: 0.22 }}
         className="mt-2 text-muted-foreground"
       >
         Thank you for your order. Your order ID is:
@@ -56,7 +56,7 @@ export function OrderSuccessHeader({ orderId }: { orderId: string }) {
       <motion.p
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: EASE.editorial, delay: 0.29 }}
+        transition={{ duration: 0.5, ease: EASE.entrance, delay: 0.29 }}
         className="mt-1 text-lg font-mono font-semibold text-info"
       >
         #{orderId}

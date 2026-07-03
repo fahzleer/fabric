@@ -78,7 +78,7 @@ export default function CheckoutPage() {
             initial={{ opacity: 0, x: 8 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -8 }}
-            transition={{ duration: 0.25, ease: EASE.smooth }}
+            transition={{ duration: 0.25, ease: EASE.settle }}
           >
             {step === "address" && <AddressForm onNext={goToSummary} />}
             {step === "summary" && (

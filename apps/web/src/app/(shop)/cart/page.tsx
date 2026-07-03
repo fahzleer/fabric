@@ -64,7 +64,7 @@ export default function CartPage() {
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, x: -12 }}
-                  transition={{ duration: 0.25, ease: EASE.smooth }}
+                  transition={{ duration: 0.25, ease: EASE.settle }}
                 >
                   <CartItemRow item={item} />
                 </motion.div>

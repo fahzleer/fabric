@@ -149,7 +149,7 @@ export function AddToCartButton({
             initial={{ opacity: 0, scale: 0.96 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.96 }}
-            transition={{ duration: 0.18, ease: EASE.smooth }}
+            transition={{ duration: 0.18, ease: EASE.settle }}
           >
             {status === "adding"
               ? "Adding..."
