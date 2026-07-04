@@ -1,3 +1,4 @@
+import { DashboardRealtimeRefresh } from "@/components/dashboard-realtime-refresh";
 import { CountUpNumber } from "@/components/motion/count-up-number";
 import { RevealGroup, RevealItem } from "@/components/motion/reveal";
 import { formatPrice } from "@/lib/price";
@@ -35,6 +36,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-8">
+      <DashboardRealtimeRefresh />
       <div>
         <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
         <p className="mt-1 text-sm text-muted-foreground">Store performance overview</p>

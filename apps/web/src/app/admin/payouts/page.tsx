@@ -1,4 +1,5 @@
 import { CopyIdButton } from "@/components/admin/copy-id-button";
+import { DashboardRealtimeRefresh } from "@/components/dashboard-realtime-refresh";
 import { createMerchantApi } from "@/lib/merchant-api";
 import type { PayoutRequest } from "@/lib/merchant-api";
 import { isErr, isOk, isSome } from "@fabric/types";
@@ -72,6 +73,7 @@ export default async function AdminPayoutsPage() {
 
   return (
     <div className="space-y-6 max-w-5xl">
+      <DashboardRealtimeRefresh />
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>

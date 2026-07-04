@@ -33,6 +33,32 @@ export function requireAuth(verifier: PasetoVerifierService): MiddlewareHandler 
 }
 
 /**
+ * Same verification as requireAuth, but also accepts the token as a `token`
+ * query param. The browser's native EventSource API cannot set an
+ * Authorization header, so SSE endpoints are the one legitimate case for
+ * token-in-URL — everything else in this API uses requireAuth.
+ */
+export function requireAuthEventSource(verifier: PasetoVerifierService): MiddlewareHandler {
+  return async (c, next) => {
+    const authHeader = c.req.header("authorization");
+    const token = authHeader ? authHeader.replace("Bearer ", "").trim() : c.req.query("token");
+    if (!token) {
+      return c.json({ error: "Unauthorized", _tag: "MissingAuthHeader" }, 401);
+    }
+
+    const result = await verifier.verify(token);
+    if (result._tag === "Err") {
+      return c.json({ error: "Unauthorized", _tag: result.error._tag }, 401);
+    }
+
+    c.set("userId", result.value.sub);
+    c.set("userRole", result.value.role as UserRole);
+    c.set("userEmail", result.value.email);
+    await next();
+  };
+}
+
+/**
  * Verifies a session if an Authorization header is present, but proceeds
  * without one otherwise — for routes that support both authenticated and
  * guest access (e.g. guest checkout). An invalid/expired token still fails

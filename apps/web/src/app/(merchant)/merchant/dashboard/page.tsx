@@ -1,4 +1,5 @@
 import { ClearCartOnMount } from "@/app/(shop)/order/[id]/confirmation/_components/clear-cart-on-mount";
+import { DashboardRealtimeRefresh } from "@/components/dashboard-realtime-refresh";
 import { CountUpNumber } from "@/components/motion/count-up-number";
 import { RevealGroup, RevealItem } from "@/components/motion/reveal";
 import { type MerchantStatus, createMerchantApi } from "@/lib/merchant-api";
@@ -192,6 +193,7 @@ export default async function MerchantDashboardPage({
   return (
     <div className="space-y-8">
       {welcome === "1" && <ClearCartOnMount />}
+      <DashboardRealtimeRefresh />
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
