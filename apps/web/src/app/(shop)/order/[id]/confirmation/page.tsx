@@ -1,9 +1,11 @@
+import { Reveal } from "@/components/motion/reveal";
 import { auth } from "@/lib/auth";
 import { formatPrice } from "@/lib/price";
 import { type Maybe, None, Some, isNone, isSome } from "@fabric/types";
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import Link from "next/link";
 import { ClearCartOnMount } from "./_components/clear-cart-on-mount";
+import { OrderSuccessHeader } from "./_components/order-success-header";
 import { OrderTracker } from "./_components/order-tracker";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3010";
@@ -84,13 +86,23 @@ async function getAuthToken(): Promise<Maybe<string>> {
   }
 }
 
+async function getGuestEmail(): Promise<string | undefined> {
+  const cookieStore = await cookies();
+  return cookieStore.get("fabric_guest_email")?.value;
+}
+
 async function fetchOrderDetail(
   id: string,
-  authToken: Maybe<string>
+  authToken: Maybe<string>,
+  guestEmail: string | undefined
 ): Promise<{ order: Maybe<OrderDetail>; fetchError: Maybe<string> }> {
   try {
     const res = await fetch(`${API_BASE}/api/orders/${id}`, {
-      headers: isSome(authToken) ? { Authorization: `Bearer ${authToken.value}` } : {},
+      headers: isSome(authToken)
+        ? { Authorization: `Bearer ${authToken.value}` }
+        : guestEmail
+          ? { "x-guest-email": guestEmail }
+          : {},
       cache: "no-store",
     });
     if (res.ok) {
@@ -133,10 +145,13 @@ function computePriceBreakdown(order: Maybe<OrderDetail>): PriceBreakdown {
 }
 
 function getStatusInfo(order: Maybe<OrderDetail>) {
-  if (isNone(order)) return { label: "", colour: "text-gray-700 bg-gray-50 border-gray-200" };
+  if (isNone(order)) return { label: "", colour: "text-muted-foreground bg-muted border-border" };
   const status = order.value.status;
   return (
-    STATUS_LABELS[status] ?? { label: status, colour: "text-gray-700 bg-gray-50 border-gray-200" }
+    STATUS_LABELS[status] ?? {
+      label: status,
+      colour: "text-muted-foreground bg-muted border-border",
+    }
   );
 }
 
@@ -144,7 +159,7 @@ function OrderLineItems({ lines, currency }: { lines: OrderLine[]; currency: str
   if (lines.length === 0) return null;
   return (
     <div className="px-6 py-4">
-      <h2 className="text-sm font-semibold text-gray-900 mb-3">Items Ordered</h2>
+      <h2 className="text-sm font-semibold text-foreground mb-3">Items Ordered</h2>
       <div className="space-y-3">
         {lines.map((line) => (
           <div
@@ -152,12 +167,12 @@ function OrderLineItems({ lines, currency }: { lines: OrderLine[]; currency: str
             className="flex justify-between items-start"
           >
             <div>
-              <p className="text-sm font-medium text-gray-900">{line.productName}</p>
-              <p className="text-xs text-gray-500">
+              <p className="text-sm font-medium text-foreground">{line.productName}</p>
+              <p className="text-xs text-muted-foreground">
                 Size: {line.size} · Qty: {line.quantity}
               </p>
             </div>
-            <p className="text-sm font-medium text-gray-900">
+            <p className="text-sm font-medium text-foreground">
               {formatPrice({ amount: line.unitPrice.amount * line.quantity, currency })}
             </p>
           </div>
@@ -171,7 +186,7 @@ function OrderPriceBreakdown({ breakdown }: { breakdown: PriceBreakdown }) {
   const { subtotalCents, currency, discountCents, shippingCents, taxCents, totalCents } = breakdown;
   return (
     <div className="px-6 py-4 space-y-2">
-      <div className="flex justify-between text-sm text-gray-600">
+      <div className="flex justify-between text-sm text-muted-foreground">
         <span>Subtotal</span>
         <span>{formatPrice({ amount: subtotalCents / 100, currency })}</span>
       </div>
@@ -181,19 +196,19 @@ function OrderPriceBreakdown({ breakdown }: { breakdown: PriceBreakdown }) {
           <span>−{formatPrice({ amount: discountCents / 100, currency })}</span>
         </div>
       )}
-      <div className="flex justify-between text-sm text-gray-600">
+      <div className="flex justify-between text-sm text-muted-foreground">
         <span>Shipping</span>
         <span>
           {shippingCents === 0 ? "Free" : formatPrice({ amount: shippingCents / 100, currency })}
         </span>
       </div>
       {taxCents > 0 && (
-        <div className="flex justify-between text-sm text-gray-600">
+        <div className="flex justify-between text-sm text-muted-foreground">
           <span>VAT (7%)</span>
           <span>{formatPrice({ amount: taxCents / 100, currency })}</span>
         </div>
       )}
-      <div className="flex justify-between font-semibold text-gray-900 border-t border-gray-100 pt-2 mt-1">
+      <div className="flex justify-between font-semibold text-foreground border-t border-border pt-2 mt-1">
         <span>Total</span>
         <span>{formatPrice({ amount: totalCents / 100, currency })}</span>
       </div>
@@ -204,10 +219,10 @@ function OrderPriceBreakdown({ breakdown }: { breakdown: PriceBreakdown }) {
 function ShippingInfo({ address }: { address: OrderDetail["shippingAddress"] }) {
   return (
     <div className="px-6 py-4">
-      <h2 className="text-sm font-semibold text-gray-900 mb-1">Ship to</h2>
-      <p className="text-sm text-gray-600">{address.recipientName}</p>
-      <p className="text-sm text-gray-600">{address.street}</p>
-      <p className="text-sm text-gray-600">
+      <h2 className="text-sm font-semibold text-foreground mb-1">Ship to</h2>
+      <p className="text-sm text-muted-foreground">{address.recipientName}</p>
+      <p className="text-sm text-muted-foreground">{address.street}</p>
+      <p className="text-sm text-muted-foreground">
         {address.city}, {address.country} {address.postalCode}
       </p>
     </div>
@@ -221,12 +236,14 @@ interface PageProps {
 export default async function OrderConfirmationPage({ params }: PageProps) {
   const { id } = await params;
   const authToken = await getAuthToken();
-  const { order, fetchError } = await fetchOrderDetail(id, authToken);
+  const guestEmail = isNone(authToken) ? await getGuestEmail() : undefined;
+  const { order, fetchError } = await fetchOrderDetail(id, authToken, guestEmail);
   const breakdown = computePriceBreakdown(order);
   const statusInfo = getStatusInfo(order);
+  const isGuest = isNone(authToken) && isSome(order);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-muted">
       <ClearCartOnMount />
       {isSome(order) && (
         <OrderTracker
@@ -238,35 +255,18 @@ export default async function OrderConfirmationPage({ params }: PageProps) {
       )}
 
       <div className="mx-auto max-w-2xl px-4 py-16 sm:px-6 lg:px-8">
-        {/* Success icon */}
-        <div className="text-center mb-8">
-          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-success-subtle">
-            <svg
-              className="h-8 w-8 text-success"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              aria-hidden="true"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M5 13l4 4L19 7"
-              />
-            </svg>
-          </div>
-          <h1 className="text-3xl font-bold text-gray-900">Order Placed!</h1>
-          <p className="mt-2 text-gray-600">Thank you for your order. Your order ID is:</p>
-          <p className="mt-1 text-lg font-mono font-semibold text-info">#{id}</p>
-        </div>
+        {/* Success header — the animated completion moment */}
+        <OrderSuccessHeader orderId={id} />
 
         {/* Order detail card */}
-        <div className="rounded-lg bg-white border border-gray-200 divide-y divide-gray-100">
+        <Reveal
+          delay={0.1}
+          className="rounded-lg bg-card border border-border divide-y divide-border"
+        >
           {/* Status */}
           {isSome(order) && (
             <div className="px-6 py-4 flex items-center justify-between">
-              <span className="text-sm font-medium text-gray-700">Status</span>
+              <span className="text-sm font-medium text-muted-foreground">Status</span>
               <span
                 className={`inline-flex items-center rounded-full border px-3 py-0.5 text-xs font-medium ${statusInfo.colour}`}
               >
@@ -292,13 +292,31 @@ export default async function OrderConfirmationPage({ params }: PageProps) {
 
           {/* What happens next */}
           <div className="px-6 py-4 space-y-1">
-            <h2 className="text-sm font-semibold text-gray-900">What happens next?</h2>
-            <p className="text-sm text-gray-600">You will receive an email confirmation shortly.</p>
-            <p className="text-sm text-gray-600">
+            <h2 className="text-sm font-semibold text-foreground">What happens next?</h2>
+            <p className="text-sm text-muted-foreground">
+              You will receive an email confirmation shortly.
+            </p>
+            <p className="text-sm text-muted-foreground">
               Your order will be processed and shipped within 2–3 business days.
             </p>
           </div>
-        </div>
+        </Reveal>
+
+        {/* Optional post-purchase account upsell — guest checkout is never gated,
+            but creating an account afterwards makes future order tracking easier. */}
+        {isGuest && (
+          <div className="mt-6 rounded-lg border border-info bg-info-subtle p-4 text-center">
+            <p className="text-sm text-foreground">
+              Save this order to an account to track it and check out faster next time.
+            </p>
+            <Link
+              href="/auth/register"
+              className="mt-2 inline-block text-sm font-medium text-info hover:text-info/80 underline"
+            >
+              Create an account
+            </Link>
+          </div>
+        )}
 
         {/* Actions */}
         <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
@@ -308,12 +326,14 @@ export default async function OrderConfirmationPage({ params }: PageProps) {
           >
             Continue Shopping
           </Link>
-          <Link
-            href="/account/orders"
-            className="rounded-lg border border-gray-300 px-6 py-3 text-gray-700 font-medium hover:bg-gray-50 text-center"
-          >
-            View My Orders
-          </Link>
+          {!isGuest && (
+            <Link
+              href="/account/orders"
+              className="rounded-lg border border-border-strong px-6 py-3 text-muted-foreground font-medium hover:bg-muted text-center"
+            >
+              View My Orders
+            </Link>
+          )}
         </div>
       </div>
     </div>

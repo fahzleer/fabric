@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@fabric/ui";
+import { Alert, AlertDescription, AlertTitle, Button } from "@fabric/ui";
 import Link from "next/link";
 import { useEffect } from "react";
 
@@ -55,12 +55,12 @@ export default function ProductError({ error, reset }: ErrorProps) {
 
         {/* Error details (development only) */}
         {process.env.NODE_ENV === "development" && (
-          <div className="mt-4 p-4 bg-muted rounded text-left">
-            <p className="text-sm text-foreground font-mono">{error.message}</p>
+          <Alert variant="destructive" className="mt-4 text-left">
+            <AlertTitle className="font-mono text-sm">{error.message}</AlertTitle>
             {error.digest !== undefined && (
-              <p className="mt-2 text-xs text-muted-foreground">Error ID: {error.digest}</p>
+              <AlertDescription className="mt-2 text-xs">Error ID: {error.digest}</AlertDescription>
             )}
-          </div>
+          </Alert>
         )}
 
         {/* Actions */}

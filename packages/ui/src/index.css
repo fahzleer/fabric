@@ -17,6 +17,7 @@
   --color-secondary-foreground: hsl(var(--secondary-foreground));
   --color-muted: hsl(var(--muted));
   --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-faint: hsl(var(--faint));
   --color-accent: hsl(var(--accent));
   --color-accent-foreground: hsl(var(--accent-foreground));
   --color-destructive: hsl(var(--destructive));
@@ -28,6 +29,7 @@
   --color-warning: hsl(var(--warning));
   --color-warning-foreground: hsl(var(--warning-foreground));
   --color-warning-subtle: hsl(var(--warning-subtle));
+  --color-warning-text: hsl(var(--warning-text));
   --color-info: hsl(var(--info));
   --color-info-foreground: hsl(var(--info-foreground));
   --color-info-subtle: hsl(var(--info-subtle));
@@ -41,8 +43,30 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+
+  /* Named type scale (DESIGN.md §7.3) — kept in lockstep with apps/web. */
+  --text-caption: 0.75rem;
+  --text-caption--line-height: 1rem;
+  --text-body-sm: 0.875rem;
+  --text-body-sm--line-height: 1.25rem;
+  --text-body: 1rem;
+  --text-body--line-height: 1.5rem;
+  --text-title: 1.125rem;
+  --text-title--line-height: 1.75rem;
+  --text-price: 1.25rem;
+  --text-price--line-height: 1.75rem;
+  --text-h2: 1.5rem;
+  --text-h2--line-height: 2rem;
+  --text-h1: 1.875rem;
+  --text-h1--line-height: 2.25rem;
+  --text-display: 2.25rem;
+  --text-display--line-height: 1.1;
 }
 
+/* Punk/band-merch identity (see DESIGN.md §1) — dark-canvas default, riot-red
+   brand, sharp radius. Kept in lockstep with apps/web/src/app/globals.css;
+   see that file for the contrast verification notes behind the brand/
+   destructive lightness values. */
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -57,9 +81,10 @@
     --secondary-foreground: 0 0% 20%;
     --muted: 0 0% 94%;
     --muted-foreground: 0 0% 42%;
+    --faint: 0 0% 64%;
     --accent: 0 0% 94%;
     --accent-foreground: 0 0% 4%;
-    --destructive: 0 84% 60%;
+    --destructive: 0 84% 48%;
     --destructive-foreground: 0 0% 100%;
     --destructive-subtle: 0 86% 97%;
     --success: 160 84% 39%;
@@ -68,16 +93,17 @@
     --warning: 38 92% 50%;
     --warning-foreground: 0 0% 4%;
     --warning-subtle: 48 96% 95%;
+    --warning-text: 26 90% 37%;
     --info: 221 83% 53%;
     --info-foreground: 0 0% 100%;
     --info-subtle: 214 95% 96%;
-    --brand: 36 38% 64%;
-    --brand-foreground: 0 0% 4%;
+    --brand: 355 78% 48%;
+    --brand-foreground: 0 0% 100%;
     --border: 0 0% 91%;
     --border-strong: 0 0% 84%;
     --input: 0 0% 91%;
-    --ring: 0 0% 6%;
-    --radius: 0.5rem;
+    --ring: 355 78% 48%;
+    --radius: 0.25rem;
     --chart-1: 12 76% 61%;
     --chart-2: 173 58% 39%;
     --chart-3: 197 37% 24%;
@@ -86,38 +112,40 @@
   }
 
   .dark {
-    --background: 0 0% 4%;
-    --foreground: 40 30% 96%;
-    --card: 0 0% 7%;
-    --card-foreground: 40 30% 96%;
-    --popover: 0 0% 7%;
-    --popover-foreground: 40 30% 96%;
-    --primary: 33 30% 65%;
+    --background: 0 0% 3%;
+    --foreground: 40 15% 94%;
+    --card: 0 0% 8%;
+    --card-foreground: 40 15% 94%;
+    --popover: 0 0% 8%;
+    --popover-foreground: 40 15% 94%;
+    --primary: 0 0% 96%;
     --primary-foreground: 0 0% 4%;
-    --secondary: 0 0% 12%;
-    --secondary-foreground: 40 30% 96%;
-    --muted: 0 0% 12%;
-    --muted-foreground: 0 0% 60%;
-    --accent: 33 30% 65%;
-    --accent-foreground: 0 0% 4%;
-    --destructive: 0 63% 55%;
-    --destructive-foreground: 40 30% 96%;
+    --secondary: 0 0% 14%;
+    --secondary-foreground: 40 15% 94%;
+    --muted: 0 0% 13%;
+    --muted-foreground: 0 0% 66%;
+    --faint: 0 0% 50%;
+    --accent: 355 78% 48%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84% 48%;
+    --destructive-foreground: 0 0% 100%;
     --destructive-subtle: 0 40% 14%;
-    --success: 160 60% 45%;
+    --success: 142 71% 45%;
     --success-foreground: 0 0% 4%;
     --success-subtle: 158 40% 12%;
-    --warning: 38 80% 55%;
+    --warning: 38 92% 58%;
     --warning-foreground: 0 0% 4%;
     --warning-subtle: 36 40% 12%;
-    --info: 217 80% 62%;
+    --warning-text: 38 90% 65%;
+    --info: 217 91% 65%;
     --info-foreground: 0 0% 4%;
     --info-subtle: 220 40% 14%;
-    --brand: 33 30% 65%;
-    --brand-foreground: 0 0% 4%;
-    --border: 0 0% 15%;
-    --border-strong: 0 0% 22%;
-    --input: 0 0% 15%;
-    --ring: 33 30% 65%;
+    --brand: 355 78% 48%;
+    --brand-foreground: 0 0% 100%;
+    --border: 0 0% 20%;
+    --border-strong: 0 0% 32%;
+    --input: 0 0% 20%;
+    --ring: 355 78% 48%;
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
@@ -135,4 +163,38 @@
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
   }
+}
+
+/* Sticker "shadow-sticker" — used sparingly, WorkflowCanvas among them. */
+@utility shadow-sticker {
+  box-shadow: 2px 2px 0 0 hsl(var(--border-strong));
+}
+
+/* WorkflowCanvas (react-flow) chrome — base.css only ships structural rules
+   for Controls/MiniMap (no color, no `--xy-*` var hooks for buttons), so
+   they're themed directly here rather than through CSS custom properties.
+   Kept in lockstep with apps/web/src/app/globals.css. */
+.workflow-canvas .react-flow__controls {
+  overflow: hidden;
+  border: 2px solid hsl(var(--border-strong));
+  box-shadow: 2px 2px 0 0 hsl(var(--border-strong));
+}
+.workflow-canvas .react-flow__controls-button {
+  background-color: hsl(var(--card));
+  border-bottom: 1px solid hsl(var(--border));
+  color: hsl(var(--foreground));
+}
+.workflow-canvas .react-flow__controls-button:last-child {
+  border-bottom: none;
+}
+.workflow-canvas .react-flow__controls-button:hover {
+  background-color: hsl(var(--brand));
+  color: hsl(var(--brand-foreground));
+}
+.workflow-canvas .react-flow__controls-button:disabled {
+  opacity: 0.4;
+}
+.workflow-canvas .react-flow__minimap {
+  border: 2px solid hsl(var(--border-strong));
+  box-shadow: 2px 2px 0 0 hsl(var(--border-strong));
 }

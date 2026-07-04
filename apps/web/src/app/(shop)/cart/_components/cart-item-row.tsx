@@ -3,12 +3,14 @@
 import { cartAtom } from "@/application/atoms/cart.atoms";
 import type { CartItem } from "@/domain/cart/types";
 import { dexieCartAdapter } from "@/infrastructure/dexie/dexie-cart.adapter";
+import { EASE } from "@/lib/motion";
 import { formatPrice } from "@/lib/price";
 import { useAtomSet } from "@effect-atom/atom-react";
 import { Button } from "@fabric/ui";
 import BigNumber from "bignumber.js";
 import { Effect } from "effect";
 import { Option } from "effect";
+import { AnimatePresence, motion } from "motion/react";
 import Image from "next/image";
 
 interface CartItemRowProps {
@@ -76,7 +78,21 @@ export function CartItemRow({ item }: CartItemRowProps) {
             >
               −
             </Button>
-            <span className="w-8 text-center text-sm">{item.quantity}</span>
+            {/* Quantity pops briefly on change — quick, reassuring, never delays */}
+            <span className="relative w-8 overflow-hidden text-center text-sm">
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.span
+                  key={item.quantity}
+                  className="inline-block"
+                  initial={{ opacity: 0, y: -6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 6 }}
+                  transition={{ duration: 0.15, ease: EASE.settle }}
+                >
+                  {item.quantity}
+                </motion.span>
+              </AnimatePresence>
+            </span>
             <Button
               type="button"
               variant="outline"
@@ -91,7 +107,7 @@ export function CartItemRow({ item }: CartItemRowProps) {
           <button
             type="button"
             onClick={handleRemove}
-            className="text-xs text-destructive hover:text-destructive/80"
+            className="rounded-sm text-xs text-destructive hover:text-destructive/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >
             Remove
           </button>

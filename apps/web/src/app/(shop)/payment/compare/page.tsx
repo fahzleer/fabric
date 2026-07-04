@@ -42,7 +42,7 @@ const METHODS = [
     name: "บัตรเครดิต / เดบิต",
     href: "/payment/card",
     badge: "รองรับต่างประเทศ",
-    badgeColor: "bg-gray-100 text-gray-800",
+    badgeColor: "bg-secondary text-foreground",
     fee: "ฟรี",
     speed: "< 1 นาที",
     security: "3D Secure + PCI-DSS Level 1",
@@ -124,27 +124,29 @@ export default function PaymentComparePage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
       />
 
-      <nav aria-label="breadcrumb" className="mb-6 text-sm text-gray-500">
+      <nav aria-label="breadcrumb" className="mb-6 text-sm text-muted-foreground">
         <ol className="flex items-center gap-1">
           <li>
-            <Link href="/" className="hover:text-gray-700">
+            <Link href="/" className="hover:text-muted-foreground">
               หน้าแรก
             </Link>
           </li>
           <li aria-hidden="true">/</li>
           <li>
-            <Link href="/products" className="hover:text-gray-700">
+            <Link href="/products" className="hover:text-muted-foreground">
               สินค้า
             </Link>
           </li>
           <li aria-hidden="true">/</li>
-          <li className="text-gray-900 font-medium">เปรียบเทียบวิธีชำระเงิน</li>
+          <li className="text-foreground font-medium">เปรียบเทียบวิธีชำระเงิน</li>
         </ol>
       </nav>
 
       <header className="mb-10">
-        <h1 className="text-3xl font-bold text-gray-900">เปรียบเทียบวิธีชำระเงิน</h1>
-        <p className="mt-2 text-gray-600 max-w-xl">Fabric รองรับ 3 วิธีชำระเงิน — เลือกแบบที่เหมาะกับคุณ</p>
+        <h1 className="font-display text-3xl text-foreground">เปรียบเทียบวิธีชำระเงิน</h1>
+        <p className="mt-2 text-muted-foreground max-w-xl">
+          Fabric รองรับ 3 วิธีชำระเงิน — เลือกแบบที่เหมาะกับคุณ
+        </p>
       </header>
 
       <TrustBadges className="mb-10" />
@@ -152,30 +154,30 @@ export default function PaymentComparePage() {
       {/* Method cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 mb-10">
         {METHODS.map((m) => (
-          <div key={m.id} className="rounded-xl border border-gray-200 bg-white p-5 space-y-4">
+          <div key={m.id} className="rounded-xl border border-border bg-card p-5 space-y-4">
             <div>
               <span
                 className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${m.badgeColor}`}
               >
                 {m.badge}
               </span>
-              <h2 className="mt-2 text-lg font-semibold text-gray-900">{m.name}</h2>
+              <h2 className="mt-2 text-lg font-semibold text-foreground">{m.name}</h2>
             </div>
             <ul className="space-y-1">
               {m.pros.map((p) => (
-                <li key={p} className="flex items-start gap-1.5 text-sm text-gray-700">
+                <li key={p} className="flex items-start gap-1.5 text-sm text-muted-foreground">
                   <span className="text-success font-bold mt-0.5">+</span> {p}
                 </li>
               ))}
               {m.cons.map((c) => (
-                <li key={c} className="flex items-start gap-1.5 text-sm text-gray-500">
-                  <span className="text-gray-400 font-bold mt-0.5">−</span> {c}
+                <li key={c} className="flex items-start gap-1.5 text-sm text-muted-foreground">
+                  <span className="text-faint font-bold mt-0.5">−</span> {c}
                 </li>
               ))}
             </ul>
             <Link
               href={m.href}
-              className="block w-full rounded-lg border border-gray-200 py-2 text-center text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+              className="block w-full rounded-lg border border-border py-2 text-center text-sm font-medium text-muted-foreground hover:bg-muted transition-colors"
             >
               ดูวิธีชำระ →
             </Link>
@@ -185,15 +187,15 @@ export default function PaymentComparePage() {
 
       {/* Comparison table */}
       <section aria-labelledby="table-heading" className="overflow-x-auto">
-        <h2 id="table-heading" className="text-xl font-semibold text-gray-900 mb-4">
+        <h2 id="table-heading" className="text-xl font-semibold text-foreground mb-4">
           ตารางเปรียบเทียบ
         </h2>
         <table className="w-full text-sm border-collapse">
           <thead>
-            <tr className="border-b border-gray-200">
-              <th className="py-3 pr-4 text-left font-medium text-gray-500 w-1/4" />
+            <tr className="border-b border-border">
+              <th className="py-3 pr-4 text-left font-medium text-muted-foreground w-1/4" />
               {METHODS.map((m) => (
-                <th key={m.id} className="py-3 px-2 text-left font-semibold text-gray-900">
+                <th key={m.id} className="py-3 px-2 text-left font-semibold text-foreground">
                   {m.name}
                 </th>
               ))}
@@ -201,10 +203,10 @@ export default function PaymentComparePage() {
           </thead>
           <tbody>
             {COMPARE_ROWS.map((row) => (
-              <tr key={row.key} className="border-b border-gray-100">
-                <td className="py-3 pr-4 font-medium text-gray-500">{row.label}</td>
+              <tr key={row.key} className="border-b border-border">
+                <td className="py-3 pr-4 font-medium text-muted-foreground">{row.label}</td>
                 {METHODS.map((m) => (
-                  <td key={m.id} className="py-3 px-2 text-gray-700">
+                  <td key={m.id} className="py-3 px-2 text-muted-foreground">
                     {String(m[row.key])}
                   </td>
                 ))}
@@ -216,14 +218,14 @@ export default function PaymentComparePage() {
 
       <FaqSection items={FAQ_ITEMS} />
 
-      <div className="mt-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-t border-gray-200 pt-8">
+      <div className="mt-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-t border-border pt-8">
         <div>
-          <h2 className="text-lg font-semibold text-gray-900">เลือกวิธีชำระเงินและช้อปเลย</h2>
+          <h2 className="text-lg font-semibold text-foreground">เลือกวิธีชำระเงินและช้อปเลย</h2>
           <FreshnessLabel updatedAt="2026-06-23" quarter="Q2 2026" />
         </div>
         <Link
           href="/checkout"
-          className="rounded-lg bg-gray-900 px-6 py-3 text-sm font-medium text-white hover:bg-gray-700"
+          className="rounded-lg bg-primary px-6 py-3 text-sm font-medium text-primary-foreground hover:bg-primary/90"
         >
           ไปที่หน้าชำระเงิน
         </Link>

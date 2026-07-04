@@ -4,10 +4,12 @@ import { cartAtom } from "@/application/atoms/cart.atoms";
 import type { ProductId, ProductPrice, ProductSize } from "@/domain/product/types";
 import { dexieCartAdapter } from "@/infrastructure/dexie/dexie-cart.adapter";
 import { trackEvent } from "@/lib/analytics";
+import { EASE } from "@/lib/motion";
 import { Atom, useAtom, useAtomSet } from "@effect-atom/atom-react";
 import { type Maybe, None, Some, isNone, isSome } from "@fabric/types";
 import { Button } from "@fabric/ui";
 import { Effect, Option } from "effect";
+import { AnimatePresence, motion } from "motion/react";
 
 const selectedSizeAtom = Atom.make<Maybe<ProductSize>>(None());
 const quantityAtom = Atom.make(1);
@@ -73,7 +75,7 @@ export function AddToCartButton({
               key={size}
               type="button"
               onClick={() => setSelectedSize(Some(size))}
-              className={`border rounded px-4 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring ${
+              className={`border rounded px-4 py-2 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
                 isSome(selectedSize) && selectedSize.value === size
                   ? "border-foreground bg-secondary text-foreground"
                   : "border-input text-foreground hover:border-border-strong"
@@ -138,13 +140,24 @@ export function AddToCartButton({
               : ""
         }`}
       >
-        <span className="inline-block w-full text-center">
-          {status === "adding"
-            ? "Adding..."
-            : status === "added"
-              ? "✓ Added to Cart"
-              : "Add to Cart"}
-        </span>
+        {/* Label swaps with a quick pop for reassuring add-to-cart feedback.
+            mode="wait" + short duration keeps the conversion path snappy. */}
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.span
+            key={status}
+            className="inline-block w-full text-center"
+            initial={{ opacity: 0, scale: 0.96 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.96 }}
+            transition={{ duration: 0.18, ease: EASE.settle }}
+          >
+            {status === "adding"
+              ? "Adding..."
+              : status === "added"
+                ? "✓ Added to Cart"
+                : "Add to Cart"}
+          </motion.span>
+        </AnimatePresence>
       </Button>
     </div>
   );

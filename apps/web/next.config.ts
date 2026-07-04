@@ -7,7 +7,8 @@ const require = createRequire(import.meta.url);
 const nextConfig: NextConfig = {
   outputFileTracingRoot: path.join(__dirname, "../../"),
   // @fabric/ui ships raw TSX (main: ./src/index.ts) — Next must transpile it.
-  transpilePackages: ["@fabric/ui"],
+  // @react-three/drei ships untranspiled ESM helpers that need the same treatment.
+  transpilePackages: ["@fabric/ui", "@react-three/drei"],
   images: {
     dangerouslyAllowSVG: true,
     remotePatterns: [

@@ -72,6 +72,46 @@ To skip in emergencies (avoid unless critical): `git commit --no-verify`
 - CI must pass (lint + typecheck + test)
 - Keep PRs focused — one concern per PR
 
+## Design System & Tokens
+
+`DESIGN.md` is the spec for UI work. The web app and `packages/ui` share **one**
+semantic token layer (HSL CSS vars in `apps/web/src/app/globals.css` +
+`packages/ui/src/index.css`, kept in lockstep). **PRs that touch UI must use
+tokens, not raw Tailwind palette classes.**
+
+| Don't write | Use the token |
+|---|---|
+| `text-gray-900` | `text-foreground` |
+| `text-gray-700/600/500` | `text-muted-foreground` |
+| `text-gray-400` (and lighter) | `text-faint` |
+| `bg-gray-50` / `bg-gray-100` | `bg-muted` / `bg-secondary` |
+| `border-gray-200` / `-300` | `border-border` / `border-border-strong` |
+| `bg-red-*` / `bg-emerald-*` / `bg-amber-*` / `bg-blue-*` | `bg-destructive` / `bg-success` / `bg-warning` / `bg-info` (+ `-subtle` surfaces) |
+| `text-warning` on a subtle surface | `text-warning-text` (AA-legible) |
+| raw `<button>` / `<input>` | `<Button>` / `<Input>` from `@fabric/ui` |
+| price `text-xl font-bold` | `text-price font-price` |
+
+**Guards (run before pushing UI changes):**
+
+```bash
+bun run check:design   # check-accents.ts + check-grays.ts — 0 violations required
+```
+
+Two CI guards in `scripts/design/` enforce this:
+- `check-accents.ts` — bans raw accent families (`red`/`emerald`/`amber`/`blue`/…).
+- `check-grays.ts` — bans raw `gray-*` neutrals.
+
+Documented carve-outs (both guards) — the **only** two: `analytics/_components/*`
+(data-viz uses the categorical `--chart-*` palette) and `global-error.tsx`
+(renders its own `<html>`, no token CSS at runtime). The `(shop)` marketing /
+guide / payment / locale landing pages and the dark store page were the last raw
+holdouts and are now fully tokenized and **enforced**. Don't add new entries to
+these carve-out lists without a documented reason.
+
+UI components live in `packages/ui` with a Storybook story + Vitest test + an
+`*.e2e.ts` (Playwright a11y + visual-snapshot). New components/states need all
+three; visual baselines are generated on CI (Linux), not committed locally.
+
 ## Architecture Notes
 
 See [`CLAUDE.md`](./CLAUDE.md) for detailed architecture, domain types, auth flow, and critical pitfalls.

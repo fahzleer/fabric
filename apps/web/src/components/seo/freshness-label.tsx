@@ -13,9 +13,9 @@ export function FreshnessLabel({ updatedAt, quarter }: FreshnessLabelProps) {
   }).format(new Date(updatedAt));
 
   return (
-    <p className="mt-2 text-xs text-gray-400">
+    <p className="mt-2 text-xs text-faint">
       อัปเดตข้อมูล{" "}
-      <time dateTime={updatedAt} className="font-medium text-gray-500">
+      <time dateTime={updatedAt} className="font-medium text-muted-foreground">
         {quarter} · {displayDate}
       </time>
     </p>

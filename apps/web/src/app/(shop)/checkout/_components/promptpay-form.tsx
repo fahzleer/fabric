@@ -8,6 +8,7 @@ import {
 } from "@/application/atoms/checkout.atoms";
 import { getCartTotal } from "@/domain/cart/types";
 import type { ShoppingCart } from "@/domain/cart/types";
+import { buildGuestOrderItems, setGuestEmailCookie } from "@/lib/guest-order";
 import { formatPrice } from "@/lib/price";
 import { syncCartToServer } from "@/lib/sync-cart";
 import { Atom, useAtom, useAtomSet, useAtomValue } from "@effect-atom/atom-react";
@@ -44,6 +45,7 @@ type PromptPayShippingAddress = {
   postalCode: string;
   country: string;
   phone: string;
+  email: string;
   province: string;
 };
 
@@ -83,12 +85,14 @@ async function createPromptPayOrder(
   cartId: string,
   voucherCode: string,
   shippingAddress: PromptPayShippingAddress,
-  authToken: Maybe<string>
+  authToken: Maybe<string>,
+  cart: ShoppingCart
 ): Promise<OrderResult> {
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     ...(isSome(authToken) ? { Authorization: `Bearer ${authToken.value}` } : {}),
   };
+  const { email, ...restAddress } = shippingAddress;
   const res = await fetch(`${API_BASE}/api/orders`, {
     method: "POST",
     headers,
@@ -96,7 +100,8 @@ async function createPromptPayOrder(
       cartId,
       paymentMethod: "promptpay",
       voucherCode: voucherCode || undefined,
-      shippingAddress,
+      shippingAddress: restAddress,
+      ...(isSome(authToken) ? {} : { guestEmail: email, items: buildGuestOrderItems(cart) }),
     }),
   });
   if (!res.ok) {
@@ -227,11 +232,12 @@ async function executePromptPayFlow(
     ...rawShipping,
     province: rawShipping.province ?? "Bangkok",
   };
-  const orderResult = await createPromptPayOrder(cart.id, voucherCode, shipping, authToken);
+  const orderResult = await createPromptPayOrder(cart.id, voucherCode, shipping, authToken, cart);
   if (isErr(orderResult)) {
     deps.setPhase({ _tag: "error", message: orderResult.error });
     return;
   }
+  if (isNone(authToken)) setGuestEmailCookie(shipping.email);
   deps.setPhase({ _tag: "generating" });
   const qrResult = await createPromptPayQr(orderResult.value, authToken);
   if (isErr(qrResult)) {
@@ -254,21 +260,21 @@ function WaitingSection({ phase, timeLeft }: { phase: Phase; timeLeft: number })
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between text-sm">
-        <span className="text-gray-600">QR expires in</span>
+        <span className="text-muted-foreground">QR expires in</span>
         <span
-          className={`font-mono font-semibold text-lg ${timeLeft < 60_000 ? "text-destructive" : "text-gray-900"}`}
+          className={`font-mono font-semibold text-lg ${timeLeft < 60_000 ? "text-destructive" : "text-foreground"}`}
         >
           {formatCountdown(timeLeft)}
         </span>
       </div>
-      <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
+      <div className="w-full h-1.5 bg-secondary rounded-full overflow-hidden">
         <div
           className={`h-full rounded-full transition-all duration-1000 ${timeLeft < 60_000 ? "bg-destructive" : "bg-success"}`}
           style={{ width: `${Math.max(0, (timeLeft / QR_DURATION_MS) * 100)}%` }}
         />
       </div>
       <div className="flex flex-col items-center gap-3 py-4">
-        <div className="rounded-xl border-2 border-success p-4 bg-white shadow-sm">
+        <div className="rounded-xl border-2 border-success p-4 bg-card shadow-sm">
           <img
             src={phase.qrImageUrl}
             alt="PromptPay QR code"
@@ -277,12 +283,12 @@ function WaitingSection({ phase, timeLeft }: { phase: Phase; timeLeft: number })
             className="block"
           />
         </div>
-        <p className="text-center text-sm text-gray-500 max-w-xs">
+        <p className="text-center text-sm text-muted-foreground max-w-xs">
           Open your banking app, choose <span className="font-medium">PromptPay</span>, and scan
           this QR code to pay.
         </p>
       </div>
-      <div className="flex items-center justify-center gap-2 text-xs text-gray-400">
+      <div className="flex items-center justify-center gap-2 text-xs text-faint">
         <span className="h-2 w-2 rounded-full bg-success animate-pulse" />
         Waiting for payment confirmation…
       </div>
@@ -378,15 +384,15 @@ export function PromptPayForm({ cart, onBack }: PromptPayFormProps) {
   const isLoading = phase._tag === "placing" || phase._tag === "generating";
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-5">
+    <div className="bg-card rounded-lg border border-border p-6 space-y-5">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-900">Pay via PromptPay</h2>
+        <h2 className="text-lg font-semibold text-foreground">Pay via PromptPay</h2>
         <span className="inline-flex items-center gap-1 rounded-full bg-success-subtle border border-success px-2.5 py-1 text-xs font-medium text-success">
           PromptPay QR
         </span>
       </div>
 
-      <div className="border border-gray-100 rounded-lg p-3 bg-gray-50 flex justify-between font-semibold text-gray-900">
+      <div className="border border-border rounded-lg p-3 bg-muted flex justify-between font-semibold text-foreground">
         <span>Total</span>
         <span>{formatPrice({ amount: totalAmount, currency })}</span>
       </div>
@@ -403,7 +409,7 @@ export function PromptPayForm({ cart, onBack }: PromptPayFormProps) {
               QR code has expired. Click below to generate a new one.
             </div>
           )}
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-muted-foreground">
             A QR code will be generated for you to scan with your banking app. The QR code is valid
             for <span className="font-medium">15 minutes</span>.
           </p>

@@ -16,10 +16,10 @@ export default function ProductModalNotFound() {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="bg-white rounded-lg p-8 text-center max-w-md">
-        <div className="mx-auto mb-4 w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
+      <div className="bg-card rounded-lg p-8 text-center max-w-md">
+        <div className="mx-auto mb-4 w-16 h-16 bg-secondary rounded-full flex items-center justify-center">
           <svg
-            className="w-8 h-8 text-gray-400"
+            className="w-8 h-8 text-faint"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -33,9 +33,9 @@ export default function ProductModalNotFound() {
             />
           </svg>
         </div>
-        <h2 className="text-xl font-bold text-gray-900 mb-2">Product Not Found</h2>
-        <p className="text-gray-600">This product does not exist or has been removed.</p>
-        <p className="text-sm text-gray-500 mt-4">Going back...</p>
+        <h2 className="text-xl font-bold text-foreground mb-2">Product Not Found</h2>
+        <p className="text-muted-foreground">This product does not exist or has been removed.</p>
+        <p className="text-sm text-muted-foreground mt-4">Going back...</p>
       </div>
     </div>
   );

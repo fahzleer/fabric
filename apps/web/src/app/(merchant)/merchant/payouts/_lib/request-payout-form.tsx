@@ -4,11 +4,27 @@ import { useActionState } from "react";
 import { type RequestPayoutState, requestPayoutAction } from "./actions";
 
 const INITIAL_STATE: RequestPayoutState = {};
+const MINIMUM_PAYOUT_CENTS = 10_000;
+
+const BANKS = [
+  "Kasikorn Bank (KBank)",
+  "Siam Commercial Bank (SCB)",
+  "Bangkok Bank",
+  "Krungthai Bank",
+  "Bank of Ayudhya (Krungsri)",
+  "TMBThanachart Bank (ttb)",
+  "Other",
+] as const;
+
+const inputClass =
+  "w-full rounded-lg border border-border bg-muted px-3 py-2.5 text-sm text-foreground placeholder-muted-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring";
+const labelClass = "block text-sm font-medium text-foreground mb-1.5";
 
 export function RequestPayoutForm({ availableBalanceCents }: { availableBalanceCents: number }) {
   const [state, formAction, pending] = useActionState(requestPayoutAction, INITIAL_STATE);
 
   const availableBaht = (availableBalanceCents / 100).toFixed(2);
+  const belowMinimum = availableBalanceCents < MINIMUM_PAYOUT_CENTS;
 
   if (state.success) {
     return (
@@ -23,7 +39,7 @@ export function RequestPayoutForm({ availableBalanceCents }: { availableBalanceC
     <form action={formAction} className="space-y-4">
       {/* Amount field */}
       <div>
-        <label htmlFor="amountBaht" className="block text-sm font-medium text-foreground mb-1.5">
+        <label htmlFor="amountBaht" className={labelClass}>
           Withdrawal amount (฿)
         </label>
         <div className="relative">
@@ -39,31 +55,71 @@ export function RequestPayoutForm({ availableBalanceCents }: { availableBalanceC
             step={1}
             placeholder="500"
             required
-            className="w-full rounded-lg border border-border bg-muted pl-8 pr-4 py-2.5 text-sm text-foreground placeholder-muted-foreground focus:border-success focus:outline-none focus:ring-1 focus:ring-success"
+            disabled={belowMinimum}
+            className="w-full rounded-lg border border-border bg-muted pl-8 pr-4 py-2.5 text-sm text-foreground placeholder-muted-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
           />
         </div>
-        <p className="mt-1 text-xs text-muted-foreground">Min ฿100 · Available: ฿{availableBaht}</p>
+        <p className="mt-1 text-xs text-muted-foreground">Minimum withdrawal: ฿100</p>
       </div>
 
-      {/* Bank info field */}
-      <div>
-        <label htmlFor="bankInfo" className="block text-sm font-medium text-foreground mb-1.5">
-          Bank account details
-        </label>
-        <textarea
-          id="bankInfo"
-          name="bankInfo"
-          rows={2}
-          placeholder="e.g. Kasikorn Bank — 123-4-56789-0 — John Doe"
-          required
-          minLength={5}
-          maxLength={200}
-          className="w-full rounded-lg border border-border bg-muted px-3 py-2.5 text-sm text-foreground placeholder-muted-foreground focus:border-success focus:outline-none focus:ring-1 focus:ring-success resize-none"
-        />
-        <p className="mt-1 text-xs text-muted-foreground">
-          Bank name, account number, and account holder name
-        </p>
+      {/* Bank account details — structured fields */}
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="sm:col-span-2">
+          <label htmlFor="bankName" className={labelClass}>
+            Bank
+          </label>
+          <select
+            id="bankName"
+            name="bankName"
+            required
+            disabled={belowMinimum}
+            className={inputClass}
+          >
+            <option value="">Select bank…</option>
+            {BANKS.map((bank) => (
+              <option key={bank} value={bank}>
+                {bank}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label htmlFor="accountNumber" className={labelClass}>
+            Account number
+          </label>
+          <input
+            id="accountNumber"
+            name="accountNumber"
+            type="text"
+            inputMode="numeric"
+            placeholder="123-4-56789-0"
+            required
+            disabled={belowMinimum}
+            className={`${inputClass} disabled:cursor-not-allowed disabled:opacity-50`}
+          />
+        </div>
+        <div>
+          <label htmlFor="accountHolder" className={labelClass}>
+            Account holder name
+          </label>
+          <input
+            id="accountHolder"
+            name="accountHolder"
+            type="text"
+            placeholder="John Doe"
+            required
+            disabled={belowMinimum}
+            className={`${inputClass} disabled:cursor-not-allowed disabled:opacity-50`}
+          />
+        </div>
       </div>
+
+      {belowMinimum && (
+        <div className="rounded-lg border border-warning/30 bg-warning/10 px-3 py-2.5 text-sm text-warning">
+          Your available balance (฿{availableBaht}) is below the ฿100 minimum — keep selling to
+          unlock withdrawals.
+        </div>
+      )}
 
       {/* Error feedback */}
       {state.error && (
@@ -74,7 +130,7 @@ export function RequestPayoutForm({ availableBalanceCents }: { availableBalanceC
 
       <button
         type="submit"
-        disabled={pending || availableBalanceCents < 10_000}
+        disabled={pending || belowMinimum}
         className="w-full rounded-lg bg-success px-4 py-2.5 text-sm font-semibold text-foreground hover:bg-success disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
       >
         {pending ? "Submitting…" : "Request withdrawal"}

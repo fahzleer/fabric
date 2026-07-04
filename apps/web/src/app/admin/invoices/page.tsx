@@ -1,5 +1,6 @@
 import { formatPrice } from "@/lib/price";
 import { connection } from "next/server";
+import { InvoiceActions } from "./_lib/invoice-actions";
 import { getInvoices } from "./_lib/queries";
 import type { InvoiceStatus } from "./_lib/types";
 
@@ -67,6 +68,9 @@ export default async function InvoicesPage() {
                 <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
                   Due Date
                 </th>
+                <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -90,6 +94,9 @@ export default async function InvoicesPage() {
                       month: "short",
                       day: "numeric",
                     })}
+                  </td>
+                  <td className="px-4 py-3">
+                    <InvoiceActions invoice={inv} />
                   </td>
                 </tr>
               ))}

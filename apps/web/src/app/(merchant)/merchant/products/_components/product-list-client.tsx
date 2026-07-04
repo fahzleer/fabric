@@ -20,6 +20,29 @@ const STATUS_BADGE: Record<string, string> = {
   archived: "bg-destructive/20 text-destructive border-destructive/40",
 };
 
+function stockBadgeClass(qty: number): string {
+  if (qty === 0) return "bg-destructive/20 text-destructive";
+  if (qty <= 5) return "bg-warning/20 text-warning";
+  return "bg-muted text-foreground";
+}
+
+function StockBySize({ stock }: { stock: Record<string, number> }) {
+  const entries = Object.entries(stock);
+  if (entries.length === 0) return <span className="text-xs text-muted-foreground">—</span>;
+  return (
+    <div className="flex flex-wrap gap-1">
+      {entries.map(([size, qty]) => (
+        <span
+          key={size}
+          className={`rounded px-1.5 py-0.5 text-xs font-mono ${stockBadgeClass(qty)}`}
+        >
+          {size}:{qty}
+        </span>
+      ))}
+    </div>
+  );
+}
+
 export function ProductListClient({ initialProducts }: { initialProducts: MerchantProduct[] }) {
   const [, setAllProducts] = useAtom(merchantAllProductsAtom);
 
@@ -52,7 +75,7 @@ function FilterView() {
   );
 
   const inputCls =
-    "rounded-lg border border-border bg-muted px-3 py-2 text-sm text-foreground placeholder-muted-foreground focus:border-success focus:outline-none focus:ring-1 focus:ring-success";
+    "rounded-lg border border-border bg-muted px-3 py-2 text-sm text-foreground placeholder-muted-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring";
 
   return (
     <div className="space-y-4">
@@ -117,6 +140,9 @@ function ProductTable({ products }: { products: MerchantProduct[] }) {
               Price
             </th>
             <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Stock by Size
+            </th>
+            <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Status
             </th>
             <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground" />
@@ -150,6 +176,9 @@ function ProductTable({ products }: { products: MerchantProduct[] }) {
                 </td>
                 <td className="px-5 py-4 font-medium text-foreground">
                   {formatPrice({ amount: p.price, currency: p.priceCurrency })}
+                </td>
+                <td className="px-5 py-4">
+                  <StockBySize stock={p.stock} />
                 </td>
                 <td className="px-5 py-4">
                   <span

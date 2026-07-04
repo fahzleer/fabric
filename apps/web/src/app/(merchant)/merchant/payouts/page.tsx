@@ -89,6 +89,7 @@ export default async function MerchantPayoutsPage() {
         <p className="mt-1 text-4xl font-bold text-success">
           {formatBaht(Math.max(0, availableCents))}
         </p>
+        <p className="mt-1 text-xs text-muted-foreground">Minimum withdrawal: ฿100</p>
         <div className="mt-4 flex flex-wrap gap-x-6 gap-y-1 text-sm text-muted-foreground">
           <span>
             Total revenue:{" "}

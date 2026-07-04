@@ -81,25 +81,27 @@ export default function IndonesiaPage() {
         <header className="mb-10">
           <div className="flex items-center gap-2 mb-3">
             <span className="text-2xl">🇮🇩</span>
-            <span className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+            <span className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
               Indonesia
             </span>
           </div>
-          <h1 className="text-4xl font-bold text-gray-900">Kaos Premium — Dikirim ke Indonesia</h1>
-          <p className="mt-4 text-lg text-gray-600 max-w-2xl">
+          <h1 className="font-display text-4xl text-foreground">
+            Kaos Premium — Dikirim ke Indonesia
+          </h1>
+          <p className="mt-4 text-lg text-muted-foreground max-w-2xl">
             Temukan koleksi kaos premium berkualitas tinggi dari Fabric, dikirim langsung ke seluruh
             Indonesia. Bayar aman dengan kartu Visa/Mastercard internasional atau USDC crypto.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             <Link
               href="/products"
-              className="rounded-lg bg-gray-900 px-6 py-3 text-sm font-medium text-white hover:bg-gray-700"
+              className="rounded-lg bg-primary px-6 py-3 text-sm font-medium text-primary-foreground hover:bg-primary/90"
             >
               Lihat Produk
             </Link>
             <Link
               href="/payment/card"
-              className="rounded-lg border border-gray-300 px-6 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              className="rounded-lg border border-border-strong px-6 py-3 text-sm font-medium text-muted-foreground hover:bg-muted"
             >
               Cara Pembayaran →
             </Link>
@@ -109,7 +111,7 @@ export default function IndonesiaPage() {
         <TrustBadges className="mb-10" />
 
         <section aria-labelledby="shipping-heading" className="mb-10">
-          <h2 id="shipping-heading" className="text-xl font-semibold text-gray-900 mb-4">
+          <h2 id="shipping-heading" className="text-xl font-semibold text-foreground mb-4">
             Pengiriman ke Indonesia
           </h2>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -118,33 +120,37 @@ export default function IndonesiaPage() {
               { label: "Pelacakan", value: "Tersedia di semua pesanan" },
               { label: "Pengembalian", value: "Garansi 7 hari" },
             ].map((item) => (
-              <div key={item.label} className="rounded-lg border border-gray-200 bg-white p-4">
-                <p className="text-xs text-gray-500 uppercase tracking-wide">{item.label}</p>
-                <p className="mt-1 font-semibold text-gray-900">{item.value}</p>
+              <div key={item.label} className="rounded-lg border border-border bg-card p-4">
+                <p className="text-xs text-muted-foreground uppercase tracking-wide">
+                  {item.label}
+                </p>
+                <p className="mt-1 font-semibold text-foreground">{item.value}</p>
               </div>
             ))}
           </div>
         </section>
 
         <section aria-labelledby="payment-heading" className="mb-10">
-          <h2 id="payment-heading" className="text-xl font-semibold text-gray-900 mb-4">
+          <h2 id="payment-heading" className="text-xl font-semibold text-foreground mb-4">
             Metode Pembayaran untuk Indonesia
           </h2>
           <ul className="space-y-3">
-            <li className="flex items-start gap-3 rounded-lg border border-gray-200 p-4">
+            <li className="flex items-start gap-3 rounded-lg border border-border p-4">
               <span className="text-success font-bold mt-0.5">✓</span>
               <div>
-                <p className="font-medium text-gray-900">Kartu Kredit / Debit (Visa, Mastercard)</p>
-                <p className="text-sm text-gray-500">
+                <p className="font-medium text-foreground">
+                  Kartu Kredit / Debit (Visa, Mastercard)
+                </p>
+                <p className="text-sm text-muted-foreground">
                   Diterima dari semua bank Indonesia — BCA, Mandiri, BRI, BNI, dan lainnya.
                 </p>
               </div>
             </li>
-            <li className="flex items-start gap-3 rounded-lg border border-gray-200 p-4">
+            <li className="flex items-start gap-3 rounded-lg border border-border p-4">
               <span className="text-success font-bold mt-0.5">✓</span>
               <div>
-                <p className="font-medium text-gray-900">USDC di Base Network</p>
-                <p className="text-sm text-gray-500">
+                <p className="font-medium text-foreground">USDC di Base Network</p>
+                <p className="text-sm text-muted-foreground">
                   Bayar dengan crypto — MetaMask atau Coinbase Wallet, tanpa rekening bank.
                 </p>
               </div>
@@ -153,7 +159,7 @@ export default function IndonesiaPage() {
         </section>
 
         <section aria-labelledby="why-heading" className="mb-10">
-          <h2 id="why-heading" className="text-xl font-semibold text-gray-900 mb-4">
+          <h2 id="why-heading" className="text-xl font-semibold text-foreground mb-4">
             Mengapa Memilih Fabric?
           </h2>
           <ul className="space-y-2">
@@ -164,7 +170,7 @@ export default function IndonesiaPage() {
               "Pembayaran aman dengan enkripsi TLS 1.3 dan standar PCI-DSS",
               "Konfirmasi pesanan otomatis via email setelah pembayaran berhasil",
             ].map((item) => (
-              <li key={item} className="flex items-start gap-2 text-sm text-gray-700">
+              <li key={item} className="flex items-start gap-2 text-sm text-muted-foreground">
                 <span className="text-success font-bold mt-0.5 flex-shrink-0">✓</span>
                 {item}
               </li>

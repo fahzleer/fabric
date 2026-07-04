@@ -101,51 +101,53 @@ export default function HowToOrderPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
 
-      <nav aria-label="breadcrumb" className="mb-6 text-sm text-gray-500">
+      <nav aria-label="breadcrumb" className="mb-6 text-sm text-muted-foreground">
         <ol className="flex items-center gap-1">
           <li>
-            <Link href="/" className="hover:text-gray-700">
+            <Link href="/" className="hover:text-muted-foreground">
               หน้าแรก
             </Link>
           </li>
           <li aria-hidden="true">/</li>
           <li>
-            <Link href="/guides" className="hover:text-gray-700">
+            <Link href="/guides" className="hover:text-muted-foreground">
               คู่มือ
             </Link>
           </li>
           <li aria-hidden="true">/</li>
-          <li className="text-gray-900 font-medium">วิธีสั่งซื้อ</li>
+          <li className="text-foreground font-medium">วิธีสั่งซื้อ</li>
         </ol>
       </nav>
 
       <header className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">วิธีสั่งซื้อสินค้าจาก Fabric</h1>
+        <h1 className="font-display text-3xl text-foreground">วิธีสั่งซื้อสินค้าจาก Fabric</h1>
         <FreshnessLabel updatedAt={UPDATED_AT} quarter={QUARTER} />
-        <p className="mt-3 text-gray-600 max-w-xl">ครั้งแรกก็ง่าย — ทำตาม 6 ขั้นตอนนี้ สั่งสินค้าได้ใน 5 นาที</p>
+        <p className="mt-3 text-muted-foreground max-w-xl">
+          ครั้งแรกก็ง่าย — ทำตาม 6 ขั้นตอนนี้ สั่งสินค้าได้ใน 5 นาที
+        </p>
       </header>
 
       <section aria-labelledby="steps-heading">
-        <h2 id="steps-heading" className="text-xl font-semibold text-gray-900 mb-6">
+        <h2 id="steps-heading" className="text-xl font-semibold text-foreground mb-6">
           ขั้นตอนการสั่งซื้อ
         </h2>
         <ol className="space-y-6">
           {STEPS.map((step, i) => (
             <li key={step.name} className="flex gap-4">
-              <span className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-900 text-white flex items-center justify-center text-sm font-semibold">
+              <span className="flex-shrink-0 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-semibold">
                 {i + 1}
               </span>
               <div>
-                <p className="font-medium text-gray-900">{step.name}</p>
-                <p className="mt-0.5 text-sm text-gray-600">{step.text}</p>
+                <p className="font-medium text-foreground">{step.name}</p>
+                <p className="mt-0.5 text-sm text-muted-foreground">{step.text}</p>
               </div>
             </li>
           ))}
         </ol>
       </section>
 
-      <div className="mt-8 rounded-xl bg-gray-50 border border-gray-200 p-5 space-y-2">
-        <p className="text-sm font-semibold text-gray-900">ชำระเงินได้ 3 วิธี</p>
+      <div className="mt-8 rounded-xl bg-muted border border-border p-5 space-y-2">
+        <p className="text-sm font-semibold text-foreground">ชำระเงินได้ 3 วิธี</p>
         <div className="flex flex-wrap gap-2">
           <Link
             href="/payment/promptpay"
@@ -155,7 +157,7 @@ export default function HowToOrderPage() {
           </Link>
           <Link
             href="/payment/card"
-            className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-800 hover:bg-gray-200"
+            className="rounded-full bg-secondary px-3 py-1 text-xs font-medium text-foreground hover:bg-secondary"
           >
             บัตรเครดิต / เดบิต
           </Link>
@@ -175,7 +177,7 @@ export default function HowToOrderPage() {
       <div className="mt-10">
         <Link
           href="/products"
-          className="rounded-lg bg-gray-900 px-6 py-3 text-sm font-medium text-white hover:bg-gray-700"
+          className="rounded-lg bg-primary px-6 py-3 text-sm font-medium text-primary-foreground hover:bg-primary/90"
         >
           เริ่มเลือกสินค้า
         </Link>

@@ -14,6 +14,11 @@ storybook-static/
 coverage/
 *.lcov
 
+# Playwright visual regression baselines — CI (Linux) generates the canonical
+# set; local baselines are platform-specific (font rendering) and would cause
+# false CI failures if committed.
+packages/ui/src/__screenshots__/
+
 # Playwright
 playwright-report/
 test-results/
@@ -49,3 +54,6 @@ project/project/
 firebase-debug.log
 ui-debug.log
 .vercel
+
+# Claude Code local worktrees / agent scratch
+.claude/worktrees/

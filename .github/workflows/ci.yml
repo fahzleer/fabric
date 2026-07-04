@@ -31,6 +31,9 @@ jobs:
       - name: Lint (Biome)
         run: bunx biome check .
 
+      - name: Design tokens (no raw gray-* / accent-NNN in apps/web)
+        run: bun run check:design
+
       - name: Typecheck
         run: bunx turbo typecheck
 

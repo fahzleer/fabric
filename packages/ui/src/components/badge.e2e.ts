@@ -31,4 +31,29 @@ test.describe("Badge", () => {
     await expect(badge).toBeVisible();
     await expect(badge).toHaveClass(/text-purple-600/);
   });
+
+  test("success variant renders", async ({ page, badgePOM }) => {
+    await badgePOM.goto("ui-badge--success");
+    await expect(page.getByText("Success", { exact: true })).toBeVisible();
+  });
+
+  test("warning variant renders", async ({ page, badgePOM }) => {
+    await badgePOM.goto("ui-badge--warning");
+    await expect(page.getByText("Warning", { exact: true })).toBeVisible();
+  });
+
+  test("info variant renders", async ({ page, badgePOM }) => {
+    await badgePOM.goto("ui-badge--info");
+    await expect(page.getByText("Info", { exact: true })).toBeVisible();
+  });
+
+  test("danger variant renders", async ({ page, badgePOM }) => {
+    await badgePOM.goto("ui-badge--danger");
+    await expect(page.getByText("Danger", { exact: true })).toBeVisible();
+  });
+
+  test("neutral variant renders", async ({ page, badgePOM }) => {
+    await badgePOM.goto("ui-badge--neutral");
+    await expect(page.getByText("Neutral", { exact: true })).toBeVisible();
+  });
 });

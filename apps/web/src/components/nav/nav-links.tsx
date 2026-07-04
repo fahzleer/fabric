@@ -34,7 +34,7 @@ function NavLink({
   href,
   children,
   className = "",
-  activeClassName = "text-gray-900 font-semibold",
+  activeClassName = "text-foreground font-semibold",
 }: NavLinkProps) {
   return (
     <Link href={href} className="text-sm font-medium transition-colors">
@@ -45,23 +45,35 @@ function NavLink({
   );
 }
 
+// Genre nav — direct links into the catalog filter, reusing the same genre
+// keys as GENRE_LABELS/getGenreOptions in products/_lib/product-helpers.ts.
+// Kept as a small local list (rather than importing from _lib) since this is
+// the site-wide header, outside the (shop)/products route's own module tree.
+const GENRE_NAV: ReadonlyArray<{ href: string; label: string }> = [
+  { href: "/products?genre=punk", label: "Punk" },
+  { href: "/products?genre=metal", label: "Metal" },
+  { href: "/products?genre=emo", label: "Emo" },
+  { href: "/products?genre=hardcore", label: "Hardcore" },
+  { href: "/products?genre=deathcore", label: "Deathcore" },
+];
+
 interface NavLinksProps {
-  isLoggedIn: boolean;
   isAdmin: boolean;
 }
 
-export function NavLinks({ isLoggedIn, isAdmin }: NavLinksProps) {
+export function NavLinks({ isAdmin }: NavLinksProps) {
   return (
-    <div className="flex items-center gap-6">
-      {isLoggedIn && (
+    <div className="hidden items-center gap-6 md:flex">
+      {GENRE_NAV.map((genre) => (
         <NavLink
-          href="/products"
-          className="text-gray-500 hover:text-gray-900"
-          activeClassName="text-gray-900 font-semibold"
+          key={genre.href}
+          href={genre.href}
+          className="text-muted-foreground hover:text-foreground"
+          activeClassName="text-brand font-semibold"
         >
-          Products
+          {genre.label}
         </NavLink>
-      )}
+      ))}
       {isAdmin && (
         <NavLink
           href="/admin"

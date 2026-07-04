@@ -1,12 +1,15 @@
 "use client";
 
 import { cartAtom } from "@/application/atoms/cart.atoms";
+import { SceneCanvas } from "@/components/3d/scene-canvas";
 import type { ShoppingCart } from "@/domain/cart/types";
 import { useDexieCartSync } from "@/infrastructure/dexie/use-dexie-cart-sync";
+import { EASE } from "@/lib/motion";
 import { syncCartToServer } from "@/lib/sync-cart";
 import { useAtomValue } from "@effect-atom/atom-react";
 import { type Maybe, None, Some, isSome } from "@fabric/types";
 import { Option } from "effect";
+import { AnimatePresence, motion } from "motion/react";
 import { parseAsStringLiteral, useQueryState } from "nuqs";
 import { AddressForm } from "./_components/address-form";
 import { OmiseCardForm } from "./_components/omise-card-form";
@@ -15,6 +18,13 @@ import { PromptPayForm } from "./_components/promptpay-form";
 import { X402PaymentForm } from "./_components/x402-payment-form";
 
 const STEPS = ["address", "summary", "payment"] as const;
+// Display-only Thai labels — the STEPS values themselves stay as the nuqs
+// query-param data model so bookmarked/shared checkout URLs keep working.
+const STEP_LABELS: Record<(typeof STEPS)[number], string> = {
+  address: "ที่อยู่จัดส่ง",
+  summary: "สรุปคำสั่งซื้อ",
+  payment: "ชำระเงิน",
+};
 const PAYMENT_METHODS = ["card", "promptpay", "crypto"] as const;
 
 export default function CheckoutPage() {
@@ -44,8 +54,16 @@ export default function CheckoutPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-muted">
       <div className="mx-auto max-w-2xl px-4 py-8 sm:px-6 lg:px-8">
+        {/* Decorative only — confined band above the form, never behind the
+            step indicator or the payment forms below it. */}
+        <SceneCanvas
+          variant="band"
+          className="mb-6 h-20 rounded-lg border border-border"
+          lazyMount
+        />
+
         {/* Step indicator */}
         <div className="mb-8 flex items-center justify-center gap-4">
           {STEPS.map((s, i) => (
@@ -56,75 +74,95 @@ export default function CheckoutPage() {
                     ? "bg-info text-white"
                     : STEPS.indexOf(step) > i
                       ? "bg-success text-white"
-                      : "bg-gray-200 text-gray-600"
+                      : "bg-secondary text-muted-foreground"
                 }`}
               >
                 {i + 1}
               </div>
-              <span className="text-sm font-medium text-gray-600 capitalize">{s}</span>
-              {i < STEPS.length - 1 && <div className="h-px w-8 bg-gray-300" />}
+              <span className="text-sm font-medium text-muted-foreground">{STEP_LABELS[s]}</span>
+              {i < STEPS.length - 1 && <div className="h-px w-8 bg-border-strong" />}
             </div>
           ))}
         </div>
 
-        {step === "address" && <AddressForm onNext={goToSummary} />}
-        {step === "summary" && (
-          <OrderSummary
-            cart={cart}
-            onNext={() => setStep("payment")}
-            onBack={() => setStep("address")}
-          />
-        )}
-        {step === "payment" && (
-          <div className="space-y-4">
-            {/* Payment method tabs — segmented control */}
-            <div className="bg-card rounded-lg border border-border p-1 flex gap-1">
-              <button
-                type="button"
-                onClick={() => setPaymentMethod("card")}
-                className={`flex-1 rounded-md py-2 text-sm font-medium transition-colors ${
-                  paymentMethod === "card"
-                    ? "bg-primary text-primary-foreground shadow-sm"
-                    : "text-muted-foreground hover:bg-muted"
-                }`}
-              >
-                Credit Card
-              </button>
-              <button
-                type="button"
-                onClick={() => setPaymentMethod("promptpay")}
-                className={`flex-1 rounded-md py-2 text-sm font-medium transition-colors ${
-                  paymentMethod === "promptpay"
-                    ? "bg-primary text-primary-foreground shadow-sm"
-                    : "text-muted-foreground hover:bg-muted"
-                }`}
-              >
-                PromptPay
-              </button>
-              <button
-                type="button"
-                onClick={() => setPaymentMethod("crypto")}
-                className={`flex-1 rounded-md py-2 text-sm font-medium transition-colors ${
-                  paymentMethod === "crypto"
-                    ? "bg-primary text-primary-foreground shadow-sm"
-                    : "text-muted-foreground hover:bg-muted"
-                }`}
-              >
-                USDC
-              </button>
-            </div>
+        {/* Step content — quick reassuring cross-fade + settle between steps.
+            mode="wait" avoids overlap so the checkout flow never feels busy;
+            kept fast (base duration) so it never delays a shopper. */}
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            key={step}
+            initial={{ opacity: 0, x: 8 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -8 }}
+            transition={{ duration: 0.25, ease: EASE.settle }}
+          >
+            {step === "address" && <AddressForm onNext={goToSummary} />}
+            {step === "summary" && (
+              <OrderSummary
+                cart={cart}
+                onNext={() => setStep("payment")}
+                onBack={() => setStep("address")}
+              />
+            )}
+            {step === "payment" && (
+              <div className="space-y-4">
+                {/* Payment method tabs — segmented control */}
+                <div className="bg-card rounded-lg border border-border p-1 flex gap-1">
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMethod("card")}
+                    className={`flex-1 rounded-md py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 ${
+                      paymentMethod === "card"
+                        ? "bg-primary text-primary-foreground shadow-sm"
+                        : "text-muted-foreground hover:bg-muted"
+                    }`}
+                  >
+                    บัตรเครดิต
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMethod("promptpay")}
+                    className={`flex-1 rounded-md py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 ${
+                      paymentMethod === "promptpay"
+                        ? "bg-primary text-primary-foreground shadow-sm"
+                        : "text-muted-foreground hover:bg-muted"
+                    }`}
+                  >
+                    PromptPay
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMethod("crypto")}
+                    className={`flex-1 rounded-md py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 ${
+                      paymentMethod === "crypto"
+                        ? "bg-primary text-primary-foreground shadow-sm"
+                        : "text-muted-foreground hover:bg-muted"
+                    }`}
+                  >
+                    USDC
+                  </button>
+                </div>
+                <p className="text-xs text-muted-foreground px-1">
+                  {paymentMethod === "card" && "ตัดเงินทันทีผ่านบัตรเครดิต/เดบิต Visa หรือ Mastercard"}
+                  {paymentMethod === "promptpay" &&
+                    "สแกน QR ผ่านแอปธนาคารของคุณ ยืนยันการชำระเงินภายในไม่กี่วินาที"}
+                  {paymentMethod === "crypto" &&
+                    "ชำระด้วย USDC บนเครือข่าย Base — ต้องมีกระเป๋าเงิน Web3 เช่น MetaMask"}
+                </p>
 
-            {paymentMethod === "card" && (
-              <OmiseCardForm cart={cart} onBack={() => setStep("summary")} />
+                {paymentMethod === "card" && (
+                  <OmiseCardForm cart={cart} onBack={() => setStep("summary")} />
+                )}
+                {paymentMethod === "promptpay" && (
+                  <PromptPayForm cart={cart} onBack={() => setStep("summary")} />
+                )}
+                {paymentMethod === "crypto" && (
+                  <X402PaymentForm cart={cart} onBack={() => setStep("summary")} />
+                )}
+              </div>
             )}
-            {paymentMethod === "promptpay" && (
-              <PromptPayForm cart={cart} onBack={() => setStep("summary")} />
-            )}
-            {paymentMethod === "crypto" && (
-              <X402PaymentForm cart={cart} onBack={() => setStep("summary")} />
-            )}
-          </div>
-        )}
+          </motion.div>
+        </AnimatePresence>
       </div>
     </div>
   );

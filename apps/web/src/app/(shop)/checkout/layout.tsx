@@ -1,15 +1,9 @@
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
 import { CheckoutWagmiProvider } from "./_components/wagmi-provider";
 
-export default async function CheckoutLayout({ children }: { children: ReactNode }) {
-  const session = await auth.api.getSession({ headers: await headers() });
-
-  if (session === null || session === undefined) {
-    redirect("/auth/login?callbackUrl=/checkout");
-  }
-
+// Guest checkout is supported — no session required to reach checkout.
+// cf-api resolves order ownership via session token when present, or via
+// the email captured in AddressForm otherwise.
+export default function CheckoutLayout({ children }: { children: ReactNode }) {
   return <CheckoutWagmiProvider>{children}</CheckoutWagmiProvider>;
 }

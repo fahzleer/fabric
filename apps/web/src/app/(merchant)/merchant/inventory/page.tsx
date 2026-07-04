@@ -174,35 +174,57 @@ export default async function MerchantInventoryPage() {
           </p>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-xl border border-border">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border bg-muted/60">
-                {["Product", "Status", "Price", "Stock by Size", "Total"].map((h) => (
-                  <th
-                    key={h}
-                    className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground"
-                  >
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border bg-card/30">
-              {products.map((p) => (
-                <MerchantProductRow key={p.id} p={p} />
-              ))}
-            </tbody>
-          </table>
-          <div className="border-t border-border bg-muted/40 px-4 py-3 flex items-center justify-between">
-            <span className="text-xs text-muted-foreground">
-              {products.length} product{products.length !== 1 ? "s" : ""}
+        <>
+          {/* Stock-health legend */}
+          <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
+            <span className="font-medium text-foreground">Stock badges:</span>
+            <span className="flex items-center gap-1.5">
+              <span className="rounded px-1.5 py-0.5 font-mono bg-muted text-foreground">M:12</span>
+              Healthy
             </span>
-            <span className="text-xs text-muted-foreground">
-              Total: <span className="font-semibold text-foreground">{totalStock} units</span>
+            <span className="flex items-center gap-1.5">
+              <span className="rounded px-1.5 py-0.5 font-mono bg-warning/20 text-warning">
+                M:3
+              </span>
+              Low (≤ 5)
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="rounded px-1.5 py-0.5 font-mono bg-destructive/20 text-destructive">
+                M:0
+              </span>
+              Out of stock
             </span>
           </div>
-        </div>
+          <div className="overflow-hidden rounded-xl border border-border">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border bg-muted/60">
+                  {["Product", "Status", "Price", "Stock by Size", "Total"].map((h) => (
+                    <th
+                      key={h}
+                      className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                    >
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border bg-card/30">
+                {products.map((p) => (
+                  <MerchantProductRow key={p.id} p={p} />
+                ))}
+              </tbody>
+            </table>
+            <div className="border-t border-border bg-muted/40 px-4 py-3 flex items-center justify-between">
+              <span className="text-xs text-muted-foreground">
+                {products.length} product{products.length !== 1 ? "s" : ""}
+              </span>
+              <span className="text-xs text-muted-foreground">
+                Total: <span className="font-semibold text-foreground">{totalStock} units</span>
+              </span>
+            </div>
+          </div>
+        </>
       )}
     </div>
   );

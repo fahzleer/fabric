@@ -118,7 +118,7 @@ export function MMMAnalyzer() {
             type="text"
             value={salesInput}
             onChange={(e) => setSalesInput(e.target.value)}
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm font-mono focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm font-mono focus-visible:border-ring focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
             placeholder="142000, 158000, 167000, ..."
           />
         </div>
@@ -138,7 +138,7 @@ export function MMMAnalyzer() {
                 type="text"
                 value={spendInputs[key]}
                 onChange={(e) => setSpendInputs((prev) => ({ ...prev, [key]: e.target.value }))}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm font-mono focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm font-mono focus-visible:border-ring focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                 placeholder="spend per month, ..."
               />
             </div>

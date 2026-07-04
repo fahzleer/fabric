@@ -1,8 +1,15 @@
+import { CopyIdButton } from "@/components/admin/copy-id-button";
+import { DashboardRealtimeRefresh } from "@/components/dashboard-realtime-refresh";
 import { createMerchantApi } from "@/lib/merchant-api";
 import type { PayoutRequest } from "@/lib/merchant-api";
 import { isErr, isOk, isSome } from "@fabric/types";
 import type { Metadata } from "next";
 import { connection } from "next/server";
+import {
+  BulkApproveBar,
+  PayoutSelectAllCheckbox,
+  PayoutSelectCheckbox,
+} from "./_lib/bulk-payout-actions";
 import { PayoutActionButtons } from "./_lib/payout-action-buttons";
 
 export const metadata: Metadata = {
@@ -51,11 +58,22 @@ export default async function AdminPayoutsPage() {
   }
   const api = maybeApi.value;
 
-  const result = await api.listAllPendingPayouts();
+  const [result, historyResult, merchantsResult] = await Promise.all([
+    api.listAllPendingPayouts(),
+    api.listPayoutHistory(20),
+    api.getAdminMerchants(),
+  ]);
   const payouts = isOk(result) ? result.value : [];
+  const history = isOk(historyResult)
+    ? historyResult.value.filter((p) => p.status !== "pending")
+    : [];
+  const storeNameByUserId = new Map(
+    (isOk(merchantsResult) ? merchantsResult.value : []).map((m) => [m.userId, m.storeName])
+  );
 
   return (
     <div className="space-y-6 max-w-5xl">
+      <DashboardRealtimeRefresh />
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
@@ -92,68 +110,138 @@ export default async function AdminPayoutsPage() {
 
       {/* Payout table */}
       {payouts.length > 0 && (
-        <div className="overflow-hidden rounded-xl border border-border">
-          <table className="w-full text-sm">
-            <thead className="border-b border-border bg-muted/60">
-              <tr>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  Submitted
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  Merchant ID
-                </th>
-                <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  Amount
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  Bank details
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  Status
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border bg-card/30">
-              {payouts.map((p) => (
-                <tr key={p.id} className="hover:bg-muted/2 transition-colors">
-                  <td className="px-4 py-4 text-foreground whitespace-nowrap text-xs">
-                    {formatDate(p.requestedAt)}
-                  </td>
-                  <td className="px-4 py-4">
-                    <code className="rounded bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">
-                      {p.userId.slice(0, 12)}…
-                    </code>
-                  </td>
-                  <td className="px-4 py-4 text-right font-semibold text-foreground whitespace-nowrap">
-                    {formatBaht(p.amountCents)}
-                  </td>
-                  <td className="px-4 py-4 text-muted-foreground text-xs max-w-xs">
-                    <span className="block truncate" title={p.bankInfo}>
-                      {p.bankInfo}
-                    </span>
-                  </td>
-                  <td className="px-4 py-4">
-                    <StatusBadge status={p.status} />
-                  </td>
-                  <td className="px-4 py-4">
-                    <PayoutActionButtons requestId={p.id} ownerUserId={p.userId} />
-                  </td>
+        <div className="space-y-3">
+          <BulkApproveBar />
+          <div className="overflow-hidden rounded-xl border border-border">
+            <table className="w-full text-sm">
+              <thead className="border-b border-border bg-muted/60">
+                <tr>
+                  <th className="px-4 py-3 w-8">
+                    <PayoutSelectAllCheckbox
+                      payouts={payouts.map((p) => ({ id: p.id, userId: p.userId }))}
+                    />
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    Submitted
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    Merchant
+                  </th>
+                  <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    Amount
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    Bank details
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    Status
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    Actions
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-border bg-card/30">
+                {payouts.map((p) => (
+                  <tr key={p.id} className="hover:bg-muted/2 transition-colors">
+                    <td className="px-4 py-4">
+                      <PayoutSelectCheckbox requestId={p.id} ownerUserId={p.userId} />
+                    </td>
+                    <td className="px-4 py-4 text-foreground whitespace-nowrap text-xs">
+                      {formatDate(p.requestedAt)}
+                    </td>
+                    <td className="px-4 py-4">
+                      <p className="font-medium text-foreground text-xs">
+                        {storeNameByUserId.get(p.userId) ?? "Unknown store"}
+                      </p>
+                      <div className="mt-0.5 flex items-center gap-1">
+                        <code className="rounded bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">
+                          {p.userId.slice(0, 12)}…
+                        </code>
+                        <CopyIdButton value={p.userId} />
+                      </div>
+                    </td>
+                    <td className="px-4 py-4 text-right font-semibold text-foreground whitespace-nowrap">
+                      {formatBaht(p.amountCents)}
+                    </td>
+                    <td className="px-4 py-4 text-muted-foreground text-xs max-w-xs">
+                      <span className="block truncate" title={p.bankInfo}>
+                        {p.bankInfo}
+                      </span>
+                    </td>
+                    <td className="px-4 py-4">
+                      <StatusBadge status={p.status} />
+                    </td>
+                    <td className="px-4 py-4">
+                      <PayoutActionButtons requestId={p.id} ownerUserId={p.userId} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
 
-          {/* Summary footer */}
-          <div className="border-t border-border bg-muted/40 px-4 py-3 flex items-center justify-between">
-            <span className="text-xs text-muted-foreground">
-              {payouts.length} pending request{payouts.length !== 1 ? "s" : ""}
-            </span>
-            <span className="text-xs font-medium text-foreground">
-              Total: {formatBaht(payouts.reduce((sum, p) => sum + p.amountCents, 0))}
-            </span>
+            {/* Summary footer */}
+            <div className="border-t border-border bg-muted/40 px-4 py-3 flex items-center justify-between">
+              <span className="text-xs text-muted-foreground">
+                {payouts.length} pending request{payouts.length !== 1 ? "s" : ""}
+              </span>
+              <span className="text-xs font-medium text-foreground">
+                Total: {formatBaht(payouts.reduce((sum, p) => sum + p.amountCents, 0))}
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Recent history — approved/rejected reasons live here, no longer lost
+          once a request leaves the pending queue. */}
+      {history.length > 0 && (
+        <div>
+          <h2 className="text-sm font-semibold text-foreground mb-3">Recent history</h2>
+          <div className="overflow-hidden rounded-xl border border-border">
+            <table className="w-full text-sm">
+              <thead className="border-b border-border bg-muted/60">
+                <tr>
+                  {["Resolved", "Merchant", "Amount", "Status", "Note"].map((h) => (
+                    <th
+                      key={h}
+                      className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                    >
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border bg-card/30">
+                {history.map((p) => (
+                  <tr key={p.id} className="hover:bg-muted/2 transition-colors">
+                    <td className="px-4 py-3 text-foreground whitespace-nowrap text-xs">
+                      {p.resolvedAt ? formatDate(p.resolvedAt) : "—"}
+                    </td>
+                    <td className="px-4 py-3">
+                      <p className="font-medium text-foreground text-xs">
+                        {storeNameByUserId.get(p.userId) ?? "Unknown store"}
+                      </p>
+                      <div className="mt-0.5 flex items-center gap-1">
+                        <code className="rounded bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">
+                          {p.userId.slice(0, 12)}…
+                        </code>
+                        <CopyIdButton value={p.userId} />
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 font-semibold text-foreground whitespace-nowrap">
+                      {formatBaht(p.amountCents)}
+                    </td>
+                    <td className="px-4 py-3">
+                      <StatusBadge status={p.status} />
+                    </td>
+                    <td className="px-4 py-3 text-muted-foreground text-xs max-w-xs truncate">
+                      {p.adminNote ?? "—"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       )}

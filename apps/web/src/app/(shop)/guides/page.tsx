@@ -56,21 +56,21 @@ export default function GuidesPage() {
           { name: "คู่มือและวิธีใช้งาน", href: "/guides" },
         ]}
       />
-      <nav aria-label="breadcrumb" className="mb-6 text-sm text-gray-500">
+      <nav aria-label="breadcrumb" className="mb-6 text-sm text-muted-foreground">
         <ol className="flex items-center gap-1">
           <li>
-            <Link href="/" className="hover:text-gray-700">
+            <Link href="/" className="hover:text-muted-foreground">
               หน้าแรก
             </Link>
           </li>
           <li aria-hidden="true">/</li>
-          <li className="text-gray-900 font-medium">คู่มือและวิธีใช้งาน</li>
+          <li className="text-foreground font-medium">คู่มือและวิธีใช้งาน</li>
         </ol>
       </nav>
 
       <header className="mb-10">
-        <h1 className="text-3xl font-bold text-gray-900">คู่มือและวิธีใช้งาน</h1>
-        <p className="mt-2 text-gray-600">ทุกอย่างที่คุณต้องรู้เกี่ยวกับการซื้อสินค้าที่ Fabric</p>
+        <h1 className="font-display text-3xl text-foreground">คู่มือและวิธีใช้งาน</h1>
+        <p className="mt-2 text-muted-foreground">ทุกอย่างที่คุณต้องรู้เกี่ยวกับการซื้อสินค้าที่ Fabric</p>
       </header>
 
       <TrustBadges className="mb-10" />
@@ -80,13 +80,13 @@ export default function GuidesPage() {
           <li key={guide.slug}>
             <Link
               href={guide.slug}
-              className="flex items-start justify-between rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md"
+              className="flex items-start justify-between rounded-xl border border-border bg-card p-5 shadow-sm transition-shadow hover:shadow-md"
             >
               <div>
-                <p className="font-semibold text-gray-900">{guide.title}</p>
-                <p className="mt-1 text-sm text-gray-500">{guide.description}</p>
+                <p className="font-semibold text-foreground">{guide.title}</p>
+                <p className="mt-1 text-sm text-muted-foreground">{guide.description}</p>
               </div>
-              <span className="ml-4 flex-shrink-0 text-xs text-gray-400">{guide.time}</span>
+              <span className="ml-4 flex-shrink-0 text-xs text-faint">{guide.time}</span>
             </Link>
           </li>
         ))}
@@ -114,20 +114,22 @@ export default function GuidesPage() {
         ]}
       />
 
-      <div className="mt-12 rounded-xl bg-gray-50 border border-gray-200 p-6">
-        <h2 className="font-semibold text-gray-900">ยังหาคำตอบไม่เจอ?</h2>
-        <p className="mt-1 text-sm text-gray-600">ติดต่อทีมงาน Fabric ผ่านทาง LINE OA หรืออีเมล</p>
+      <div className="mt-12 rounded-xl bg-muted border border-border p-6">
+        <h2 className="font-semibold text-foreground">ยังหาคำตอบไม่เจอ?</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          ติดต่อทีมงาน Fabric ผ่านทาง LINE OA หรืออีเมล
+        </p>
         <Link
           href="/auth/register"
-          className="mt-4 inline-block rounded-lg bg-gray-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-gray-700"
+          className="mt-4 inline-block rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90"
         >
           สร้างบัญชีและเริ่มช้อป
         </Link>
       </div>
 
-      <div className="mt-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-t border-gray-200 pt-8">
+      <div className="mt-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-t border-border pt-8">
         <div>
-          <h2 className="text-lg font-semibold text-gray-900">คู่มือที่อัปเดตล่าสุด</h2>
+          <h2 className="text-lg font-semibold text-foreground">คู่มือที่อัปเดตล่าสุด</h2>
           <FreshnessLabel updatedAt="2026-06-23" quarter="Q2 2026" />
         </div>
       </div>

@@ -86,6 +86,21 @@ export function registerPayoutRoutes(
     return c.json({ payouts: result.value });
   });
 
+  app.get("/admin/payouts/history", requireAuth(verifier), async (c) => {
+    if (!requireAdmin(c)) {
+      return c.json({ error: "Forbidden: admin only" }, 403);
+    }
+
+    const limit = Math.min(200, Math.max(1, Number(c.req.query("limit") ?? "50")));
+    const result = await payoutService.listRecent(limit);
+
+    if (result._tag === "Err") {
+      return c.json({ error: result.error.message, _tag: result.error._tag }, 500);
+    }
+
+    return c.json({ payouts: result.value });
+  });
+
   app.patch("/admin/payouts/:requestId/approve", requireAuth(verifier), async (c) => {
     if (!requireAdmin(c)) {
       return c.json({ error: "Forbidden: admin only" }, 403);

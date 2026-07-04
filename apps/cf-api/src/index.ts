@@ -21,6 +21,7 @@ import { registerPayoutRoutes } from "./features/payout/payout.handlers";
 import { PayoutService } from "./features/payout/payout.service";
 import { registerProductRoutes } from "./features/product/product.handlers";
 import { ProductService } from "./features/product/product.service";
+import { registerRealtimeRoutes } from "./features/realtime/realtime.handlers";
 import { registerStoreRoutes } from "./features/store/store.handlers";
 import { PasetoVerifierService } from "./infrastructure/auth/paseto-verifier.service";
 import { StripeBillingAdapter } from "./infrastructure/billing/stripe-billing.adapter";
@@ -190,6 +191,7 @@ async function startBoot() {
   registerInternalRoutes(app, config.pasetoKey, config.internalSecret);
   registerStoreRoutes(app, merchantRepo, productRepo);
   registerPayoutRoutes(app, payoutService, verifier);
+  registerRealtimeRoutes(app, db, verifier);
   registerMlRoutes(app);
   app.get("/api/health", (c) =>
     c.json({ status: "ok", service: "cf-api", regions: DEPLOY_REGIONS })

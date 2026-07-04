@@ -48,6 +48,10 @@ export class PayoutService {
     return this.payoutRepo.listAllPending();
   }
 
+  async listRecent(limit: number): Promise<Result<PayoutRequest[], PayoutError>> {
+    return this.payoutRepo.listRecent(limit);
+  }
+
   async approvePayout(requestId: string, ownerUserId: string): Promise<Result<void, PayoutError>> {
     return this.payoutRepo.approvePayout(requestId, ownerUserId);
   }

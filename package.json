@@ -31,9 +31,10 @@
     "emulator:bg": "firebase emulators:start --only database,storage",
     "build": "turbo build",
     "lint": "biome lint .",
-    "lint:all": "turbo lint",
+    "lint:all": "biome lint .",
     "format": "biome format --write .",
     "check": "biome check --write .",
+    "check:design": "bun run scripts/design/check-accents.ts && bun run scripts/design/check-grays.ts",
     "typecheck": "turbo typecheck",
     "test": "turbo test",
     "prepare": "husky"

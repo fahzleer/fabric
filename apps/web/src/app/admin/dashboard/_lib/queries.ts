@@ -8,8 +8,18 @@ export type DashboardStats = {
   totalOrders: number;
   totalRevenueCents: number;
   currency: string;
-  activeUsers30d: number;
-  churnRatePct: number;
+  /**
+   * All-time confirmed-or-later order count — cf-api's `getAdminStats()`
+   * (order.service.ts) computes this from an unbounded `findAll`, no date
+   * filter. Previously exposed here as `activeUsers30d` (fed from the same
+   * `confirmedOrders` field but labeled/rendered as a 30-day unique-buyer
+   * count on the dashboard) — that was wrong on two counts: it isn't a
+   * buyer count, and it isn't scoped to 30 days. Renamed to reflect what
+   * the number actually is; a real unique-buyers-in-30-days metric would
+   * need a new backend query, out of scope here.
+   */
+  confirmedOrders: number;
+  pendingOrders: number;
 };
 
 async function issueAdminToken(userId: string, email: string): Promise<string | null> {
@@ -53,8 +63,8 @@ export async function getDashboardStats(): Promise<DashboardStats> {
       totalOrders: data.totalOrders ?? 0,
       totalRevenueCents: data.totalRevenueCents ?? 0,
       currency: data.currency ?? "THB",
-      activeUsers30d: data.confirmedOrders ?? 0,
-      churnRatePct: 0,
+      confirmedOrders: data.confirmedOrders ?? 0,
+      pendingOrders: data.pendingOrders ?? 0,
     };
   } catch {
     return fallback();
@@ -66,7 +76,7 @@ function fallback(): DashboardStats {
     totalOrders: 0,
     totalRevenueCents: 0,
     currency: "THB",
-    activeUsers30d: 0,
-    churnRatePct: 0,
+    confirmedOrders: 0,
+    pendingOrders: 0,
   };
 }

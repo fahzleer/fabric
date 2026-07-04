@@ -136,7 +136,7 @@ export default async function MerchantOnboardingPage({
               minLength={2}
               maxLength={80}
               placeholder="e.g. Bangkok Threads"
-              className="mt-1.5 w-full rounded-lg border border-border bg-muted px-3 py-2.5 text-sm text-foreground placeholder-muted-foreground outline-none focus:border-success/60 focus:ring-1 focus:ring-success/30"
+              className="mt-1.5 w-full rounded-lg border border-border bg-muted px-3 py-2.5 text-sm text-foreground placeholder-muted-foreground focus-visible:outline-none focus-visible:border-ring focus-visible:ring-1 focus-visible:ring-ring/40"
             />
             <p className="mt-1 text-xs text-muted-foreground">
               This will be displayed to customers and used in your store URL.

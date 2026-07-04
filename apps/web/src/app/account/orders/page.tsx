@@ -27,12 +27,12 @@ type OrdersPage = {
 };
 
 const STATUS_LABELS: Record<string, { label: string; tone: StatusTone }> = {
-  pending: { label: "Payment Pending", tone: "warning" },
-  confirmed: { label: "Confirmed", tone: "success" },
-  processing: { label: "Processing", tone: "info" },
-  shipped: { label: "Shipped", tone: "info" },
-  delivered: { label: "Delivered", tone: "success" },
-  cancelled: { label: "Cancelled", tone: "danger" },
+  pending: { label: "รอชำระเงิน", tone: "warning" },
+  confirmed: { label: "ยืนยันแล้ว", tone: "success" },
+  processing: { label: "กำลังจัดเตรียม", tone: "info" },
+  shipped: { label: "จัดส่งแล้ว", tone: "info" },
+  delivered: { label: "ส่งถึงแล้ว", tone: "success" },
+  cancelled: { label: "ยกเลิก", tone: "danger" },
 };
 
 async function getAuthToken(): Promise<string | null> {
@@ -83,23 +83,23 @@ export default async function OrdersPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-muted">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-6 flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-gray-900">My Orders</h1>
+          <h1 className="text-2xl font-bold text-foreground">คำสั่งซื้อของฉัน</h1>
           <Link href="/products" className="text-sm text-info hover:underline">
-            ← Continue Shopping
+            ← เลือกซื้อสินค้าต่อ
           </Link>
         </div>
 
         {orders.length === 0 ? (
-          <div className="rounded-lg border border-gray-200 bg-white p-12 text-center">
-            <p className="text-gray-500">You have no orders yet.</p>
+          <div className="rounded-lg border border-border bg-card p-12 text-center">
+            <p className="text-muted-foreground">คุณยังไม่มีคำสั่งซื้อ</p>
             <Link
               href="/products"
               className="mt-4 inline-block rounded-lg bg-info px-4 py-2 text-sm font-medium text-white hover:bg-info/90"
             >
-              Browse Products
+              เลือกซื้อสินค้า
             </Link>
           </div>
         ) : (
@@ -121,19 +121,19 @@ export default async function OrdersPage() {
                 <Link
                   key={orderId}
                   href={`/order/${orderId}/confirmation`}
-                  className="block rounded-lg border border-gray-200 bg-white p-5 hover:border-info/80 hover:shadow-sm transition-all"
+                  className="block rounded-lg border border-border bg-card p-5 hover:border-info/80 hover:shadow-sm transition-all"
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div>
-                      <p className="text-xs text-gray-400 mb-1">{date}</p>
-                      <p className="text-sm font-mono text-gray-600">#{orderId.slice(0, 8)}…</p>
-                      <p className="mt-2 text-sm text-gray-500">
-                        {order.itemCount} item{order.itemCount !== 1 ? "s" : ""}
+                      <p className="text-xs text-faint mb-1">{date}</p>
+                      <p className="text-sm font-mono text-muted-foreground">
+                        #{orderId.slice(0, 8)}…
                       </p>
+                      <p className="mt-2 text-sm text-muted-foreground">{order.itemCount} รายการ</p>
                     </div>
                     <div className="text-right shrink-0">
                       <Badge variant={status.tone}>{status.label}</Badge>
-                      <p className="mt-2 text-base font-semibold text-gray-900">
+                      <p className="mt-2 text-base font-semibold text-foreground">
                         {formatPrice({ amount: totalAmount, currency: order.currency ?? "THB" })}
                       </p>
                     </div>

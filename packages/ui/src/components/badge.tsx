@@ -3,7 +3,7 @@ import type * as React from "react";
 import { cn } from "../lib/utils";
 
 const badgeVariants = cva(
-  "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+  "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
   {
     variants: {
       variant: {
@@ -16,7 +16,7 @@ const badgeVariants = cva(
         // Soft status tones — the canonical home for status pills. Use these
         // instead of ad-hoc bg-{green,amber,blue,red}-{50,100} (see DESIGN.md §7.2).
         success: "border-success/30 bg-success-subtle text-success",
-        warning: "border-warning/40 bg-warning-subtle text-warning",
+        warning: "border-warning/40 bg-warning-subtle text-warning-text",
         info: "border-info/30 bg-info-subtle text-info",
         danger: "border-destructive/30 bg-destructive-subtle text-destructive",
         neutral: "border-border bg-muted text-muted-foreground",

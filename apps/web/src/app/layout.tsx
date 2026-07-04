@@ -2,7 +2,7 @@ import { AtomRegistryProvider } from "@/components/providers/atom-registry-provi
 import { OrganicTracker } from "@/components/providers/organic-tracker";
 import { ToastListener } from "@/components/ui/toast-listener";
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Kanit } from "next/font/google";
 import Script from "next/script";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import type React from "react";
@@ -29,6 +29,17 @@ const geistMono = Geist_Mono({
   display: "swap",
   preload: false,
   adjustFontFallback: true,
+});
+// Kanit (Cadson Demak) — the display font, replaces Playfair Display. One
+// family natively covers Thai + Latin at every weight, so headings mixing
+// Thai and English (e.g. genre tags, product names) never mismatch weight
+// the way a Latin-only serif paired with a separate Thai face would.
+const kanit = Kanit({
+  variable: "--font-kanit",
+  subsets: ["latin", "thai"],
+  weight: ["400", "500", "700", "900"],
+  display: "swap",
+  preload: true,
 });
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://fabric.cool";
@@ -96,8 +107,8 @@ export default function RootLayout({
   };
 
   return (
-    <html lang="th">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+    <html lang="th" className="dark">
+      <body className={`${geistSans.variable} ${geistMono.variable} ${kanit.variable} antialiased`}>
         <script
           type="application/ld+json"
           // biome-ignore lint/security/noDangerouslySetInnerHtml: controlled server-side JSON-LD, no user input

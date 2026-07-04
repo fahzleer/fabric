@@ -67,6 +67,34 @@ describe("Button", () => {
     expect(btn.className).toContain("w-full");
   });
 
+  it("shows a spinner and disables itself when loading", () => {
+    render(<Button loading>Save</Button>);
+    const btn = screen.getByRole("button", { name: /Save/ });
+    expect((btn as HTMLButtonElement).disabled).toBe(true);
+    expect(btn.getAttribute("aria-busy")).toBe("true");
+    expect(btn.querySelector("svg")).not.toBeNull();
+  });
+
+  it("does not call onClick while loading", () => {
+    const onClick = vi.fn();
+    render(
+      <Button loading onClick={onClick}>
+        Save
+      </Button>
+    );
+    fireEvent.click(screen.getByRole("button", { name: /Save/ }));
+    expect(onClick).not.toHaveBeenCalled();
+  });
+
+  it("renders new functional variants without error", () => {
+    const variants = ["success", "info", "warning"] as const;
+    for (const variant of variants) {
+      const { unmount } = render(<Button variant={variant}>{variant}</Button>);
+      expect(screen.getByRole("button", { name: variant })).not.toBeNull();
+      unmount();
+    }
+  });
+
   it("has correct displayName", () => {
     expect(Button.displayName).toBe("Button");
   });

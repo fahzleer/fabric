@@ -1,9 +1,16 @@
+import { CountUpNumber } from "@/components/motion/count-up-number";
+import { RevealGroup, RevealItem } from "@/components/motion/reveal";
 import { createMerchantApi } from "@/lib/merchant-api";
-import { isErr, isSome } from "@fabric/types";
+import type { MerchantOrderSummary } from "@/lib/merchant-api";
+import { isErr, isOk, isSome } from "@fabric/types";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
+import { DateFilteredStats } from "./_components/date-filtered-stats";
 import { SalesInsightCard } from "./_components/sales-insight-card";
+
+const ORDER_WINDOW_PAGES = 3;
+const ORDER_WINDOW_PER_PAGE = 50;
 
 export const metadata: Metadata = {
   title: "Analytics — Merchant Portal",
@@ -24,12 +31,14 @@ function formatNumber(n: number): string {
 
 function StatCard({
   label,
-  value,
+  rawValue,
+  formatter,
   sub,
   accent = "emerald",
 }: {
   label: string;
-  value: string;
+  rawValue: number;
+  formatter?: (n: number) => string;
   sub?: string;
   accent?: "emerald" | "blue" | "purple" | "amber";
 }) {
@@ -40,13 +49,15 @@ function StatCard({
     amber: "text-warning",
   };
   return (
-    <div className="rounded-xl border border-border bg-muted/50 p-6">
+    <RevealItem className="rounded-xl border border-border bg-muted/50 p-6">
       <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
         {label}
       </p>
-      <p className={`mt-2 text-3xl font-bold ${colours[accent]}`}>{value}</p>
+      <p className={`mt-2 text-3xl font-bold ${colours[accent]}`}>
+        <CountUpNumber value={rawValue} formatter={formatter} />
+      </p>
       {sub && <p className="mt-1 text-xs text-muted-foreground">{sub}</p>}
-    </div>
+    </RevealItem>
   );
 }
 
@@ -79,6 +90,14 @@ export default async function MerchantAnalyticsPage() {
 
   const result = await api.getAnalytics();
 
+  const recentOrders: MerchantOrderSummary[] = [];
+  for (let page = 1; page <= ORDER_WINDOW_PAGES; page++) {
+    const ordersResult = await api.getMerchantOrders(page, ORDER_WINDOW_PER_PAGE);
+    if (!isOk(ordersResult)) break;
+    recentOrders.push(...ordersResult.value.items);
+    if (ordersResult.value.items.length < ORDER_WINDOW_PER_PAGE) break;
+  }
+
   if (isErr(result)) {
     if (result.error.startsWith("[MerchantNotFoundError]")) redirect("/merchant/onboarding");
     return (
@@ -108,26 +127,29 @@ export default async function MerchantAnalyticsPage() {
       </div>
 
       {/* Stat cards */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <RevealGroup className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           label="Total Revenue"
-          value={formatRevenue(totalRevenueCents)}
+          rawValue={totalRevenueCents}
+          formatter={formatRevenue}
           sub="All-time completed orders"
           accent="emerald"
         />
         <StatCard
           label="Completed Orders"
-          value={formatNumber(completedOrderCount)}
+          rawValue={completedOrderCount}
+          formatter={formatNumber}
           sub="Orders successfully confirmed"
           accent="blue"
         />
         <StatCard
           label="Active Products"
-          value={formatNumber(productCount)}
+          rawValue={productCount}
+          formatter={formatNumber}
           sub="Listed in your store"
           accent="purple"
         />
-        <div className="rounded-xl border border-border bg-muted/50 p-6">
+        <RevealItem className="rounded-xl border border-border bg-muted/50 p-6">
           <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             Plan
           </p>
@@ -143,8 +165,12 @@ export default async function MerchantAnalyticsPage() {
               ? formatRevenue(Math.round(totalRevenueCents / completedOrderCount))
               : "—"}
           </p>
-        </div>
-      </div>
+        </RevealItem>
+      </RevealGroup>
+
+      {recentOrders.length > 0 && (
+        <DateFilteredStats orders={recentOrders} windowSize={recentOrders.length} />
+      )}
 
       {/* AI sales insight (Typhoon) */}
       <SalesInsightCard hasData={completedOrderCount > 0} />

@@ -1,5 +1,6 @@
 "use client";
 
+import { RevealGroup, RevealItem } from "@/components/motion/reveal";
 import { useMemo } from "react";
 import { type ProductListItem, isBestSeller } from "../_lib/product-helpers";
 import { ProductCard } from "./product-card";
@@ -17,6 +18,13 @@ function applyFilters(
 
   if (filters.priceRanges.length > 0) {
     result = result.filter((p) => filters.priceRanges.includes(p.priceRange));
+  }
+
+  if (filters.query.trim().length > 0) {
+    const q = filters.query.trim().toLowerCase();
+    result = result.filter(
+      (p) => p.name.value.toLowerCase().includes(q) || p.tagline.toLowerCase().includes(q)
+    );
   }
 
   switch (filters.sort) {
@@ -56,7 +64,7 @@ export function ProductGrid({ products, filters }: ProductGridProps) {
 
   if (filtered.length === 0) {
     return (
-      <div className="rounded-xl border border-gray-200 bg-white p-8 text-center text-gray-500">
+      <div className="rounded-xl border border-border bg-card p-8 text-center text-muted-foreground">
         ไม่พบสินค้าที่ตรงกับตัวกรอง ลองปรับตัวกรองใหม่
       </div>
     );
@@ -64,16 +72,18 @@ export function ProductGrid({ products, filters }: ProductGridProps) {
 
   return (
     <div>
-      <p className="mb-3 text-sm text-gray-500">แสดง {filtered.length} รายการ</p>
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+      <p className="mb-3 text-sm text-muted-foreground">แสดง {filtered.length} รายการ</p>
+      {/* key on the filter signature so re-filtering replays the staggered reveal */}
+      <RevealGroup
+        key={`${filtered.length}-${filters.sort}`}
+        className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
+      >
         {filtered.map((product) => (
-          <ProductCard
-            key={product.id.value}
-            product={product}
-            badge={getBadge(product, products)}
-          />
+          <RevealItem key={product.id.value}>
+            <ProductCard product={product} badge={getBadge(product, products)} />
+          </RevealItem>
         ))}
-      </div>
+      </RevealGroup>
     </div>
   );
 }
