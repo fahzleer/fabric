@@ -1,9 +1,12 @@
 import { ClearCartOnMount } from "@/app/(shop)/order/[id]/confirmation/_components/clear-cart-on-mount";
+import { CountUpNumber } from "@/components/motion/count-up-number";
+import { RevealGroup, RevealItem } from "@/components/motion/reveal";
 import { type MerchantStatus, createMerchantApi } from "@/lib/merchant-api";
 import { isOk, isSome } from "@fabric/types";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { connection } from "next/server";
+import { AnimatedCapacityBar } from "./_components/animated-capacity-bar";
 
 export const metadata: Metadata = {
   title: "Dashboard — Merchant Portal",
@@ -47,19 +50,6 @@ function NotOnboardedView() {
   );
 }
 
-function CapacityBar({ capacityPct }: { capacityPct: number }) {
-  const barColour =
-    capacityPct >= 90 ? "bg-destructive" : capacityPct >= 70 ? "bg-warning" : "bg-success";
-  return (
-    <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-muted">
-      <div
-        className={`h-full rounded-full ${barColour}`}
-        style={{ width: `${Math.min(100, capacityPct)}%` }}
-      />
-    </div>
-  );
-}
-
 function StatsCards({
   billing,
   planKey,
@@ -72,8 +62,8 @@ function StatsCards({
   maxProducts: string;
 }) {
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-      <div className="rounded-xl border border-border bg-muted/50 px-6 py-5">
+    <RevealGroup className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <RevealItem className="rounded-xl border border-border bg-muted/50 px-6 py-5">
         <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
           Current Plan
         </p>
@@ -89,18 +79,20 @@ function StatsCards({
         >
           {statusKey}
         </p>
-      </div>
-      <div className="rounded-xl border border-border bg-muted/50 px-6 py-5">
+      </RevealItem>
+      <RevealItem className="rounded-xl border border-border bg-muted/50 px-6 py-5">
         <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
           Products
         </p>
-        <p className="mt-2 text-3xl font-bold text-foreground">{billing.productCount ?? 0}</p>
+        <p className="mt-2 text-3xl font-bold text-foreground">
+          <CountUpNumber value={billing.productCount ?? 0} />
+        </p>
         <p className="mt-1 text-xs text-muted-foreground">of {maxProducts} on your plan</p>
         {isSome(billing.productCapacityUsed) && (
-          <CapacityBar capacityPct={billing.productCapacityUsed.value} />
+          <AnimatedCapacityBar capacityPct={billing.productCapacityUsed.value} />
         )}
-      </div>
-      <div className="rounded-xl border border-border bg-muted/50 px-6 py-5">
+      </RevealItem>
+      <RevealItem className="rounded-xl border border-border bg-muted/50 px-6 py-5">
         <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
           Quick Actions
         </p>
@@ -120,8 +112,8 @@ function StatsCards({
             </Link>
           )}
         </div>
-      </div>
-    </div>
+      </RevealItem>
+    </RevealGroup>
   );
 }
 

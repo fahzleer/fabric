@@ -18,7 +18,9 @@ export async function requestPayoutAction(
   const api = maybeApi.value;
 
   const amountBaht = Number(formData.get("amountBaht"));
-  const bankInfo = String(formData.get("bankInfo") ?? "").trim();
+  const bankName = String(formData.get("bankName") ?? "").trim();
+  const accountNumber = String(formData.get("accountNumber") ?? "").trim();
+  const accountHolder = String(formData.get("accountHolder") ?? "").trim();
 
   if (!amountBaht || Number.isNaN(amountBaht) || amountBaht <= 0) {
     return { error: "Please enter a valid withdrawal amount" };
@@ -28,9 +30,11 @@ export async function requestPayoutAction(
     return { error: "Minimum withdrawal is ฿100" };
   }
 
-  if (!bankInfo) {
-    return { error: "Bank account information is required" };
+  if (!(bankName && accountNumber && accountHolder)) {
+    return { error: "Bank, account number, and account holder name are all required" };
   }
+
+  const bankInfo = `${bankName} — ${accountNumber} — ${accountHolder}`;
 
   const amountCents = Math.round(amountBaht * 100);
   const result = await api.requestPayout(amountCents, bankInfo);

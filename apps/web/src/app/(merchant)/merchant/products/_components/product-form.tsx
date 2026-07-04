@@ -1,6 +1,7 @@
 "use client";
 
 import { isOk } from "@fabric/types";
+import { Card, CardContent, CardHeader, CardTitle } from "@fabric/ui";
 import Link from "next/link";
 import { useQueryState } from "nuqs";
 import { memo, useRef, useTransition } from "react";
@@ -114,175 +115,184 @@ export const ProductForm = memo(function ProductForm({
   }
 
   return (
-    <form
-      ref={formRef}
-      action={action}
-      className="space-y-6 rounded-xl border border-border bg-muted/50 p-8"
-    >
+    <form ref={formRef} action={action} className="space-y-6">
       {errorMsg && errorMsg !== "" && (
         <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3">
           <p className="text-sm text-destructive">{errorMsg}</p>
         </div>
       )}
 
-      {/* AI bundle generator */}
-      <div className="flex items-center justify-between rounded-lg border border-success/20 bg-success/5 px-4 py-3">
-        <div>
-          <p className="text-sm font-medium text-success">✨ AI Draft</p>
-          <p className="text-xs text-success/70">
-            Generate tagline, description, and alt text in one click
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={handleGenerateAll}
-          disabled={pendingAll}
-          className="rounded-md bg-success px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-success disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          {pendingAll ? "กำลังเขียน…" : "Generate all"}
-        </button>
-      </div>
-
-      {/* Name */}
-      <div>
-        <label htmlFor="name" className={labelClass}>
-          Product name *
-        </label>
-        <input
-          id="name"
-          name="name"
-          type="text"
-          required
-          defaultValue={d.name ?? ""}
-          placeholder="T-Shirt, Hoodie…"
-          className={inputClass}
-        />
-      </div>
-
-      {/* Tagline (with AI assist) */}
-      <TaglineField ref={taglineRef} defaultValue={d.tagline} />
-
-      {/* Description (with AI assist) */}
-      <DescriptionField ref={descriptionRef} defaultValue={d.description} />
-
-      {/* Price + Currency */}
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label htmlFor="price" className={labelClass}>
-            Price *
-          </label>
-          <input
-            id="price"
-            name="price"
-            type="number"
-            required
-            min="0.01"
-            step="0.01"
-            defaultValue={d.price ?? ""}
-            placeholder="599.00"
-            className={inputClass}
-          />
-          <p className="mt-1 text-xs text-muted-foreground">
-            Enter price in baht (e.g., 599 = ฿599.00)
-          </p>
-        </div>
-        <div>
-          <label htmlFor="priceCurrency" className={labelClass}>
-            Currency
-          </label>
-          <select
-            id="priceCurrency"
-            name="priceCurrency"
-            defaultValue={d.priceCurrency ?? "THB"}
-            className={inputClass}
+      <Card>
+        <CardHeader className="flex-row items-center justify-between space-y-0">
+          <CardTitle className="text-base">Basics</CardTitle>
+          <button
+            type="button"
+            onClick={handleGenerateAll}
+            disabled={pendingAll}
+            className="rounded-md bg-success px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-success disabled:cursor-not-allowed disabled:opacity-50"
           >
-            <option value="THB">THB — Thai Baht</option>
-            <option value="USD">USD — US Dollar</option>
-            <option value="EUR">EUR — Euro</option>
-            <option value="SGD">SGD — Singapore Dollar</option>
-          </select>
-        </div>
-      </div>
+            {pendingAll ? "กำลังเขียน…" : "✨ Generate all"}
+          </button>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div>
+            <label htmlFor="name" className={labelClass}>
+              Product name *
+            </label>
+            <input
+              id="name"
+              name="name"
+              type="text"
+              required
+              defaultValue={d.name ?? ""}
+              placeholder="T-Shirt, Hoodie…"
+              className={inputClass}
+            />
+          </div>
 
-      {/* Category + Genre */}
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label htmlFor="category" className={labelClass}>
-            Category *
-          </label>
-          <select
-            id="category"
-            name="category"
-            required
-            defaultValue={d.category ?? "basic"}
-            className={inputClass}
-          >
-            {CATEGORIES.map((c) => (
-              <option key={c.value} value={c.value}>
-                {c.label}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label htmlFor="genre" className={labelClass}>
-            Genre
-          </label>
-          <select id="genre" name="genre" defaultValue={d.genre ?? ""} className={inputClass}>
-            {GENRES.map((g) => (
-              <option key={g.value} value={g.value}>
-                {g.label}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
+          <TaglineField ref={taglineRef} defaultValue={d.tagline} />
 
-      {/* Status (edit mode only) */}
-      {mode === "edit" && (
-        <div>
-          <label htmlFor="status" className={labelClass}>
-            Status
-          </label>
-          <select
-            id="status"
-            name="status"
-            defaultValue={d.status ?? "draft"}
-            className={inputClass}
-          >
-            {STATUSES.map((s) => (
-              <option key={s.value} value={s.value}>
-                {s.label}
-              </option>
-            ))}
-          </select>
-        </div>
-      )}
+          <DescriptionField ref={descriptionRef} defaultValue={d.description} />
+        </CardContent>
+      </Card>
 
-      {/* Stock by size */}
-      <fieldset>
-        <legend className="text-sm font-medium text-foreground mb-3">Stock per size</legend>
-        <div className="grid grid-cols-3 gap-3">
-          {SIZES.map((size) => (
-            <div key={size}>
-              <label htmlFor={`stock-${size}`} className="block text-xs text-muted-foreground mb-1">
-                {size}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Pricing & category</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="price" className={labelClass}>
+                Price *
               </label>
               <input
-                id={`stock-${size}`}
-                name={`stock[${size}]`}
+                id="price"
+                name="price"
                 type="number"
-                min="0"
-                defaultValue={d.stock?.[size] ?? 0}
+                required
+                min="0.01"
+                step="0.01"
+                defaultValue={d.price ?? ""}
+                placeholder="599.00"
                 className={inputClass}
               />
+              <p className="mt-1 text-xs text-muted-foreground">
+                Enter price in baht (e.g., 599 = ฿599.00)
+              </p>
             </div>
-          ))}
-        </div>
-      </fieldset>
+            <div>
+              <label htmlFor="priceCurrency" className={labelClass}>
+                Currency
+              </label>
+              <select
+                id="priceCurrency"
+                name="priceCurrency"
+                defaultValue={d.priceCurrency ?? "THB"}
+                className={inputClass}
+              >
+                <option value="THB">THB — Thai Baht</option>
+                <option value="USD">USD — US Dollar</option>
+                <option value="EUR">EUR — Euro</option>
+                <option value="SGD">SGD — Singapore Dollar</option>
+              </select>
+            </div>
+          </div>
 
-      {/* Images (with AI alt-text assist) */}
-      <ImageField ref={imageFieldRef} defaultImages={d.images} />
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="category" className={labelClass}>
+                Category *
+              </label>
+              <select
+                id="category"
+                name="category"
+                required
+                defaultValue={d.category ?? "basic"}
+                className={inputClass}
+              >
+                {CATEGORIES.map((c) => (
+                  <option key={c.value} value={c.value}>
+                    {c.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label htmlFor="genre" className={labelClass}>
+                Genre
+              </label>
+              <select id="genre" name="genre" defaultValue={d.genre ?? ""} className={inputClass}>
+                {GENRES.map((g) => (
+                  <option key={g.value} value={g.value}>
+                    {g.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {mode === "edit" && (
+            <div>
+              <label htmlFor="status" className={labelClass}>
+                Status
+              </label>
+              <select
+                id="status"
+                name="status"
+                defaultValue={d.status ?? "draft"}
+                className={inputClass}
+              >
+                {STATUSES.map((s) => (
+                  <option key={s.value} value={s.value}>
+                    {s.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Inventory</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <fieldset>
+            <legend className="text-sm font-medium text-foreground mb-3">Stock per size</legend>
+            <div className="grid grid-cols-3 gap-3">
+              {SIZES.map((size) => (
+                <div key={size}>
+                  <label
+                    htmlFor={`stock-${size}`}
+                    className="block text-xs text-muted-foreground mb-1"
+                  >
+                    {size}
+                  </label>
+                  <input
+                    id={`stock-${size}`}
+                    name={`stock[${size}]`}
+                    type="number"
+                    min="0"
+                    defaultValue={d.stock?.[size] ?? 0}
+                    className={inputClass}
+                  />
+                </div>
+              ))}
+            </div>
+          </fieldset>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Media</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ImageField ref={imageFieldRef} defaultImages={d.images} />
+        </CardContent>
+      </Card>
 
       {/* Actions */}
       <div className="flex gap-3 pt-2">

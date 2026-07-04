@@ -8,4 +8,6 @@ export * from "./components/spinner";
 export * from "./components/skeleton";
 export * from "./components/empty-state";
 export * from "./components/alert";
+export * from "./components/tabs";
+export * from "./components/date-range-picker";
 export * from "./lib/utils";

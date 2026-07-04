@@ -4,17 +4,46 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 type NavItem = { href: string; label: string; icon: string; aliases: string[] };
+type NavSection = { label: string; items: NavItem[] };
 
-const navItems: NavItem[] = [
-  { href: "/merchant/dashboard", label: "Dashboard", icon: "▤", aliases: ["/merchant/onboarding"] },
-  { href: "/merchant/products", label: "Products", icon: "🏷", aliases: [] },
-  { href: "/merchant/orders", label: "Orders", icon: "📦", aliases: [] },
-  { href: "/merchant/analytics", label: "Analytics", icon: "📊", aliases: [] },
-  { href: "/merchant/payouts", label: "Payouts", icon: "💸", aliases: [] },
-  { href: "/merchant/billing", label: "Billing", icon: "💳", aliases: [] },
-  { href: "/merchant/invoices", label: "Invoices", icon: "🧾", aliases: [] },
-  { href: "/merchant/inventory", label: "Inventory", icon: "📦", aliases: [] },
-  { href: "/merchant/affiliates", label: "Affiliates", icon: "🔗", aliases: [] },
+const navSections: NavSection[] = [
+  {
+    label: "Overview",
+    items: [
+      {
+        href: "/merchant/dashboard",
+        label: "Dashboard",
+        icon: "▤",
+        aliases: ["/merchant/onboarding"],
+      },
+    ],
+  },
+  {
+    label: "Catalog",
+    items: [
+      { href: "/merchant/products", label: "Products", icon: "🏷", aliases: [] },
+      { href: "/merchant/inventory", label: "Inventory", icon: "📦", aliases: [] },
+    ],
+  },
+  {
+    label: "Sales",
+    items: [{ href: "/merchant/orders", label: "Orders", icon: "🛒", aliases: [] }],
+  },
+  {
+    label: "Finance",
+    items: [
+      { href: "/merchant/payouts", label: "Payouts", icon: "💸", aliases: [] },
+      { href: "/merchant/billing", label: "Billing", icon: "💳", aliases: [] },
+      { href: "/merchant/invoices", label: "Invoices", icon: "🧾", aliases: [] },
+    ],
+  },
+  {
+    label: "Growth",
+    items: [
+      { href: "/merchant/analytics", label: "Analytics", icon: "📊", aliases: [] },
+      { href: "/merchant/affiliates", label: "Affiliates", icon: "🔗", aliases: [] },
+    ],
+  },
 ];
 
 function matchesPath(pathname: string, item: NavItem): boolean {
@@ -37,26 +66,35 @@ export function MerchantSidebar() {
         </p>
       </div>
 
-      <nav className="flex flex-col gap-1 px-3 py-4">
-        {navItems.map((item) => {
-          const isActive = matchesPath(pathname, item);
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                isActive
-                  ? "bg-success/20 text-success"
-                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
-              }`}
-            >
-              <span aria-hidden className="text-base leading-none">
-                {item.icon}
-              </span>
-              {item.label}
-            </Link>
-          );
-        })}
+      <nav className="flex flex-col gap-4 px-3 py-4">
+        {navSections.map((section) => (
+          <div key={section.label}>
+            <p className="px-3 pb-1 text-[11px] font-semibold uppercase tracking-wider text-faint">
+              {section.label}
+            </p>
+            <div className="flex flex-col gap-1">
+              {section.items.map((item) => {
+                const isActive = matchesPath(pathname, item);
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                      isActive
+                        ? "bg-success/20 text-success"
+                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                    }`}
+                  >
+                    <span aria-hidden className="text-base leading-none">
+                      {item.icon}
+                    </span>
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </nav>
     </aside>
   );
