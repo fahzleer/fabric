@@ -90,6 +90,11 @@ export type PayoutRequest = {
   adminNote?: string;
 };
 
+export type AdminMerchant = {
+  userId: string;
+  storeName: string;
+};
+
 export type MerchantInventoryProduct = {
   id: string;
   name: string;
@@ -484,6 +489,44 @@ function _buildMerchantApi(user: { id: string; email: string; role?: string }, t
         return Ok(data.payouts ?? []);
       } catch {
         return Err("Network error loading pending payouts");
+      }
+    },
+
+    async listPayoutHistory(limit = 50): Promise<ApiResult<PayoutRequest[]>> {
+      try {
+        const res = await fetch(`${API_BASE}/admin/payouts/history?limit=${limit}`, {
+          headers: authHeaders,
+          cache: "no-store",
+        });
+        const data = (await res.json()) as {
+          payouts?: PayoutRequest[];
+          error?: string;
+          _tag?: string;
+        };
+        if (!res.ok)
+          return Err(formatApiError(data._tag, data.error ?? "Failed to load payout history"));
+        return Ok(data.payouts ?? []);
+      } catch {
+        return Err("Network error loading payout history");
+      }
+    },
+
+    async getAdminMerchants(): Promise<ApiResult<AdminMerchant[]>> {
+      try {
+        const res = await fetch(`${API_BASE}/admin/merchants`, {
+          headers: authHeaders,
+          cache: "no-store",
+        });
+        const data = (await res.json()) as {
+          merchants?: AdminMerchant[];
+          error?: string;
+          _tag?: string;
+        };
+        if (!res.ok)
+          return Err(formatApiError(data._tag, data.error ?? "Failed to load merchants"));
+        return Ok(data.merchants ?? []);
+      } catch {
+        return Err("Network error loading merchants");
       }
     },
 

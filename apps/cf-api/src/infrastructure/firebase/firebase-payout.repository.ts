@@ -158,6 +158,25 @@ export class FirebasePayoutRepository implements PayoutRepositoryPort {
     }
   }
 
+  async listRecent(
+    limit: number
+  ): Promise<Result<PayoutRequest[], ReturnType<typeof PayoutRepositoryError>>> {
+    try {
+      const snap = await firebaseQuery(this.db.ref("payoutRequests").once("value"));
+
+      const requests: PayoutRequest[] = [];
+      snap.forEach((child) => {
+        requests.push(fromRecord(child.val() as FirebasePayoutRecord));
+      });
+
+      requests.sort((a, b) => b.requestedAt.localeCompare(a.requestedAt));
+
+      return Ok(requests.slice(0, limit));
+    } catch (cause) {
+      return Err(PayoutRepositoryError("Failed to list recent payouts", Some(cause)));
+    }
+  }
+
   async approvePayout(
     requestId: string,
     ownerUserId: string

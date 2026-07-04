@@ -4,11 +4,15 @@ import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
+import type { AdminOrderForFilter } from "./_components/date-filtered-stats";
+import { DateFilteredStats } from "./_components/date-filtered-stats";
 
 export const metadata: Metadata = { title: "Analytics — Admin" };
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3010";
 const INTERNAL_SECRET = process.env.INTERNAL_SECRET ?? "";
+const ORDER_WINDOW_PAGES = 3;
+const ORDER_WINDOW_PER_PAGE = 100;
 
 type AdminAnalytics = {
   totalOrders: number;
@@ -48,6 +52,29 @@ async function getAnalytics(token: string): Promise<AdminAnalytics | null> {
   }
 }
 
+async function getRecentOrders(token: string): Promise<AdminOrderForFilter[]> {
+  const orders: AdminOrderForFilter[] = [];
+  for (let page = 1; page <= ORDER_WINDOW_PAGES; page++) {
+    try {
+      const url = new URL(`${API_BASE}/admin/orders`);
+      url.searchParams.set("page", String(page));
+      url.searchParams.set("perPage", String(ORDER_WINDOW_PER_PAGE));
+      const res = await fetch(url.toString(), {
+        headers: { Authorization: `Bearer ${token}` },
+        cache: "no-store",
+      });
+      if (!res.ok) break;
+      const data = (await res.json()) as { items?: AdminOrderForFilter[] };
+      const items = data.items ?? [];
+      orders.push(...items);
+      if (items.length < ORDER_WINDOW_PER_PAGE) break;
+    } catch {
+      break;
+    }
+  }
+  return orders;
+}
+
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
   pending: {
     label: "Payment Pending",
@@ -77,7 +104,7 @@ export default async function AdminAnalyticsPage() {
   const token = await issueAdminToken(user.id, user.email);
   if (!token) return <p className="text-muted-foreground">Failed to authenticate</p>;
 
-  const data = await getAnalytics(token);
+  const [data, recentOrders] = await Promise.all([getAnalytics(token), getRecentOrders(token)]);
   if (!data) return <p className="text-muted-foreground">Failed to load analytics</p>;
 
   const currency = data.currency ?? "THB";
@@ -133,6 +160,14 @@ export default async function AdminAnalyticsPage() {
           </div>
         ))}
       </div>
+
+      {recentOrders.length > 0 && (
+        <DateFilteredStats
+          orders={recentOrders}
+          currency={currency}
+          windowSize={recentOrders.length}
+        />
+      )}
 
       {/* Orders by status */}
       <div className="rounded-xl border border-border bg-muted/50 p-6">

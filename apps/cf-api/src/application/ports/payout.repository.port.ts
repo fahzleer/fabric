@@ -78,6 +78,9 @@ export interface PayoutRepositoryPort {
 
   listAllPending(): Promise<Result<PayoutRequest[], PayoutRepositoryError>>;
 
+  /** Most recent payouts across all merchants, any status — newest first. */
+  listRecent(limit: number): Promise<Result<PayoutRequest[], PayoutRepositoryError>>;
+
   approvePayout(
     requestId: string,
     ownerUserId: string

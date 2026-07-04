@@ -1,3 +1,4 @@
+import { CopyIdButton } from "@/components/admin/copy-id-button";
 import { auth } from "@/lib/auth";
 import { formatPrice } from "@/lib/price";
 import type { Metadata } from "next";
@@ -115,8 +116,13 @@ export default async function AdminOrdersPage({
                 key={order.id}
                 className="border-t border-border hover:bg-muted transition-colors"
               >
-                <td className="px-4 py-3 font-mono text-xs text-muted-foreground">
-                  {order.id.slice(0, 8)}…
+                <td className="px-4 py-3">
+                  <div className="flex items-center gap-1">
+                    <code className="font-mono text-xs text-muted-foreground">
+                      {order.id.slice(0, 8)}…
+                    </code>
+                    <CopyIdButton value={order.id} />
+                  </div>
                 </td>
                 <td className="px-4 py-3 text-sm text-foreground">
                   {new Date(order.placedAt).toLocaleDateString("en-GB", {
@@ -125,8 +131,13 @@ export default async function AdminOrdersPage({
                     year: "numeric",
                   })}
                 </td>
-                <td className="px-4 py-3 font-mono text-xs text-muted-foreground">
-                  {order.customerId.slice(0, 8)}…
+                <td className="px-4 py-3">
+                  <div className="flex items-center gap-1">
+                    <code className="font-mono text-xs text-muted-foreground">
+                      {order.customerId.slice(0, 8)}…
+                    </code>
+                    <CopyIdButton value={order.customerId} />
+                  </div>
                 </td>
                 <td className="px-4 py-3 text-sm text-foreground text-center">{order.itemCount}</td>
                 <td className="px-4 py-3 text-sm font-medium text-foreground">

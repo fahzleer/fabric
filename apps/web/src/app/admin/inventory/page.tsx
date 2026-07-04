@@ -1,9 +1,9 @@
 import { auth } from "@/lib/auth";
-import { formatPrice } from "@/lib/price";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
+import { InventoryTableClient } from "./_components/inventory-table-client";
 
 export const metadata: Metadata = { title: "Inventory — Admin" };
 
@@ -78,80 +78,6 @@ async function getOrders(token: string): Promise<AdminOrderItem[]> {
   }
 }
 
-function stockBadgeClass(qty: number): string {
-  if (qty === 0) return "bg-destructive/20 text-destructive";
-  if (qty <= 5) return "bg-warning/20 text-warning";
-  return "bg-muted text-foreground";
-}
-
-function AdminProductRow({
-  p,
-  sold,
-}: {
-  p: AdminProduct;
-  sold: number;
-}) {
-  const isLow = p.totalStock > 0 && p.totalStock <= 5;
-  const isOut = p.totalStock === 0 && p.status === "active";
-  return (
-    <tr
-      className={`transition-colors ${isOut ? "bg-destructive/20" : isLow ? "bg-warning/20" : "hover:bg-muted/2"}`}
-    >
-      <td className="px-4 py-3">
-        <p className="font-medium text-foreground">{p.name}</p>
-        <p className="text-xs text-muted-foreground font-mono">{p.id.slice(0, 8)}…</p>
-      </td>
-      <td className="px-4 py-3">
-        <span
-          className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${CATEGORY_STYLES[p.category] ?? "bg-muted text-muted-foreground"}`}
-        >
-          {p.category}
-        </span>
-      </td>
-      <td className="px-4 py-3">
-        <span
-          className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${STATUS_STYLES[p.status] ?? "bg-muted text-muted-foreground"}`}
-        >
-          {p.status}
-        </span>
-      </td>
-      <td className="px-4 py-3 text-foreground whitespace-nowrap">
-        {formatPrice({ amount: p.priceCents / 100, currency: p.currency })}
-      </td>
-      <td className="px-4 py-3">
-        {Object.keys(p.stock).length === 0 ? (
-          <span className="text-muted-foreground text-xs">—</span>
-        ) : (
-          <div className="flex flex-wrap gap-1">
-            {Object.entries(p.stock).map(([size, qty]) => (
-              <span
-                key={size}
-                className={`rounded px-1.5 py-0.5 text-xs font-mono ${stockBadgeClass(qty)}`}
-              >
-                {size}:{qty}
-              </span>
-            ))}
-          </div>
-        )}
-      </td>
-      <td className="px-4 py-3 text-center">
-        <span
-          className={`text-sm font-bold ${isOut ? "text-destructive" : isLow ? "text-warning" : "text-foreground"}`}
-        >
-          {p.totalStock}
-        </span>
-      </td>
-      <td className="px-4 py-3 text-center text-muted-foreground text-sm">
-        {sold > 0 ? (
-          <span className="font-medium text-success">{sold}</span>
-        ) : (
-          <span className="text-muted-foreground">0</span>
-        )}
-      </td>
-    </tr>
-  );
-}
-
 const ACTIVE_ORDER_STATUSES = new Set(["confirmed", "processing", "shipped", "delivered"]);
 
 function buildSoldByProduct(orders: AdminOrderItem[]): Map<string, number> {
@@ -177,14 +103,6 @@ const STATUS_STYLES: Record<string, string> = {
   active: "bg-success/20 text-success",
   draft: "bg-muted text-muted-foreground",
   archived: "bg-destructive/20 text-destructive",
-};
-
-const CATEGORY_STYLES: Record<string, string> = {
-  clothing: "bg-info/20 text-info",
-  electronics: "bg-info/20 text-info",
-  food: "bg-warning/20 text-warning",
-  books: "bg-success/20 text-success",
-  accessories: "bg-destructive/20 text-destructive",
 };
 
 export default async function InventoryPage() {
@@ -288,42 +206,9 @@ export default async function InventoryPage() {
           </p>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-xl border border-border">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border bg-muted/60">
-                {["Product", "Category", "Status", "Price", "Stock by Size", "Total", "Sold"].map(
-                  (h) => (
-                    <th
-                      key={h}
-                      className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground"
-                    >
-                      {h}
-                    </th>
-                  )
-                )}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border bg-card/30">
-              {products.map((p) => (
-                <AdminProductRow key={p.id} p={p} sold={soldByProduct.get(p.id) ?? 0} />
-              ))}
-            </tbody>
-          </table>
-          <div className="border-t border-border bg-muted/40 px-4 py-3 flex items-center justify-between">
-            <span className="text-xs text-muted-foreground">
-              {products.length} product{products.length !== 1 ? "s" : ""}
-              {" · "}
-              {activeProducts.length} active
-            </span>
-            <span className="text-xs text-muted-foreground">
-              Total stock:{" "}
-              <span className="font-semibold text-foreground">
-                {totalStock.toLocaleString()} units
-              </span>
-            </span>
-          </div>
-        </div>
+        <InventoryTableClient
+          products={products.map((p) => ({ ...p, sold: soldByProduct.get(p.id) ?? 0 }))}
+        />
       )}
     </div>
   );
