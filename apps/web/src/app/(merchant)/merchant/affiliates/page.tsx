@@ -3,25 +3,12 @@ import { isErr, isSome } from "@fabric/types";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@fabric/ui";
 import type { Metadata } from "next";
 import { connection } from "next/server";
+import { PipelineCanvas } from "./_components/pipeline-canvas";
 
 export const metadata: Metadata = { title: "Affiliates — Merchant Portal" };
 
 const PIPELINE_COLUMNS = ["draft", "creating", "editing", "ready_to_post", "published"] as const;
 type PipelineStatus = (typeof PIPELINE_COLUMNS)[number];
-const PIPELINE_LABELS: Record<PipelineStatus, string> = {
-  draft: "In Draft",
-  creating: "Creating",
-  editing: "Editing",
-  ready_to_post: "Ready to Post",
-  published: "Published",
-};
-const PIPELINE_STYLES: Record<PipelineStatus, string> = {
-  draft: "border-border bg-card/40 text-muted-foreground",
-  creating: "border-info/40 bg-info/30 text-info",
-  editing: "border-info/40 bg-info/30 text-info",
-  ready_to_post: "border-warning/40 bg-warning/30 text-warning",
-  published: "border-success/40 bg-success/30 text-success",
-};
 const PLATFORM_ICONS: Record<string, string> = {
   tiktok: "🎵",
   youtube: "▶",
@@ -264,59 +251,14 @@ export default async function MerchantAffiliatesPage() {
         </TabsContent>
 
         <TabsContent value="pipeline" className="space-y-8">
-          {/* Content Pipeline */}
+          {/* Content Pipeline — node-based canvas: drag stages around, draw
+              your own connections. Manual/visualization only for now, see
+              PipelineCanvas's doc comment for why. */}
           <section>
             <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Content Pipeline
             </h2>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-              {PIPELINE_COLUMNS.map((col) => {
-                const items = pipelineByStatus[col] ?? [];
-                const style = PIPELINE_STYLES[col];
-                return (
-                  <div key={col} className={`rounded-xl border p-3 ${style}`}>
-                    <div className="mb-2 flex items-center justify-between">
-                      <h3 className="text-xs font-semibold uppercase tracking-wider">
-                        {PIPELINE_LABELS[col]}
-                      </h3>
-                      <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
-                        {items.length}
-                      </span>
-                    </div>
-                    <div className="space-y-2">
-                      {items.map((item) => {
-                        const aff = item.affiliateId
-                          ? data.affiliates.find((a) => a.id === item.affiliateId)
-                          : null;
-                        return (
-                          <div
-                            key={item.id}
-                            className="rounded-lg border border-border bg-muted/60 px-3 py-2"
-                          >
-                            <p className="text-xs font-medium text-foreground leading-snug">
-                              {item.title}
-                            </p>
-                            <div className="mt-1 flex items-center gap-1">
-                              <span className="text-xs">
-                                {PLATFORM_ICONS[item.platform] ?? "🔗"}
-                              </span>
-                              {aff && (
-                                <span className="truncate rounded bg-muted px-1 text-xs text-muted-foreground">
-                                  {aff.name}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        );
-                      })}
-                      {items.length === 0 && (
-                        <p className="py-3 text-center text-xs text-muted-foreground">empty</p>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+            <PipelineCanvas pipelineByStatus={pipelineByStatus} affiliates={data.affiliates} />
           </section>
         </TabsContent>
 

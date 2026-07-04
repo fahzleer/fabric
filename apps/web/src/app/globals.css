@@ -288,6 +288,35 @@ body {
   box-shadow: 2px 2px 0 0 hsl(var(--border-strong));
 }
 
+/* WorkflowCanvas (react-flow) chrome — base.css only ships structural rules
+   for Controls/MiniMap (no color, no `--xy-*` var hooks for buttons), so
+   they're themed directly here rather than through CSS custom properties.
+   Kept in lockstep with packages/ui/src/index.css. */
+.workflow-canvas .react-flow__controls {
+  overflow: hidden;
+  border: 2px solid hsl(var(--border-strong));
+  box-shadow: 2px 2px 0 0 hsl(var(--border-strong));
+}
+.workflow-canvas .react-flow__controls-button {
+  background-color: hsl(var(--card));
+  border-bottom: 1px solid hsl(var(--border));
+  color: hsl(var(--foreground));
+}
+.workflow-canvas .react-flow__controls-button:last-child {
+  border-bottom: none;
+}
+.workflow-canvas .react-flow__controls-button:hover {
+  background-color: hsl(var(--brand));
+  color: hsl(var(--brand-foreground));
+}
+.workflow-canvas .react-flow__controls-button:disabled {
+  opacity: 0.4;
+}
+.workflow-canvas .react-flow__minimap {
+  border: 2px solid hsl(var(--border-strong));
+  box-shadow: 2px 2px 0 0 hsl(var(--border-strong));
+}
+
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;

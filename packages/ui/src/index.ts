@@ -10,4 +10,5 @@ export * from "./components/empty-state";
 export * from "./components/alert";
 export * from "./components/tabs";
 export * from "./components/date-range-picker";
+export * from "./components/workflow-canvas";
 export * from "./lib/utils";

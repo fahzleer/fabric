@@ -21,6 +21,12 @@
       "port": 8082
     },
     {
+      "name": "ui-storybook",
+      "runtimeExecutable": "bun",
+      "runtimeArgs": ["run", "--filter=@fabric/ui", "storybook"],
+      "port": 6006
+    },
+    {
       "name": "static",
       "runtimeExecutable": "bun",
       "runtimeArgs": ["--eval", "Bun.serve({port:9999,fetch(req){const p=new URL(req.url).pathname;const f=Bun.file('.'+p);return f.exists().then(e=>e?new Response(f):new Response('not found',{status:404}))}})"],
