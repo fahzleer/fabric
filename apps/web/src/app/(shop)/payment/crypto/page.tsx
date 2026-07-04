@@ -127,7 +127,7 @@ export default function CryptoPaymentPage() {
           <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-info-subtle text-info font-bold text-sm">
             USDC
           </span>
-          <h1 className="text-3xl font-bold text-foreground">ชำระด้วย Crypto (USDC)</h1>
+          <h1 className="font-display text-3xl text-foreground">ชำระด้วย Crypto (USDC)</h1>
         </div>
         <FreshnessLabel updatedAt={UPDATED_AT} quarter={QUARTER} />
         <p className="mt-3 text-muted-foreground max-w-xl">

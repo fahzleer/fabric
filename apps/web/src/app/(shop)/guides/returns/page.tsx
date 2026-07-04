@@ -119,7 +119,7 @@ export default function ReturnsPage() {
       </nav>
 
       <header className="mb-8">
-        <h1 className="text-3xl font-bold text-foreground">นโยบายคืนและเปลี่ยนสินค้า</h1>
+        <h1 className="font-display text-3xl text-foreground">นโยบายคืนและเปลี่ยนสินค้า</h1>
         <FreshnessLabel updatedAt={UPDATED_AT} quarter={QUARTER} />
         <p className="mt-3 text-muted-foreground max-w-xl">
           เราดูแลทุกการซื้อขาย — หากสินค้าไม่เป็นไปตามที่คาดหวัง แจ้งเราได้ภายใน 7 วัน

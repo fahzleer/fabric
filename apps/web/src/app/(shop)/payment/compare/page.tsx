@@ -143,7 +143,7 @@ export default function PaymentComparePage() {
       </nav>
 
       <header className="mb-10">
-        <h1 className="text-3xl font-bold text-foreground">เปรียบเทียบวิธีชำระเงิน</h1>
+        <h1 className="font-display text-3xl text-foreground">เปรียบเทียบวิธีชำระเงิน</h1>
         <p className="mt-2 text-muted-foreground max-w-xl">
           Fabric รองรับ 3 วิธีชำระเงิน — เลือกแบบที่เหมาะกับคุณ
         </p>

@@ -84,7 +84,7 @@ export default function VietnamPage() {
               Việt Nam
             </span>
           </div>
-          <h1 className="text-4xl font-bold text-foreground">
+          <h1 className="font-display text-4xl text-foreground">
             Áo Thun Premium — Giao Hàng Đến Việt Nam
           </h1>
           <p className="mt-4 text-lg text-muted-foreground max-w-2xl">

@@ -104,7 +104,7 @@ export default function AboutPage() {
         </nav>
 
         <header className="mb-10">
-          <h1 className="text-4xl font-bold text-foreground">เกี่ยวกับ Fabric</h1>
+          <h1 className="font-display text-4xl text-foreground">เกี่ยวกับ Fabric</h1>
           <p className="mt-4 text-lg text-muted-foreground max-w-2xl">
             Fabric คือแพลตฟอร์มซื้อขายเสื้อผ้า premium quality สำหรับคนที่ใส่ใจในคุณภาพและรายละเอียด —
             ทั้งในไทยและทั่วเอเชียตะวันออกเฉียงใต้

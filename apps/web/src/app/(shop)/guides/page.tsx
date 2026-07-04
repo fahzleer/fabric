@@ -69,7 +69,7 @@ export default function GuidesPage() {
       </nav>
 
       <header className="mb-10">
-        <h1 className="text-3xl font-bold text-foreground">คู่มือและวิธีใช้งาน</h1>
+        <h1 className="font-display text-3xl text-foreground">คู่มือและวิธีใช้งาน</h1>
         <p className="mt-2 text-muted-foreground">ทุกอย่างที่คุณต้องรู้เกี่ยวกับการซื้อสินค้าที่ Fabric</p>
       </header>
 

@@ -124,7 +124,7 @@ export default function CardPaymentPage() {
           <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-secondary text-muted-foreground font-bold text-lg">
             💳
           </span>
-          <h1 className="text-3xl font-bold text-foreground">ชำระด้วยบัตรเครดิต / เดบิต</h1>
+          <h1 className="font-display text-3xl text-foreground">ชำระด้วยบัตรเครดิต / เดบิต</h1>
         </div>
         <FreshnessLabel updatedAt={UPDATED_AT} quarter={QUARTER} />
         <p className="mt-3 text-muted-foreground max-w-xl">

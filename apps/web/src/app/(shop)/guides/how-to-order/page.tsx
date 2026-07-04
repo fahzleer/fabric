@@ -120,7 +120,7 @@ export default function HowToOrderPage() {
       </nav>
 
       <header className="mb-8">
-        <h1 className="text-3xl font-bold text-foreground">วิธีสั่งซื้อสินค้าจาก Fabric</h1>
+        <h1 className="font-display text-3xl text-foreground">วิธีสั่งซื้อสินค้าจาก Fabric</h1>
         <FreshnessLabel updatedAt={UPDATED_AT} quarter={QUARTER} />
         <p className="mt-3 text-muted-foreground max-w-xl">
           ครั้งแรกก็ง่าย — ทำตาม 6 ขั้นตอนนี้ สั่งสินค้าได้ใน 5 นาที
