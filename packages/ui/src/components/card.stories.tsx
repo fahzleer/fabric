@@ -29,7 +29,7 @@ export const Default: Story = {
 
 export const WithCustomClassName: Story = {
   render: () => (
-    <Card className="w-80 bg-gray-50">
+    <Card className="w-80 bg-secondary">
       <CardContent>
         <p>Custom className applied.</p>
       </CardContent>
