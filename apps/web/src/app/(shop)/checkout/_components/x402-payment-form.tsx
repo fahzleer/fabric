@@ -9,6 +9,7 @@ import {
 } from "@/application/atoms/checkout.atoms";
 import { getCartTotal } from "@/domain/cart/types";
 import type { ShoppingCart } from "@/domain/cart/types";
+import { buildGuestOrderItems, setGuestEmailCookie } from "@/lib/guest-order";
 import { formatPrice } from "@/lib/price";
 import { syncCartToServer } from "@/lib/sync-cart";
 import { Atom, Result, useAtom, useAtomSet, useAtomValue } from "@effect-atom/atom-react";
@@ -74,6 +75,7 @@ type ShippingAddress = {
   postalCode: string;
   country: string;
   phone: string;
+  email: string;
   province: string;
 };
 
@@ -149,13 +151,17 @@ type RawShippingAddress = Omit<ShippingAddress, "province"> & { province?: strin
 function buildOrderBody(
   cartId: string,
   voucherCode: string,
-  rawShipping: RawShippingAddress
+  rawShipping: RawShippingAddress,
+  isGuest: boolean,
+  cart: ShoppingCart
 ): object {
+  const { email, ...restAddress } = rawShipping;
   return {
     cartId,
     paymentMethod: "crypto",
     voucherCode: voucherCode || undefined,
-    shippingAddress: { ...rawShipping, province: rawShipping.province ?? "Bangkok" },
+    shippingAddress: { ...restAddress, province: rawShipping.province ?? "Bangkok" },
+    ...(isGuest ? { guestEmail: email, items: buildGuestOrderItems(cart) } : {}),
   };
 }
 
@@ -241,7 +247,7 @@ async function executeX402Payment(
   if (isSome(authToken)) {
     await syncCartToServer(cart.items, authToken.value);
   }
-  const orderBody = buildOrderBody(cart.id, voucherCode, shippingAddress);
+  const orderBody = buildOrderBody(cart.id, voucherCode, shippingAddress, isNone(authToken), cart);
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     ...(isSome(authToken) ? { Authorization: `Bearer ${authToken.value}` } : {}),
@@ -286,6 +292,7 @@ async function executeX402Payment(
     deps.setStatus("error");
     return;
   }
+  if (isNone(authToken)) setGuestEmailCookie(shippingAddress.email);
   deps.setPlacedOrderId(Option.some(orderId));
   deps.setStatus("done");
   deps.push(`/order/${orderId}/confirmation`);

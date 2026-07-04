@@ -1,6 +1,7 @@
 "use client";
 
 import { cartAtom } from "@/application/atoms/cart.atoms";
+import { SceneCanvas } from "@/components/3d/scene-canvas";
 import { getCartItemCount, isCartEmpty } from "@/domain/cart/types";
 import { useDexieCartSync } from "@/infrastructure/dexie/use-dexie-cart-sync";
 import { EASE } from "@/lib/motion";
@@ -48,6 +49,13 @@ export default function CartPage() {
   return (
     <div className="min-h-screen bg-muted">
       <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
+        {/* Decorative only — confined band, never behind the items/summary below */}
+        <SceneCanvas
+          variant="band"
+          className="mb-6 h-24 rounded-lg border border-border"
+          lazyMount
+        />
+
         <h1 className="text-2xl font-bold text-foreground mb-8">
           Shopping Cart ({getCartItemCount(cart)} items)
         </h1>

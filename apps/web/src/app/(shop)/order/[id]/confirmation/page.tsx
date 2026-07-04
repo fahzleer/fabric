@@ -2,7 +2,7 @@ import { Reveal } from "@/components/motion/reveal";
 import { auth } from "@/lib/auth";
 import { formatPrice } from "@/lib/price";
 import { type Maybe, None, Some, isNone, isSome } from "@fabric/types";
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import Link from "next/link";
 import { ClearCartOnMount } from "./_components/clear-cart-on-mount";
 import { OrderSuccessHeader } from "./_components/order-success-header";
@@ -86,13 +86,23 @@ async function getAuthToken(): Promise<Maybe<string>> {
   }
 }
 
+async function getGuestEmail(): Promise<string | undefined> {
+  const cookieStore = await cookies();
+  return cookieStore.get("fabric_guest_email")?.value;
+}
+
 async function fetchOrderDetail(
   id: string,
-  authToken: Maybe<string>
+  authToken: Maybe<string>,
+  guestEmail: string | undefined
 ): Promise<{ order: Maybe<OrderDetail>; fetchError: Maybe<string> }> {
   try {
     const res = await fetch(`${API_BASE}/api/orders/${id}`, {
-      headers: isSome(authToken) ? { Authorization: `Bearer ${authToken.value}` } : {},
+      headers: isSome(authToken)
+        ? { Authorization: `Bearer ${authToken.value}` }
+        : guestEmail
+          ? { "x-guest-email": guestEmail }
+          : {},
       cache: "no-store",
     });
     if (res.ok) {
@@ -226,9 +236,11 @@ interface PageProps {
 export default async function OrderConfirmationPage({ params }: PageProps) {
   const { id } = await params;
   const authToken = await getAuthToken();
-  const { order, fetchError } = await fetchOrderDetail(id, authToken);
+  const guestEmail = isNone(authToken) ? await getGuestEmail() : undefined;
+  const { order, fetchError } = await fetchOrderDetail(id, authToken, guestEmail);
   const breakdown = computePriceBreakdown(order);
   const statusInfo = getStatusInfo(order);
+  const isGuest = isNone(authToken) && isSome(order);
 
   return (
     <div className="min-h-screen bg-muted">
@@ -290,6 +302,22 @@ export default async function OrderConfirmationPage({ params }: PageProps) {
           </div>
         </Reveal>
 
+        {/* Optional post-purchase account upsell — guest checkout is never gated,
+            but creating an account afterwards makes future order tracking easier. */}
+        {isGuest && (
+          <div className="mt-6 rounded-lg border border-info bg-info-subtle p-4 text-center">
+            <p className="text-sm text-foreground">
+              Save this order to an account to track it and check out faster next time.
+            </p>
+            <Link
+              href="/auth/register"
+              className="mt-2 inline-block text-sm font-medium text-info hover:text-info/80 underline"
+            >
+              Create an account
+            </Link>
+          </div>
+        )}
+
         {/* Actions */}
         <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
           <Link
@@ -298,12 +326,14 @@ export default async function OrderConfirmationPage({ params }: PageProps) {
           >
             Continue Shopping
           </Link>
-          <Link
-            href="/account/orders"
-            className="rounded-lg border border-border-strong px-6 py-3 text-muted-foreground font-medium hover:bg-muted text-center"
-          >
-            View My Orders
-          </Link>
+          {!isGuest && (
+            <Link
+              href="/account/orders"
+              className="rounded-lg border border-border-strong px-6 py-3 text-muted-foreground font-medium hover:bg-muted text-center"
+            >
+              View My Orders
+            </Link>
+          )}
         </div>
       </div>
     </div>

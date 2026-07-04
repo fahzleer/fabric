@@ -8,6 +8,7 @@ import {
 } from "@/application/atoms/checkout.atoms";
 import { getCartTotal } from "@/domain/cart/types";
 import type { ShoppingCart } from "@/domain/cart/types";
+import { buildGuestOrderItems, setGuestEmailCookie } from "@/lib/guest-order";
 import { formatPrice } from "@/lib/price";
 import { syncCartToServer } from "@/lib/sync-cart";
 import { Atom, useAtom, useAtomSet, useAtomValue } from "@effect-atom/atom-react";
@@ -44,6 +45,7 @@ type PromptPayShippingAddress = {
   postalCode: string;
   country: string;
   phone: string;
+  email: string;
   province: string;
 };
 
@@ -83,12 +85,14 @@ async function createPromptPayOrder(
   cartId: string,
   voucherCode: string,
   shippingAddress: PromptPayShippingAddress,
-  authToken: Maybe<string>
+  authToken: Maybe<string>,
+  cart: ShoppingCart
 ): Promise<OrderResult> {
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     ...(isSome(authToken) ? { Authorization: `Bearer ${authToken.value}` } : {}),
   };
+  const { email, ...restAddress } = shippingAddress;
   const res = await fetch(`${API_BASE}/api/orders`, {
     method: "POST",
     headers,
@@ -96,7 +100,8 @@ async function createPromptPayOrder(
       cartId,
       paymentMethod: "promptpay",
       voucherCode: voucherCode || undefined,
-      shippingAddress,
+      shippingAddress: restAddress,
+      ...(isSome(authToken) ? {} : { guestEmail: email, items: buildGuestOrderItems(cart) }),
     }),
   });
   if (!res.ok) {
@@ -227,11 +232,12 @@ async function executePromptPayFlow(
     ...rawShipping,
     province: rawShipping.province ?? "Bangkok",
   };
-  const orderResult = await createPromptPayOrder(cart.id, voucherCode, shipping, authToken);
+  const orderResult = await createPromptPayOrder(cart.id, voucherCode, shipping, authToken, cart);
   if (isErr(orderResult)) {
     deps.setPhase({ _tag: "error", message: orderResult.error });
     return;
   }
+  if (isNone(authToken)) setGuestEmailCookie(shipping.email);
   deps.setPhase({ _tag: "generating" });
   const qrResult = await createPromptPayQr(orderResult.value, authToken);
   if (isErr(qrResult)) {

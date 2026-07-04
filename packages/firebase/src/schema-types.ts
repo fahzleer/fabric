@@ -30,7 +30,8 @@ export interface FirebaseProductRecord {
 
 export interface FirebaseOrderRecord {
   id: string;
-  userId: string;
+  userId: string | null;
+  guestEmail: string | null;
   cartId: string;
   status: "pending" | "confirmed" | "shipped" | "delivered" | "cancelled";
   totalCents: number;

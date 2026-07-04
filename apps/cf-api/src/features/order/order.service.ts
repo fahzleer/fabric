@@ -18,12 +18,18 @@ import type {
 import type { ProductRepositoryPort } from "../../application/ports/product.repository.port";
 import type { PaginationInput } from "../../application/ports/product.repository.port";
 import type { VoucherRepositoryPort } from "../../application/ports/voucher.repository.port";
+import type { Cart, CartItem } from "../../domain/cart/cart.entity";
 import { makeEmptyCart } from "../../domain/cart/cart.entity";
-import type { CartItem } from "../../domain/cart/cart.entity";
 import type { CartId } from "../../domain/cart/cart.value-objects";
-import { transitionOrderStatus } from "../../domain/order/order.entity";
-import type { Order, OrderLine } from "../../domain/order/order.entity";
+import { makeCartItemQuantity } from "../../domain/cart/cart.value-objects";
+import {
+  customerMatchesOrder,
+  isGuestCustomer,
+  transitionOrderStatus,
+} from "../../domain/order/order.entity";
+import type { CustomerRef, Order, OrderLine } from "../../domain/order/order.entity";
 import type { OrderId, ShippingAddress } from "../../domain/order/order.value-objects";
+import { isValidSize, makeProductId } from "../../domain/product/product.value-objects";
 import type { UserId } from "../../domain/user/user.value-objects";
 import { log } from "../../infrastructure/monitoring/logger";
 import { presentDomainError } from "../shared/http-error.presenter";
@@ -31,6 +37,12 @@ import { presentDomainError } from "../shared/http-error.presenter";
 export type CheckoutPreview = CheckoutCalculation & {
   taxCents: number;
   voucherError: string | null;
+};
+
+export type GuestOrderItemInput = {
+  readonly productId: string;
+  readonly size: string;
+  readonly quantity: number;
 };
 
 export class OrderService {
@@ -48,13 +60,14 @@ export class OrderService {
   ) {}
 
   async previewCheckout(
-    userId: UserId,
+    customerRef: CustomerRef,
     cartId: string,
     country: string,
     province: string,
-    voucherCode?: string
+    voucherCode?: string,
+    guestItems?: readonly GuestOrderItemInput[]
   ): Promise<CheckoutPreview> {
-    const cartResult = await this.resolveCart(userId, cartId);
+    const cartResult = await this.resolveCart(customerRef, cartId, guestItems);
     if (cartResult._tag === "Err") return presentDomainError(cartResult.error);
     const cart = cartResult.value;
     if (cart.items.length === 0)
@@ -119,15 +132,16 @@ export class OrderService {
   }
 
   async placeOrder(
-    userId: UserId,
+    customerRef: CustomerRef,
     cartId: string,
     shippingAddress: ShippingAddress,
     paymentToken: string | undefined,
     paymentMethod: PaymentMethod = "card",
     voucherCode?: string,
-    userEmail?: string
+    userEmail?: string,
+    guestItems?: readonly GuestOrderItemInput[]
   ): Promise<Order> {
-    const cartResult = await this.resolveCart(userId, cartId);
+    const cartResult = await this.resolveCart(customerRef, cartId, guestItems);
     if (cartResult._tag === "Err") return presentDomainError(cartResult.error);
     const cart = cartResult.value;
     if (cart.items.length === 0)
@@ -181,7 +195,7 @@ export class OrderService {
 
     const order: Order = {
       id: { __brand: "OrderId" as const, value: orderId } as OrderId,
-      userId,
+      customerRef,
       cartId: cart.id.value,
       lines: orderLines as unknown as NonEmptyArray<OrderLine>,
       status: initialStatus,
@@ -205,7 +219,13 @@ export class OrderService {
     if (atomicResult._tag === "Err") return presentDomainError(atomicResult.error);
 
     if (paymentMethod === "card") {
-      await this.payment.initiatePayment(orderId, totalCents, currency, userId.value, paymentToken);
+      await this.payment.initiatePayment(
+        orderId,
+        totalCents,
+        currency,
+        customerRef.value,
+        paymentToken
+      );
       log.info(`Order placed (pending): orderId=${orderId} total=${totalCents} ${currency}`);
     } else {
       log.info(`Order placed (x402 confirmed): orderId=${orderId} total=${totalCents} ${currency}`);
@@ -213,11 +233,13 @@ export class OrderService {
       await this.recordRevenueByOwner(orderLines);
     }
 
-    const freshCart = makeEmptyCart(
-      { __brand: "CartId" as const, value: crypto.randomUUID() } as CartId,
-      cart.userId
-    );
-    await this.cartRepo.save(freshCart);
+    if (!isGuestCustomer(customerRef)) {
+      const freshCart = makeEmptyCart(
+        { __brand: "CartId" as const, value: crypto.randomUUID() } as CartId,
+        cart.userId
+      );
+      await this.cartRepo.save(freshCart);
+    }
 
     void this.eventPublisher.publish({
       event_id: crypto.randomUUID(),
@@ -227,7 +249,7 @@ export class OrderService {
       schema_version: 1,
       payload: {
         order_id: orderId,
-        user_id: userId.value,
+        user_id: customerRef.value,
         total_cents: totalCents,
         currency,
         status: initialStatus,
@@ -236,13 +258,13 @@ export class OrderService {
 
     void this.activity.track({
       id: crypto.randomUUID(),
-      userId: userId.value,
+      userId: customerRef.value,
       eventType: "order_placed",
       eventData: { orderId, totalCents, currency, paymentMethod, itemCount: cart.items.length },
     });
 
     this.sendOrderNotification(
-      userId,
+      customerRef,
       orderId,
       userEmail,
       shippingAddress,
@@ -254,13 +276,13 @@ export class OrderService {
     return atomicResult.value;
   }
 
-  async getOrder(userId: UserId, orderId: string): Promise<Order> {
+  async getOrder(customerRef: CustomerRef, orderId: string): Promise<Order> {
     const result = await this.orderRepo.findById({
       __brand: "OrderId" as const,
       value: orderId,
     } as OrderId);
     if (result._tag === "Err") return presentDomainError(result.error);
-    if (result.value.userId.value !== userId.value) {
+    if (!customerMatchesOrder(customerRef, result.value)) {
       return presentDomainError({
         _tag: "OrderNotFoundError",
         message: `Order ${orderId} not found`,
@@ -354,7 +376,7 @@ export class OrderService {
         currency: o.currency,
         itemCount: o.lines.reduce((s, l) => s + l.quantity, 0),
         placedAt: o.placedAt.toString(),
-        customerId: o.userId.value,
+        customerId: o.customerRef.value,
       })),
       total: result.value.total,
       page: result.value.page,
@@ -506,7 +528,7 @@ export class OrderService {
   }
 
   private sendOrderNotification(
-    userId: UserId,
+    customerRef: CustomerRef,
     orderId: string,
     userEmail: string | undefined,
     shippingAddress: ShippingAddress,
@@ -514,10 +536,12 @@ export class OrderService {
     currency: string,
     itemCount: number
   ): void {
+    const resolvedEmail =
+      userEmail ?? (isGuestCustomer(customerRef) ? customerRef.value : undefined);
     void this.notification?.notifyOrderPlaced({
       orderId,
-      userId: userId.value,
-      ...(userEmail ? { userEmail } : {}),
+      userId: customerRef.value,
+      ...(resolvedEmail ? { userEmail: resolvedEmail } : {}),
       ...(shippingAddress.phoneNumber ? { customerPhone: shippingAddress.phoneNumber } : {}),
       ...(shippingAddress.recipientName ? { recipientName: shippingAddress.recipientName } : {}),
       totalCents,
@@ -526,15 +550,69 @@ export class OrderService {
     });
   }
 
-  private async resolveCart(userId: UserId, cartId: string) {
+  private async resolveCart(
+    customerRef: CustomerRef,
+    cartId: string,
+    guestItems: readonly GuestOrderItemInput[] | undefined
+  ) {
+    if (isGuestCustomer(customerRef)) {
+      return this.resolveGuestCart(guestItems);
+    }
     if (cartId !== "local") {
       return this.cartRepo.findById({ __brand: "CartId" as const, value: cartId } as CartId);
     }
-    const byUserResult = await this.cartRepo.findByUserId(userId);
+    const byUserResult = await this.cartRepo.findByUserId(customerRef);
     if (byUserResult._tag === "Err") return presentDomainError(byUserResult.error);
     if (byUserResult.value._tag === "None")
       return presentDomainError({ _tag: "CartNotFoundError", message: "Cart not found for user" });
     return { _tag: "Ok" as const, value: byUserResult.value.value };
+  }
+
+  /**
+   * Guests never get a persisted server-side cart (no account to sync it
+   * against) — their cart items travel inline in the request and are
+   * resolved to authoritative product data here, on demand.
+   */
+  private async resolveGuestCart(guestItems: readonly GuestOrderItemInput[] | undefined) {
+    if (!guestItems || guestItems.length === 0) {
+      return presentDomainError({
+        _tag: "EmptyOrderError",
+        message: "Cannot place an order with an empty cart",
+      });
+    }
+
+    const items: CartItem[] = [];
+    for (const gi of guestItems) {
+      if (!isValidSize(gi.size)) {
+        return presentDomainError({
+          _tag: "InvalidSizeError",
+          message: `Invalid size: ${gi.size}`,
+        });
+      }
+      const qtyResult = makeCartItemQuantity(gi.quantity);
+      if ("_tag" in qtyResult) {
+        return presentDomainError({ _tag: "InvalidQuantityError", message: qtyResult.message });
+      }
+      const productResult = await this.productRepo.findById(makeProductId(gi.productId));
+      if (productResult._tag === "Err") return presentDomainError(productResult.error);
+      const product = productResult.value;
+      items.push({
+        productId: product.id,
+        productName: product.name.value,
+        unitPrice: product.price,
+        size: gi.size,
+        quantity: qtyResult,
+      });
+    }
+
+    const cart: Cart = {
+      id: { __brand: "CartId" as const, value: `guest-${crypto.randomUUID()}` } as CartId,
+      userId: None(),
+      items,
+      createdAt: Temporal.Now.instant(),
+      updatedAt: Temporal.Now.instant(),
+    };
+    return { _tag: "Ok" as const, value: cart };
   }
 
   private async resolveVoucher(code: string | undefined): Promise<VoucherForRoc | undefined> {

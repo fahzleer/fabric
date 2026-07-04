@@ -26,7 +26,7 @@ export function FaqSection({ items, heading = "คำถามที่พบบ
         // biome-ignore lint/security/noDangerouslySetInnerHtml: controlled server-side JSON-LD
         dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
       />
-      <h2 id="faq-heading" className="text-xl font-semibold text-foreground">
+      <h2 id="faq-heading" className="font-display text-xl text-foreground">
         {heading}
       </h2>
       <dl className="mt-6 space-y-6">

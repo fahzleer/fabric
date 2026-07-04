@@ -1,5 +1,10 @@
 import type { FirebaseOrderRecord, FirebaseProductRecord } from "@fabric/firebase";
-import { OrderNotFoundError, ProductNotFoundError, ProductOutOfStockError } from "@fabric/types";
+import {
+  type Email,
+  OrderNotFoundError,
+  ProductNotFoundError,
+  ProductOutOfStockError,
+} from "@fabric/types";
 import { None, Some, isSome } from "@fabric/types";
 import type { RepositoryError } from "@fabric/types";
 import type { NonEmptyArray } from "@fabric/types";
@@ -14,8 +19,8 @@ import type {
   StockReservationItem,
 } from "../../application/ports/product.repository.port";
 import { makeRepositoryError } from "../../application/ports/product.repository.port";
-import type { Order, OrderSummary } from "../../domain/order/order.entity";
-import { toOrderSummary } from "../../domain/order/order.entity";
+import type { CustomerRef, Order, OrderSummary } from "../../domain/order/order.entity";
+import { isGuestCustomer, toOrderSummary } from "../../domain/order/order.entity";
 import type { OrderNotFoundError as OrderNotFoundErrorType } from "../../domain/order/order.errors";
 import type { OrderId, ShippingAddress } from "../../domain/order/order.value-objects";
 import type { ProductNotFoundError as PNFError } from "../../domain/product/product.errors";
@@ -24,6 +29,11 @@ import { makeProductId } from "../../domain/product/product.value-objects";
 import type { ProductSize } from "../../domain/product/product.value-objects";
 import type { UserId } from "../../domain/user/user.value-objects";
 import { firebaseQuery } from "../../shared/abort/abort-context";
+
+const customerRefFromRecord = (record: FirebaseOrderRecord): CustomerRef =>
+  record.userId
+    ? ({ __brand: "UserId" as const, value: record.userId } as UserId)
+    : ({ __brand: "Email" as const, value: record.guestEmail ?? "" } as Email);
 
 type ReserveTxState = {
   receivedRealData: boolean;
@@ -86,7 +96,7 @@ function fromRecord(record: FirebaseOrderRecord): Order {
     : (lineEntries as unknown as NonEmptyArray<(typeof lineEntries)[number]>);
   return {
     id: { __brand: "OrderId" as const, value: record.id } as OrderId,
-    userId: { __brand: "UserId" as const, value: record.userId } as UserId,
+    customerRef: customerRefFromRecord(record),
     cartId: record.cartId,
     lines,
     status: record.status as Order["status"],
@@ -116,7 +126,8 @@ function toRecord(order: Order): FirebaseOrderRecord {
   }
   return {
     id: order.id.value,
-    userId: order.userId.value,
+    userId: isGuestCustomer(order.customerRef) ? null : order.customerRef.value,
+    guestEmail: isGuestCustomer(order.customerRef) ? order.customerRef.value : null,
     cartId: order.cartId,
     status: order.status as FirebaseOrderRecord["status"],
     totalCents: order.totalAmountInCents,
@@ -216,7 +227,7 @@ export class FirebaseOrderRepository implements OrderRepositoryPort {
           totalAmountInCents: rec.totalCents,
           currency: rec.currency,
           placedAt: rec.placedAt,
-          customerId: rec.userId,
+          customerId: rec.userId ?? rec.guestEmail ?? "unknown",
         }));
       return {
         _tag: "Ok",
@@ -274,7 +285,12 @@ export class FirebaseOrderRepository implements OrderRepositoryPort {
       let existingOrder: Order | undefined;
       existingSnap.forEach((child) => {
         const rec = child.val() as FirebaseOrderRecord;
-        if (rec.userId === order.userId.value) {
+        const recRef = customerRefFromRecord(rec);
+        if (
+          isGuestCustomer(order.customerRef)
+            ? isGuestCustomer(recRef) && recRef.value === order.customerRef.value
+            : !isGuestCustomer(recRef) && recRef.value === order.customerRef.value
+        ) {
           existingOrder = fromRecord(rec);
         }
       });

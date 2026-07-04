@@ -280,6 +280,14 @@ body {
   letter-spacing: 0.15em;
 }
 
+/* Flat offset "sticker" shadow — the punk/merch card treatment (DESIGN.md
+   §1.1), replacing soft blur elevation on product cards. Modals/dropdowns
+   keep normal soft shadows; this is a deliberate brand statement, not a
+   general elevation utility. */
+@utility shadow-sticker {
+  box-shadow: 2px 2px 0 0 hsl(var(--border-strong));
+}
+
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;

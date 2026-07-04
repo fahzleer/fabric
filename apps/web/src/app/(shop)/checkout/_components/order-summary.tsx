@@ -79,6 +79,10 @@ function VoucherSection({
       <label htmlFor="voucher-input" className="block text-sm font-medium text-foreground mb-1">
         Voucher / Promo Code
       </label>
+      <p className="mb-1.5 text-xs text-muted-foreground">
+        Have a code from a promotion or affiliate link? Enter it here — it applies at checkout, not
+        before.
+      </p>
       <div className="flex gap-2">
         <Input
           id="voucher-input"
@@ -242,7 +246,7 @@ export function OrderSummary({ cart, onNext, onBack }: OrderSummaryProps) {
 
   return (
     <div className="bg-card rounded-lg border border-border p-6 space-y-4">
-      <h2 className="text-lg font-semibold text-foreground">Order Summary</h2>
+      <h2 className="font-display text-lg text-foreground">Order Summary</h2>
 
       <CartLineItems items={cart.value.items} />
 

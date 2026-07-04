@@ -30,7 +30,7 @@ const now = Temporal.Now.instant();
 
 const ORDER: Order = {
   id: { __brand: "OrderId" as const, value: "order-001" } as OrderId,
-  userId: { __brand: "UserId" as const, value: "user-001" } as UserId,
+  customerRef: { __brand: "UserId" as const, value: "user-001" } as UserId,
   cartId: "cart-001",
   lines: [
     {
@@ -93,6 +93,7 @@ const STOCK_ITEMS: StockReserveItem[] = [
 const EXISTING_ORDER_RECORD = {
   id: "order-001",
   userId: "user-001",
+  guestEmail: null,
   cartId: "cart-001",
   status: "pending",
   totalCents: 210000,

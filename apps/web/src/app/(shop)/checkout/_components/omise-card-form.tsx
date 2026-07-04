@@ -9,6 +9,7 @@ import {
 } from "@/application/atoms/checkout.atoms";
 import { getCartTotal } from "@/domain/cart/types";
 import type { ShoppingCart } from "@/domain/cart/types";
+import { buildGuestOrderItems, setGuestEmailCookie } from "@/lib/guest-order";
 import { formatPrice } from "@/lib/price";
 import { syncCartToServer } from "@/lib/sync-cart";
 import { Atom, useAtom, useAtomSet, useAtomValue } from "@effect-atom/atom-react";
@@ -63,6 +64,7 @@ type OmiseShippingAddress = {
   postalCode: string;
   country: string;
   phone: string;
+  email: string;
   province: string;
 };
 
@@ -103,7 +105,8 @@ async function submitOmiseOrder(
   cartId: string,
   voucherCode: string,
   shippingAddress: OmiseShippingAddress,
-  authToken: Maybe<string>
+  authToken: Maybe<string>,
+  cart: ShoppingCart
 ): Promise<OmiseOrderResult> {
   const statusMessages: Record<number, string> = {
     402: "Payment declined. Please try another card.",
@@ -112,6 +115,7 @@ async function submitOmiseOrder(
     500: "Server error. Please try again in a few minutes.",
   };
 
+  const { email, ...restAddress } = shippingAddress;
   const res = await fetch(`${API_BASE}/api/orders`, {
     method: "POST",
     headers: {
@@ -123,7 +127,8 @@ async function submitOmiseOrder(
       paymentMethod: "card",
       paymentToken: token,
       voucherCode: voucherCode || undefined,
-      shippingAddress,
+      shippingAddress: restAddress,
+      ...(isSome(authToken) ? {} : { guestEmail: email, items: buildGuestOrderItems(cart) }),
     }),
   });
 
@@ -198,13 +203,15 @@ async function executeOmisePayment(
     cart.id,
     voucherCode,
     { ...rawShipping, province: rawShipping.province ?? "Bangkok" },
-    authToken
+    authToken,
+    cart
   );
   if (isErr(result)) {
     deps.setError(Some(result.error));
     deps.setStatus("error");
     return;
   }
+  if (isNone(authToken)) setGuestEmailCookie(rawShipping.email);
   deps.setPlacedOrderId(Option.some(result.value));
   deps.setStatus("done");
   deps.push(`/order/${result.value}/confirmation`);

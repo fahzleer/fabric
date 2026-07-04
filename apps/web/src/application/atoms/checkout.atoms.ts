@@ -1,3 +1,4 @@
+import { buildGuestOrderItems } from "@/lib/guest-order";
 import { Atom } from "@effect-atom/atom-react";
 import { Effect, Option } from "effect";
 import { cartAtom } from "./cart.atoms";
@@ -11,6 +12,7 @@ export type ShippingAddressFormData = {
   readonly postalCode: string;
   readonly country: string;
   readonly phone: string;
+  readonly email: string;
   readonly province?: string;
 };
 
@@ -84,6 +86,7 @@ export const pricingPreviewFetchAtom = Atom.make((get) => {
           country: addr.country,
           province: addr.city,
           voucherCode: voucherCode || undefined,
+          ...(authToken ? {} : { guestEmail: addr.email, items: buildGuestOrderItems(cartValue) }),
         }),
       })
     );

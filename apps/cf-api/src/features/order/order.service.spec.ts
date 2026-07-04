@@ -1,4 +1,5 @@
 import { describe, expect, mock, test } from "bun:test";
+import type { Email } from "@fabric/types";
 import { None } from "@fabric/types";
 import { Temporal } from "@js-temporal/polyfill";
 import type { ActivityRepositoryPort } from "../../application/ports/activity.repository.port";
@@ -12,7 +13,7 @@ import type { ProductRepositoryPort } from "../../application/ports/product.repo
 import type { VoucherRepositoryPort } from "../../application/ports/voucher.repository.port";
 import type { Cart } from "../../domain/cart/cart.entity";
 import type { CartId, CartItemQuantity } from "../../domain/cart/cart.value-objects";
-import type { Order } from "../../domain/order/order.entity";
+import type { CustomerRef, Order } from "../../domain/order/order.entity";
 import type { OrderId, OrderStatus, ShippingAddress } from "../../domain/order/order.value-objects";
 import type { ProductId, ProductPrice } from "../../domain/product/product.value-objects";
 import type { UserId } from "../../domain/user/user.value-objects";
@@ -21,6 +22,7 @@ import { OrderService } from "./order.service";
 const now = Temporal.Now.instant();
 
 const USER_ID = { __brand: "UserId" as const, value: "user-001" } as UserId;
+const GUEST_EMAIL = { __brand: "Email" as const, value: "guest@example.com" } as Email;
 const SHIPPING: ShippingAddress = {
   recipientName: "Test User",
   street: "1 Test Street",
@@ -59,10 +61,10 @@ function makeCart(items: ReturnType<typeof makeCartItem>[]): Cart {
   };
 }
 
-function makeOrder(status: OrderStatus = "pending"): Order {
+function makeOrder(status: OrderStatus = "pending", customerRef: CustomerRef = USER_ID): Order {
   return {
     id: { __brand: "OrderId" as const, value: "order-001" } as OrderId,
-    userId: USER_ID,
+    customerRef,
     cartId: "cart-001",
     lines: [] as unknown as Order["lines"],
     status,
@@ -109,6 +111,7 @@ function makePorts(
             _tag: "Ok" as const,
             value: {
               id: { value: "prod-001" },
+              name: { value: "Test Item" },
               price: { amount: (overrides.productPriceCents ?? 50000) / 100, currency: "THB" },
             },
           }
@@ -331,5 +334,100 @@ describe("OrderService.confirmOrder / failOrder", () => {
     await svc.failOrder("order-001", "Payment declined");
 
     expect(ports.orderRepo.save).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("OrderService.placeOrder — guest checkout", () => {
+  test("11. guest happy path: inline items resolve via productRepo, no cartRepo lookup", async () => {
+    const ports = makePorts({});
+    const svc = makeService(ports);
+
+    const order = await svc.placeOrder(
+      GUEST_EMAIL,
+      "local",
+      SHIPPING,
+      "tok_test",
+      "card",
+      undefined,
+      undefined,
+      [{ productId: "prod-001", size: "M", quantity: 1 }]
+    );
+
+    expect(order.customerRef).toEqual(GUEST_EMAIL);
+    expect((ports.cartRepo.findById as ReturnType<typeof mock>).mock.calls.length).toBe(0);
+    expect(ports.payment.initiatePayment).toHaveBeenCalledTimes(1);
+    // no server-side cart to clear for a guest
+    expect((ports.cartRepo.save as ReturnType<typeof mock>).mock.calls.length).toBe(0);
+  });
+
+  test("12. guest with no inline items → EmptyOrderError", async () => {
+    const ports = makePorts({});
+    const svc = makeService(ports);
+
+    await expect(
+      svc.placeOrder(GUEST_EMAIL, "local", SHIPPING, "tok_test", "card")
+    ).rejects.toThrow();
+  });
+
+  test("13. guest item references unknown product → propagates ProductNotFoundError", async () => {
+    const ports = makePorts({ productFindErr: true });
+    const svc = makeService(ports);
+
+    await expect(
+      svc.placeOrder(GUEST_EMAIL, "local", SHIPPING, "tok_test", "card", undefined, undefined, [
+        { productId: "prod-ghost", size: "M", quantity: 1 },
+      ])
+    ).rejects.toThrow();
+  });
+});
+
+describe("OrderService.getOrder — ownership by CustomerRef", () => {
+  test("14. authenticated user can read their own order", async () => {
+    const ports = makePorts({});
+    (ports.orderRepo.findById as ReturnType<typeof mock>).mockImplementation(async () => ({
+      _tag: "Ok",
+      value: makeOrder("pending", USER_ID),
+    }));
+    const svc = makeService(ports);
+
+    const order = await svc.getOrder(USER_ID, "order-001");
+
+    expect(order.customerRef).toEqual(USER_ID);
+  });
+
+  test("15. guest can read their own order by matching email", async () => {
+    const ports = makePorts({});
+    (ports.orderRepo.findById as ReturnType<typeof mock>).mockImplementation(async () => ({
+      _tag: "Ok",
+      value: makeOrder("pending", GUEST_EMAIL),
+    }));
+    const svc = makeService(ports);
+
+    const order = await svc.getOrder(GUEST_EMAIL, "order-001");
+
+    expect(order.customerRef).toEqual(GUEST_EMAIL);
+  });
+
+  test("16. mismatched guest email → OrderNotFoundError", async () => {
+    const ports = makePorts({});
+    (ports.orderRepo.findById as ReturnType<typeof mock>).mockImplementation(async () => ({
+      _tag: "Ok",
+      value: makeOrder("pending", GUEST_EMAIL),
+    }));
+    const svc = makeService(ports);
+    const otherGuest = { __brand: "Email" as const, value: "someone-else@example.com" } as Email;
+
+    await expect(svc.getOrder(otherGuest, "order-001")).rejects.toThrow();
+  });
+
+  test("17. authenticated user cannot read a guest order", async () => {
+    const ports = makePorts({});
+    (ports.orderRepo.findById as ReturnType<typeof mock>).mockImplementation(async () => ({
+      _tag: "Ok",
+      value: makeOrder("pending", GUEST_EMAIL),
+    }));
+    const svc = makeService(ports);
+
+    await expect(svc.getOrder(USER_ID, "order-001")).rejects.toThrow();
   });
 });

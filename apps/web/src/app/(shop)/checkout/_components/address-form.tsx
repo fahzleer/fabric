@@ -15,6 +15,7 @@ const addressFormAtom = Atom.make<ShippingAddressFormData>({
   postalCode: "",
   country: "TH",
   phone: "",
+  email: "",
 });
 
 const addressErrorsAtom = Atom.make<Partial<Record<keyof ShippingAddressFormData, string>>>({});
@@ -36,6 +37,8 @@ export function AddressForm({ onNext }: AddressFormProps) {
     if (form.city.trim().length < 2) newErrors.city = "กรุณากรอกเขต/อำเภอ";
     if (form.postalCode.trim().length < 4) newErrors.postalCode = "กรุณากรอกรหัสไปรษณีย์";
     if (form.phone.trim().length < 9) newErrors.phone = "กรุณากรอกเบอร์โทรศัพท์";
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim()))
+      newErrors.email = "กรุณากรอกอีเมลให้ถูกต้อง";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -80,6 +83,22 @@ export function AddressForm({ onNext }: AddressFormProps) {
         {errors.recipientName && (
           <p className="mt-1 text-xs text-destructive">{errors.recipientName}</p>
         )}
+      </div>
+
+      <div>
+        <label htmlFor="email" className="block text-sm font-medium text-muted-foreground mb-1">
+          อีเมล
+        </label>
+        <input
+          id="email"
+          type="email"
+          value={form.email}
+          onChange={(e) => setForm({ ...form, email: e.target.value })}
+          className={fieldClass(errors.email)}
+          placeholder="you@example.com"
+        />
+        <p className="mt-1 text-xs text-faint">ใช้สำหรับส่งใบยืนยันคำสั่งซื้อและติดตามพัสดุ</p>
+        {errors.email && <p className="mt-1 text-xs text-destructive">{errors.email}</p>}
       </div>
 
       <div>

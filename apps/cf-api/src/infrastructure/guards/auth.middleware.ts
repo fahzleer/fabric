@@ -32,6 +32,32 @@ export function requireAuth(verifier: PasetoVerifierService): MiddlewareHandler 
   };
 }
 
+/**
+ * Verifies a session if an Authorization header is present, but proceeds
+ * without one otherwise — for routes that support both authenticated and
+ * guest access (e.g. guest checkout). An invalid/expired token still fails
+ * closed with 401 rather than silently falling back to guest.
+ */
+export function optionalAuth(verifier: PasetoVerifierService): MiddlewareHandler {
+  return async (c, next) => {
+    const authHeader = c.req.header("authorization");
+    if (!authHeader) {
+      await next();
+      return;
+    }
+
+    const result = await verifier.verify(authHeader.replace("Bearer ", "").trim());
+    if (result._tag === "Err") {
+      return c.json({ error: "Unauthorized", _tag: result.error._tag }, 401);
+    }
+
+    c.set("userId", result.value.sub);
+    c.set("userRole", result.value.role as UserRole);
+    c.set("userEmail", result.value.email);
+    await next();
+  };
+}
+
 export function requireRole(...roles: UserRole[]): MiddlewareHandler {
   return async (c, next) => {
     const role = c.get("userRole");

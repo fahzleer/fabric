@@ -14,7 +14,7 @@ export function CartSummary({ cart }: CartSummaryProps) {
 
   return (
     <div className="bg-card rounded-lg border border-border p-6 space-y-4">
-      <h2 className="text-lg font-semibold text-foreground">Order Summary</h2>
+      <h2 className="font-display text-lg text-foreground">Order Summary</h2>
 
       <div className="space-y-2">
         {cart.items.map((item) => {

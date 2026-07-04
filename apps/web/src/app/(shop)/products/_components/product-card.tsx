@@ -44,7 +44,7 @@ export function ProductCard({ product, badge }: ProductCardProps) {
   return (
     <Link
       href={`/product/${product.id.value}`}
-      className="group block overflow-hidden rounded-lg border border-border bg-card shadow-sm transition-[transform,box-shadow] duration-300 ease-entrance hover:-translate-y-1 hover:shadow-md"
+      className="group block overflow-hidden rounded-lg border border-border bg-card shadow-sm transition-[transform,box-shadow] duration-300 ease-entrance hover:-translate-y-1 hover:shadow-sticker"
     >
       <motion.div
         layoutId={productImageLayoutId(product.id.value)}
@@ -69,7 +69,7 @@ export function ProductCard({ product, badge }: ProductCardProps) {
 
       <div className="p-4">
         <div className="flex items-start justify-between gap-2">
-          <h3 className="text-lg font-semibold text-foreground">{product.name.value}</h3>
+          <h3 className="font-display text-lg text-foreground">{product.name.value}</h3>
           <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
             {categoryLabel}
           </span>

@@ -1,4 +1,4 @@
-import type { Maybe, NonEmptyArray, Result } from "@fabric/types";
+import type { Email, Maybe, NonEmptyArray, Result } from "@fabric/types";
 import {
   Err,
   InvalidOrderStateTransitionError,
@@ -17,6 +17,21 @@ import type {
 import type { OrderId, OrderStatus, ShippingAddress } from "./order.value-objects";
 import { canTransitionOrderStatus } from "./order.value-objects";
 
+/** An order's owner: a registered account, or a guest identified by email only. */
+export type CustomerRef = UserId | Email;
+
+export const isGuestCustomer = (ref: CustomerRef): ref is Email => ref.__brand === "Email";
+
+export const customerMatchesOrder = (ref: CustomerRef, order: Order): boolean => {
+  if (isGuestCustomer(ref)) {
+    return (
+      isGuestCustomer(order.customerRef) &&
+      order.customerRef.value.toLowerCase() === ref.value.toLowerCase()
+    );
+  }
+  return !isGuestCustomer(order.customerRef) && order.customerRef.value === ref.value;
+};
+
 export interface OrderLine {
   readonly productId: ProductId;
   readonly productName: string;
@@ -29,7 +44,7 @@ export const getOrderLineTotal = (line: OrderLine): number => line.unitPrice.amo
 
 export interface Order {
   readonly id: OrderId;
-  readonly userId: UserId;
+  readonly customerRef: CustomerRef;
   readonly cartId: string;
   readonly lines: NonEmptyArray<OrderLine>;
   readonly status: OrderStatus;

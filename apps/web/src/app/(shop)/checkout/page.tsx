@@ -1,6 +1,7 @@
 "use client";
 
 import { cartAtom } from "@/application/atoms/cart.atoms";
+import { SceneCanvas } from "@/components/3d/scene-canvas";
 import type { ShoppingCart } from "@/domain/cart/types";
 import { useDexieCartSync } from "@/infrastructure/dexie/use-dexie-cart-sync";
 import { EASE } from "@/lib/motion";
@@ -55,6 +56,14 @@ export default function CheckoutPage() {
   return (
     <div className="min-h-screen bg-muted">
       <div className="mx-auto max-w-2xl px-4 py-8 sm:px-6 lg:px-8">
+        {/* Decorative only — confined band above the form, never behind the
+            step indicator or the payment forms below it. */}
+        <SceneCanvas
+          variant="band"
+          className="mb-6 h-20 rounded-lg border border-border"
+          lazyMount
+        />
+
         {/* Step indicator */}
         <div className="mb-8 flex items-center justify-center gap-4">
           {STEPS.map((s, i) => (
@@ -133,6 +142,13 @@ export default function CheckoutPage() {
                     USDC
                   </button>
                 </div>
+                <p className="text-xs text-muted-foreground px-1">
+                  {paymentMethod === "card" && "ตัดเงินทันทีผ่านบัตรเครดิต/เดบิต Visa หรือ Mastercard"}
+                  {paymentMethod === "promptpay" &&
+                    "สแกน QR ผ่านแอปธนาคารของคุณ ยืนยันการชำระเงินภายในไม่กี่วินาที"}
+                  {paymentMethod === "crypto" &&
+                    "ชำระด้วย USDC บนเครือข่าย Base — ต้องมีกระเป๋าเงิน Web3 เช่น MetaMask"}
+                </p>
 
                 {paymentMethod === "card" && (
                   <OmiseCardForm cart={cart} onBack={() => setStep("summary")} />

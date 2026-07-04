@@ -17,7 +17,7 @@ function HeroCard({ product }: { product: ProductSummary }) {
   return (
     <Link
       href={`/product/${product.id.value}`}
-      className="group block overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-[transform,box-shadow] duration-300 ease-entrance hover:-translate-y-1 hover:shadow-md"
+      className="group block overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-[transform,box-shadow] duration-300 ease-entrance hover:-translate-y-1 hover:shadow-sticker"
     >
       <div className="relative aspect-[4/3] overflow-hidden bg-muted">
         <Image
@@ -30,7 +30,7 @@ function HeroCard({ product }: { product: ProductSummary }) {
         />
       </div>
       <div className="p-6">
-        <h3 className="text-2xl font-bold text-foreground">{product.name.value}</h3>
+        <h3 className="font-display text-2xl text-foreground">{product.name.value}</h3>
         <p className="mt-1 text-sm text-muted-foreground">{product.tagline}</p>
         <p className="mt-3 text-xl font-bold text-foreground">{formattedPrice}</p>
       </div>
@@ -44,7 +44,7 @@ function SmallCard({ product }: { product: ProductSummary }) {
   return (
     <Link
       href={`/product/${product.id.value}`}
-      className="group block overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-[transform,box-shadow] duration-300 ease-entrance hover:-translate-y-1 hover:shadow-md"
+      className="group block overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-[transform,box-shadow] duration-300 ease-entrance hover:-translate-y-1 hover:shadow-sticker"
     >
       <div className="relative aspect-square overflow-hidden bg-muted">
         <Image
@@ -56,7 +56,7 @@ function SmallCard({ product }: { product: ProductSummary }) {
         />
       </div>
       <div className="p-4">
-        <h3 className="text-base font-semibold text-foreground">{product.name.value}</h3>
+        <h3 className="font-display text-base text-foreground">{product.name.value}</h3>
         <p className="mt-0.5 text-lg font-bold text-foreground">{formattedPrice}</p>
       </div>
     </Link>

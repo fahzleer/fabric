@@ -22,7 +22,7 @@ const makeLine = (overrides: Partial<OrderLine> = {}): OrderLine => ({
 
 const makeOrder = (overrides: Partial<Order> = {}): Order => ({
   id: { __brand: "OrderId", value: "order-1" },
-  userId: { __brand: "UserId", value: "user-1" },
+  customerRef: { __brand: "UserId", value: "user-1" },
   cartId: "cart-1",
   lines: [makeLine()],
   status: "pending",

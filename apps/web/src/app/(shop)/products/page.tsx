@@ -14,7 +14,7 @@ import { PackageOpen } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { connection } from "next/server";
-import { FeaturedProductsGrid, ProductsCatalog, StickyTrustBar } from "./_components";
+import { FeaturedProductsGrid, HeroBanner, ProductsCatalog, StickyTrustBar } from "./_components";
 import { deduplicateProducts, enrichProducts } from "./_lib/product-helpers";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://fabric.cool";
@@ -129,6 +129,8 @@ export default async function ProductsPage() {
 
         <ExperimentCookieSetter experimentId={TITLE_TAG_EXPERIMENT} />
         <ExperimentCookieSetter experimentId={ANCHOR_TEXT_EXPERIMENT} />
+
+        <HeroBanner />
 
         <FeaturedProductsGrid products={featured} />
 

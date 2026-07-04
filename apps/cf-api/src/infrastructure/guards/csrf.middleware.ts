@@ -13,6 +13,10 @@ const CSRF_EXEMPT_PREFIXES = [
   "/auth/login/facebook",
   "/auth/login/google",
   "/internal",
+  // Guest checkout: no Bearer token (the existing CSRF bypass below) and no
+  // cookie-based session exists in cf-api to forge in the first place — the
+  // guest's identity is a self-supplied email in the request body itself.
+  "/api/orders",
 ];
 
 const MUTATING_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);

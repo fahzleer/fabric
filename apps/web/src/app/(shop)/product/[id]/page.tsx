@@ -1,3 +1,4 @@
+import { SceneCanvas } from "@/components/3d/scene-canvas";
 import { AuthorBio } from "@/components/seo/author-bio";
 import { FaqSection } from "@/components/seo/faq-section";
 import { FreshnessLabel } from "@/components/seo/freshness-label";
@@ -247,8 +248,15 @@ export default async function ProductPage({ params: paramsPromise }: PageProps) 
           </div>
 
           <div className="flex flex-col">
+            <div className="flex items-start justify-between gap-4">
+              <h1 className="font-display text-3xl text-foreground">{product.name.value}</h1>
+              <SceneCanvas
+                variant="accent"
+                className="hidden h-24 w-24 shrink-0 rounded-full sm:block"
+                lazyMount
+              />
+            </div>
             <div>
-              <h1 className="text-3xl font-bold text-foreground">{product.name.value}</h1>
               {isSome(storeInfo) && (
                 <Link
                   href={`/store/${storeInfo.value.slug}`}
